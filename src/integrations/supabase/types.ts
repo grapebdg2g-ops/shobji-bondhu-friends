@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      disease_history: {
+        Row: {
+          created_at: string
+          crop_type: string
+          disease_name: string
+          id: string
+          image_url: string | null
+          result_json: Json
+          severity: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          crop_type: string
+          disease_name: string
+          id?: string
+          image_url?: string | null
+          result_json: Json
+          severity: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          crop_type?: string
+          disease_name?: string
+          id?: string
+          image_url?: string | null
+          result_json?: Json
+          severity?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       exchanges: {
         Row: {
           created_at: string

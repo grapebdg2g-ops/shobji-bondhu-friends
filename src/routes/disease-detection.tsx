@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { BengaliButton } from "@/components/krishi/bengali-button";
 import { cn } from "@/lib/utils";
 import { analyzeDisease, type DiseaseResult } from "@/lib/disease.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/disease-detection")({
   component: DiseaseDetectionPage,
@@ -152,6 +153,22 @@ function DiseaseDetectionPage() {
         signal: abortRef.current.signal,
       });
       dispatch({ type: "SET_RESULT", result });
+      // Save to disease_history (best-effort, fire-and-forget)
+      if (result.detected) {
+        const { data: sess } = await supabase.auth.getSession();
+        const uid = sess.session?.user.id;
+        if (uid) {
+          supabase.from("disease_history").insert({
+            user_id: uid,
+            crop_type: state.crop,
+            disease_name: result.diseaseName,
+            severity: result.severity,
+            result_json: result as never,
+          }).then(({ error }) => {
+            if (error) console.error("history save failed:", error);
+          });
+        }
+      }
     } catch (e) {
       if ((e as Error).name === "AbortError") {
         dispatch({ type: "RETAKE" });
