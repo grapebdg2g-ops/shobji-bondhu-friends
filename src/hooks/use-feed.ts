@@ -1,0 +1,102 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
+export type PostType = "general" | "help" | "success" | "weather";
+
+export type Post = {
+  id: string;
+  user_id: string;
+  user_name: string;
+  user_district: string | null;
+  type: PostType;
+  content: string;
+  image_url: string | null;
+  crop_tag: string | null;
+  likes_count: number;
+  comments_count: number;
+  district: string | null;
+  created_at: string;
+};
+
+export type FeedFilters = {
+  districtMode: "mine" | "all" | "specific";
+  district: string | null;
+  crop: string | null;
+  types: PostType[];
+};
+
+const PAGE_SIZE = 10;
+
+export function useFeed(filters: FeedFilters, myDistrict: string | null) {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const pageRef = useRef(0);
+  const reqIdRef = useRef(0);
+
+  const buildQuery = useCallback((from: number, to: number) => {
+    let q = supabase
+      .from("posts")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .range(from, to);
+
+    if (filters.districtMode === "mine" && myDistrict) {
+      q = q.eq("district", myDistrict);
+    } else if (filters.districtMode === "specific" && filters.district) {
+      q = q.eq("district", filters.district);
+    }
+    if (filters.crop) q = q.eq("crop_tag", filters.crop);
+    if (filters.types.length > 0 && filters.types.length < 4) {
+      q = q.in("type", filters.types);
+    }
+    return q;
+  }, [filters, myDistrict]);
+
+  const load = useCallback(async (reset: boolean) => {
+    const myReq = ++reqIdRef.current;
+    if (reset) {
+      pageRef.current = 0;
+      setLoading(true);
+      setHasMore(true);
+    } else {
+      setLoadingMore(true);
+    }
+    const from = pageRef.current * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    const { data, error } = await buildQuery(from, to);
+    if (myReq !== reqIdRef.current) return;
+    if (error) {
+      setError("ফিড লোড করা যায়নি");
+      setLoading(false);
+      setLoadingMore(false);
+      return;
+    }
+    const rows = (data as Post[]) ?? [];
+    setPosts((prev) => (reset ? rows : [...prev, ...rows]));
+    setHasMore(rows.length === PAGE_SIZE);
+    pageRef.current += 1;
+    setLoading(false);
+    setLoadingMore(false);
+    setError(null);
+  }, [buildQuery]);
+
+  useEffect(() => {
+    load(true);
+  }, [load]);
+
+  const loadMore = useCallback(() => {
+    if (loading || loadingMore || !hasMore) return;
+    load(false);
+  }, [load, loading, loadingMore, hasMore]);
+
+  const prepend = useCallback((p: Post) => setPosts((prev) => [p, ...prev]), []);
+  const removeById = useCallback((id: string) => setPosts((prev) => prev.filter((x) => x.id !== id)), []);
+  const updateById = useCallback((id: string, patch: Partial<Post>) => {
+    setPosts((prev) => prev.map((x) => (x.id === id ? { ...x, ...patch } : x)));
+  }, []);
+
+  return { posts, loading, loadingMore, hasMore, error, loadMore, prepend, removeById, updateById, refresh: () => load(true) };
+}
