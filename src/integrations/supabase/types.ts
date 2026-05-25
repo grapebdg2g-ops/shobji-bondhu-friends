@@ -293,34 +293,49 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
+          bio: string | null
           created_at: string
           crops: string[]
           district: string | null
+          exchanges_count: number
           id: string
           name: string
           phone: string | null
+          posts_count: number
+          prices_count: number
           role: string
           upazila: string | null
           updated_at: string
         }
         Insert: {
+          avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           crops?: string[]
           district?: string | null
+          exchanges_count?: number
           id: string
           name?: string
           phone?: string | null
+          posts_count?: number
+          prices_count?: number
           role?: string
           upazila?: string | null
           updated_at?: string
         }
         Update: {
+          avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           crops?: string[]
           district?: string | null
+          exchanges_count?: number
           id?: string
           name?: string
           phone?: string | null
+          posts_count?: number
+          prices_count?: number
           role?: string
           upazila?: string | null
           updated_at?: string
