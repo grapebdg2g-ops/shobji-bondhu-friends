@@ -9,6 +9,10 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { Toaster } from "@/components/ui/sonner";
+import { UserProvider } from "@/contexts/user-context";
+import { OfflineBanner } from "@/components/krishi/offline-banner";
+import { AppErrorBoundary } from "@/components/krishi/app-error-boundary";
 
 function NotFoundComponent() {
   return (
@@ -71,15 +75,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1" },
+      { name: "theme-color", content: "#2D6A4F" },
+      { title: "কৃষিবন্ধু — কৃষকের বিশ্বস্ত সঙ্গী" },
+      { name: "description", content: "বাংলাদেশের কৃষকদের জন্য সামাজিক প্ল্যাটফর্ম — বাজার দর, বিনিময়, রোগ শনাক্ত ও সংবাদ।" },
+      { name: "author", content: "KrishiBondhu" },
+      { property: "og:title", content: "কৃষিবন্ধু — কৃষকের বিশ্বস্ত সঙ্গী" },
+      { property: "og:description", content: "বাংলাদেশের কৃষকদের জন্য সামাজিক প্ল্যাটফর্ম — বাজার দর, বিনিময়, রোগ শনাক্ত ও সংবাদ।" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "কৃষিবন্ধু — কৃষকের বিশ্বস্ত সঙ্গী" },
+      { name: "twitter:description", content: "বাংলাদেশের কৃষকদের জন্য সামাজিক প্ল্যাটফর্ম — বাজার দর, বিনিময়, রোগ শনাক্ত ও সংবাদ।" },
     ],
     links: [
       {
@@ -113,7 +120,13 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <AppErrorBoundary>
+        <UserProvider>
+          <OfflineBanner />
+          <Outlet />
+          <Toaster richColors position="top-center" />
+        </UserProvider>
+      </AppErrorBoundary>
     </QueryClientProvider>
   );
 }
