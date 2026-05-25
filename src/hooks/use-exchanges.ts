@@ -21,10 +21,6 @@ export function useExchanges(filters: ExchangeFilters) {
   const load = useCallback(async () => {
     setError(null);
     const isAuthed = !!(await supabase.auth.getSession()).data.session;
-    const cols = isAuthed
-      ? "*"
-      : "id,created_at,title,description,type,is_free,price,unit,district,upazila,image_url,is_active,user_name,user_id";
-    const isAuthed = !!(await supabase.auth.getSession()).data.session;
     let q = supabase
       .from("exchanges")
       .select(
