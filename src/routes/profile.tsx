@@ -469,11 +469,15 @@ function MyPostsTab({ userId, onChange }: { userId: string; onChange: (d: number
   if (rows === null) return <Skeleton className="h-32 w-full rounded-2xl" />;
   if (rows.length === 0) {
     return (
-      <EmptyState title="এখনো কোনো পোস্ট নেই" description="আপনার প্রথম পোস্ট দিয়ে শুরু করুন">
-        <Link to="/feed" className="inline-flex h-10 px-4 rounded-xl bg-primary text-primary-foreground font-bold items-center gap-2">
-          <Plus className="h-4 w-4" /> প্রথম পোস্ট করুন
-        </Link>
-      </EmptyState>
+      <EmptyState
+        title="এখনো কোনো পোস্ট নেই"
+        description="আপনার প্রথম পোস্ট দিয়ে শুরু করুন"
+        action={
+          <Link to="/feed" className="inline-flex h-10 px-4 rounded-xl bg-primary text-primary-foreground font-bold items-center gap-2">
+            <Plus className="h-4 w-4" /> প্রথম পোস্ট করুন
+          </Link>
+        }
+      />
     );
   }
 
