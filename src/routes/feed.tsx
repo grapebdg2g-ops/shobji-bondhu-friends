@@ -9,7 +9,7 @@ import { BottomSheet } from "@/components/krishi/bottom-sheet";
 import { CreatePostSheet } from "@/components/krishi/create-post-sheet";
 import { CommentsSection } from "@/components/krishi/comments-section";
 import { DISTRICTS } from "@/lib/bd-data";
-import { LoadingSpinner } from "@/components/krishi/loading-spinner";
+
 import { EmptyState } from "@/components/krishi/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 
