@@ -163,7 +163,7 @@ function DiseaseDetectionPage() {
             crop_type: state.crop,
             disease_name: result.diseaseName,
             severity: result.severity,
-            result_json: result as unknown as Record<string, unknown>,
+            result_json: result as never,
           }).then(({ error }) => {
             if (error) console.error("history save failed:", error);
           });
