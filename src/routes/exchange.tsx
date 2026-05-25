@@ -2,15 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { ArrowLeft, Search, Plus, Home, BarChart3, Repeat2, User as UserIcon, Sprout, Leaf, Wrench, HardHat } from "lucide-react";
 import { useUser } from "@/contexts/user-context";
-import { useExchanges, type ExchangeType, type Exchange } from "@/hooks/use-exchanges";
+import { useExchanges, type ExchangeType } from "@/hooks/use-exchanges";
 import { ExchangeCard } from "@/components/krishi/exchange-card";
-import { BottomSheet } from "@/components/krishi/bottom-sheet";
-import { BengaliButton } from "@/components/krishi/bengali-button";
 import { EmptyState } from "@/components/krishi/empty-state";
 import { LoadingSpinner } from "@/components/krishi/loading-spinner";
+import { NewAdWizard } from "@/components/krishi/new-ad-wizard";
 import { DISTRICTS } from "@/lib/bd-data";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/exchange")({
   component: ExchangePage,
@@ -35,7 +32,7 @@ function ExchangePage() {
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const filters = useMemo(() => ({ district, type, query, freeOnly, sort }), [district, type, query, freeOnly, sort]);
-  const { items, loading, addOptimistic, replaceOptimistic, removeOptimistic } = useExchanges(filters);
+  const { items, loading, addOptimistic } = useExchanges(filters);
 
   return (
     <main className="min-h-screen bg-background pb-28">
@@ -112,16 +109,15 @@ function ExchangePage() {
         <Plus className="h-5 w-5" /> বিজ্ঞাপন দিন
       </button>
 
-      <NewAdSheet
+      <NewAdWizard
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
         defaultDistrict={user?.district ?? "ঢাকা"}
+        defaultUpazila={user?.upazila ?? null}
         userId={user?.id ?? null}
         userName={user?.name ?? "কৃষক"}
         userPhone={user?.phone ?? null}
-        onOptimistic={addOptimistic}
-        onReplace={replaceOptimistic}
-        onRollback={removeOptimistic}
+        onCreated={addOptimistic}
       />
 
       <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
@@ -152,111 +148,5 @@ function TabPill({ active, onClick, label, icon }: { active: boolean; onClick: (
     >
       {icon} {label}
     </button>
-  );
-}
-
-function NewAdSheet({
-  open, onClose, defaultDistrict, userId, userName, userPhone,
-  onOptimistic, onReplace, onRollback,
-}: {
-  open: boolean; onClose: () => void; defaultDistrict: string;
-  userId: string | null; userName: string; userPhone: string | null;
-  onOptimistic: (i: Exchange) => void;
-  onReplace: (tempId: string, real: Exchange) => void;
-  onRollback: (id: string) => void;
-}) {
-  const [title, setTitle] = useState("");
-  const [type, setType] = useState<ExchangeType>("seed");
-  const [isFree, setIsFree] = useState(false);
-  const [price, setPrice] = useState("");
-  const [unit, setUnit] = useState("কেজি");
-  const [district, setDistrict] = useState(defaultDistrict);
-  const [phone, setPhone] = useState(userPhone ?? "");
-  const [saving, setSaving] = useState(false);
-
-  const reset = () => { setTitle(""); setType("seed"); setIsFree(false); setPrice(""); setUnit("কেজি"); };
-
-  const submit = async () => {
-    if (!userId) { toast.error("লগইন করুন"); return; }
-    if (!title.trim() || !district) { toast.error("সব তথ্য দিন"); return; }
-    setSaving(true);
-    const tempId = `temp-${crypto.randomUUID()}`;
-    const optimistic: Exchange = {
-      id: tempId, title: title.trim(), description: null, type,
-      is_free: isFree, price: isFree ? null : Number(price) || 0, unit: isFree ? null : unit,
-      image_url: null, district, upazila: null,
-      user_id: userId, user_name: userName, user_phone: phone || null,
-      is_active: true, created_at: new Date().toISOString(),
-    };
-    onOptimistic(optimistic);
-    onClose();
-    const { data, error } = await supabase.from("exchanges").insert({
-      title: optimistic.title, type, is_free: isFree,
-      price: optimistic.price, unit: optimistic.unit,
-      district, user_id: userId, user_name: userName, user_phone: phone || null,
-    }).select().single();
-    setSaving(false);
-    if (error || !data) {
-      onRollback(tempId);
-      toast.error("সংরক্ষণ ব্যর্থ হয়েছে");
-      return;
-    }
-    onReplace(tempId, data as Exchange);
-    toast.success("বিজ্ঞাপন পোস্ট হয়েছে");
-    reset();
-  };
-
-  return (
-    <BottomSheet open={open} onClose={onClose} title="নতুন বিজ্ঞাপন">
-      <div className="space-y-3">
-        <Field label="শিরোনাম">
-          <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full h-11 px-3 rounded-lg border border-border bg-background text-sm" placeholder="যেমন: হাইব্রিড টমেটো চারা" />
-        </Field>
-        <Field label="ধরন">
-          <div className="grid grid-cols-4 gap-2">
-            {TABS.map(({ type: t, label }) => (
-              <button key={t} type="button" onClick={() => setType(t)}
-                className={`h-10 rounded-lg text-sm font-medium border ${type === t ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border"}`}>
-                {label}
-              </button>
-            ))}
-          </div>
-        </Field>
-        <label className="flex items-center gap-2 text-sm font-medium">
-          <input type="checkbox" checked={isFree} onChange={(e) => setIsFree(e.target.checked)} className="h-4 w-4" />
-          বিনামূল্যে
-        </label>
-        {!isFree && (
-          <div className="grid grid-cols-2 gap-2">
-            <Field label="মূল্য (৳)">
-              <input value={price} onChange={(e) => setPrice(e.target.value)} type="number" inputMode="decimal" className="w-full h-11 px-3 rounded-lg border border-border bg-background text-sm" />
-            </Field>
-            <Field label="একক">
-              <select value={unit} onChange={(e) => setUnit(e.target.value)} className="w-full h-11 px-3 rounded-lg border border-border bg-background text-sm">
-                {["কেজি","মণ","পিস","দিন","ঘণ্টা"].map((u) => <option key={u} value={u}>{u}</option>)}
-              </select>
-            </Field>
-          </div>
-        )}
-        <Field label="জেলা">
-          <select value={district} onChange={(e) => setDistrict(e.target.value)} className="w-full h-11 px-3 rounded-lg border border-border bg-background text-sm">
-            {DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
-          </select>
-        </Field>
-        <Field label="যোগাযোগ নম্বর (WhatsApp)">
-          <input value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" placeholder="01XXXXXXXXX" className="w-full h-11 px-3 rounded-lg border border-border bg-background text-sm" />
-        </Field>
-        <BengaliButton fullWidth loading={saving} onClick={submit}>পোস্ট করুন</BengaliButton>
-      </div>
-    </BottomSheet>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <label className="text-xs font-semibold text-muted-foreground mb-1 block">{label}</label>
-      {children}
-    </div>
   );
 }
