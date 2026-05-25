@@ -101,6 +101,115 @@ export type Database = {
         }
         Relationships: []
       }
+      post_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+          user_name?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          comments_count: number
+          content: string
+          created_at: string
+          crop_tag: string | null
+          district: string | null
+          id: string
+          image_url: string | null
+          likes_count: number
+          type: string
+          user_district: string | null
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          comments_count?: number
+          content: string
+          created_at?: string
+          crop_tag?: string | null
+          district?: string | null
+          id?: string
+          image_url?: string | null
+          likes_count?: number
+          type?: string
+          user_district?: string | null
+          user_id: string
+          user_name?: string
+        }
+        Update: {
+          comments_count?: number
+          content?: string
+          created_at?: string
+          crop_tag?: string | null
+          district?: string | null
+          id?: string
+          image_url?: string | null
+          likes_count?: number
+          type?: string
+          user_district?: string | null
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: []
+      }
       prices: {
         Row: {
           category: string
@@ -187,7 +296,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      decrement_likes: { Args: { post_id: string }; Returns: undefined }
+      increment_comments: { Args: { post_id: string }; Returns: undefined }
+      increment_likes: { Args: { post_id: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
