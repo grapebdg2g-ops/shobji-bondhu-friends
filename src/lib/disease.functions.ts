@@ -72,6 +72,12 @@ export const analyzeDisease = createServerFn({ method: "POST" })
     if (!res.ok) {
       const errText = await res.text().catch(() => "");
       console.error("Kimi API error:", res.status, errText);
+      if (res.status === 429) {
+        throw new Error("অনেক অনুরোধ, কিছুক্ষণ পর আবার চেষ্টা করুন");
+      }
+      if (res.status === 401 || res.status === 403) {
+        throw new Error("API কী সমস্যা, পরে চেষ্টা করুন");
+      }
       throw new Error(`API ত্রুটি (${res.status})`);
     }
 
