@@ -54,7 +54,7 @@ function FeedPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
 
-  const { posts, loading, loadingMore, hasMore, error, loadMore, prepend, updateById } = useFeed(filters, user?.district ?? null);
+  const { posts, loading, loadingMore, hasMore, error, loadMore, prepend, updateById, refresh } = useFeed(filters, user?.district ?? null);
 
   // Active users (stories) — distinct recent posters
   const [activeUsers, setActiveUsers] = useState<{ name: string; district: string | null }[]>([]);
@@ -122,8 +122,6 @@ function FeedPage() {
     return () => { supabase.removeChannel(ch); if (dismissTimer.current) window.clearTimeout(dismissTimer.current); };
   }, [districtForSub, user]);
 
-  const { refresh } = useFeedRefresh();
-  // refresh is provided by useFeed
 
   // Infinite scroll
   const sentinelRef = useRef<HTMLDivElement | null>(null);
