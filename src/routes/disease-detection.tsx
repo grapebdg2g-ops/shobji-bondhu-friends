@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { BengaliButton } from "@/components/krishi/bengali-button";
 import { cn } from "@/lib/utils";
 import { analyzeDisease, type DiseaseResult } from "@/lib/disease.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/disease-detection")({
   component: DiseaseDetectionPage,
