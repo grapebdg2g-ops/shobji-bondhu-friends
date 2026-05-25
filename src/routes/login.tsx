@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Sprout, Mail, Phone, ChevronRight } from "lucide-react";
+import { Mail, Phone, ChevronRight } from "lucide-react";
+import logo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -78,8 +79,8 @@ function LoginPage() {
   return (
     <main className="min-h-screen bg-background flex flex-col">
       <header className="flex flex-col items-center gap-3 px-6 pt-12 pb-8" style={{ background: "var(--gradient-brand)" }}>
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 ring-2 ring-white/25">
-          <Sprout className="h-9 w-9 text-white" />
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 ring-2 ring-white/25 overflow-hidden">
+          <img src={logo} alt="কৃষিবন্ধু লোগো" className="h-14 w-14 object-contain" />
         </div>
         <h1 className="text-2xl font-bold text-white">কৃষিবন্ধু</h1>
         <p className="text-sm text-white/85">প্রবেশ করুন আপনার অ্যাকাউন্টে</p>

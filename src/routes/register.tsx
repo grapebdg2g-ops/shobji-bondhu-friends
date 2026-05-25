@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Sprout, Check } from "lucide-react";
+import { Check } from "lucide-react";
+import logo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -51,8 +52,8 @@ function RegisterPage() {
   return (
     <main className="min-h-screen bg-background">
       <header className="flex items-center gap-3 px-6 pt-10 pb-6" style={{ background: "var(--gradient-brand)" }}>
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 ring-2 ring-white/20">
-          <Sprout className="h-7 w-7 text-white" />
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 ring-2 ring-white/20 overflow-hidden">
+          <img src={logo} alt="কৃষিবন্ধু লোগো" className="h-10 w-10 object-contain" />
         </div>
         <div>
           <h1 className="text-xl font-bold text-white">নিবন্ধন করুন</h1>
