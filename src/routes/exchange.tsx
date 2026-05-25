@@ -32,7 +32,7 @@ function ExchangePage() {
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const filters = useMemo(() => ({ district, type, query, freeOnly, sort }), [district, type, query, freeOnly, sort]);
-  const { items, loading, addOptimistic, replaceOptimistic, removeOptimistic } = useExchanges(filters);
+  const { items, loading, addOptimistic } = useExchanges(filters);
 
   return (
     <main className="min-h-screen bg-background pb-28">
