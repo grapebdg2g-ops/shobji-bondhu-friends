@@ -227,10 +227,29 @@ function FeedPage() {
         </div>
       </section>
 
+      {/* New posts banner */}
+      {newCount > 0 && (
+        <div className="sticky top-2 z-20 px-4">
+          <button
+            onClick={() => {
+              setNewCount(0);
+              refresh();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="w-full bg-primary text-primary-foreground rounded-full h-10 px-4 shadow-lg flex items-center justify-center gap-2 font-semibold text-sm active:scale-[0.98]"
+          >
+            <ArrowUp className="h-4 w-4" />
+            <span>{`${newCount}টি নতুন পোস্ট দেখুন`}</span>
+          </button>
+        </div>
+      )}
+
       {/* Posts */}
-      <section className="px-4 space-y-4">
+      <section className="px-4 space-y-4 mt-2">
         {loading ? (
-          <div className="py-10"><LoadingSpinner /></div>
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => <PostSkeleton key={i} />)}
+          </div>
         ) : error ? (
           <p className="text-center text-sm text-destructive py-6">{error}</p>
         ) : posts.length === 0 ? (
@@ -248,14 +267,37 @@ function FeedPage() {
           ))
         )}
 
-        <div ref={sentinelRef} className="h-8" />
-        {loadingMore && <p className="text-center text-xs text-muted-foreground py-2">আরো লোড হচ্ছে...</p>}
-        {!hasMore && posts.length > 0 && <p className="text-center text-xs text-muted-foreground py-3">— শেষ —</p>}
+        <div ref={sentinelRef} className="h-2" />
+        {loadingMore && (
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => <PostSkeleton key={`m-${i}`} />)}
+          </div>
+        )}
+        {!hasMore && posts.length > 0 && (
+          <p className="text-center text-xs text-muted-foreground py-4">আর কোনো পোস্ট নেই</p>
+        )}
       </section>
 
       <FilterSheet open={filterOpen} onClose={() => setFilterOpen(false)} value={filters} onApply={(f) => { setFilters(f); setFilterOpen(false); }} />
       <CreatePostSheet open={createOpen} onClose={() => setCreateOpen(false)} onCreated={prepend} />
     </main>
+  );
+}
+
+function PostSkeleton() {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+      <div className="flex items-center gap-3">
+        <Skeleton className="h-11 w-11 rounded-full" />
+        <div className="flex-1 space-y-2">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-2.5 w-16" />
+        </div>
+      </div>
+      <Skeleton className="h-3 w-full" />
+      <Skeleton className="h-3 w-4/5" />
+      <Skeleton className="h-32 w-full rounded-xl" />
+    </div>
   );
 }
 
