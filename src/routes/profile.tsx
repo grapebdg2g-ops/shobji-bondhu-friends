@@ -594,11 +594,15 @@ function MyExchangesTab({ userId, onChange }: { userId: string; onChange: (d: nu
   if (rows === null) return <Skeleton className="h-32 w-full rounded-2xl" />;
   if (rows.length === 0) {
     return (
-      <EmptyState title="কোনো বিজ্ঞাপন নেই" description="আপনার প্রথম বিজ্ঞাপন দিন">
-        <Link to="/exchange" className="inline-flex h-10 px-4 rounded-xl bg-primary text-primary-foreground font-bold items-center gap-2">
-          <Plus className="h-4 w-4" /> বিজ্ঞাপন দিন
-        </Link>
-      </EmptyState>
+      <EmptyState
+        title="কোনো বিজ্ঞাপন নেই"
+        description="আপনার প্রথম বিজ্ঞাপন দিন"
+        action={
+          <Link to="/exchange" className="inline-flex h-10 px-4 rounded-xl bg-primary text-primary-foreground font-bold items-center gap-2">
+            <Plus className="h-4 w-4" /> বিজ্ঞাপন দিন
+          </Link>
+        }
+      />
     );
   }
 
