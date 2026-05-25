@@ -124,7 +124,6 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AppErrorBoundary>
         <UserProvider>
-          <OfflineBanner />
           <Outlet />
           <Toaster richColors position="top-center" />
         </UserProvider>
