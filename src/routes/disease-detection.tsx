@@ -158,8 +158,9 @@ function DiseaseDetectionPage() {
         return;
       }
       console.error(e);
-      const msg = (e as Error).message?.includes("ত্রুটি")
-        ? "সংযোগ সমস্যা, আবার চেষ্টা করুন"
+      const raw = (e as Error).message ?? "";
+      const msg = raw && /[\u0980-\u09FF]/.test(raw)
+        ? raw
         : "শনাক্ত করা সম্ভব হয়নি, আবার চেষ্টা করুন";
       dispatch({ type: "SET_ERROR", msg });
     }
