@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, SlidersHorizontal, ThumbsUp, MessageCircle, Share2, Plus, HelpCircle, Star, CloudRain, ChevronDown } from "lucide-react";
+import { ArrowLeft, SlidersHorizontal, ThumbsUp, MessageCircle, Share2, Plus, HelpCircle, Star, CloudRain, ChevronDown, ArrowUp } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/user-context";
@@ -9,8 +9,9 @@ import { BottomSheet } from "@/components/krishi/bottom-sheet";
 import { CreatePostSheet } from "@/components/krishi/create-post-sheet";
 import { CommentsSection } from "@/components/krishi/comments-section";
 import { DISTRICTS } from "@/lib/bd-data";
-import { LoadingSpinner } from "@/components/krishi/loading-spinner";
+
 import { EmptyState } from "@/components/krishi/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/feed")({
   component: FeedPage,
@@ -53,7 +54,7 @@ function FeedPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
 
-  const { posts, loading, loadingMore, hasMore, error, loadMore, prepend, updateById } = useFeed(filters, user?.district ?? null);
+  const { posts, loading, loadingMore, hasMore, error, loadMore, prepend, updateById, refresh } = useFeed(filters, user?.district ?? null);
 
   // Active users (stories) — distinct recent posters
   const [activeUsers, setActiveUsers] = useState<{ name: string; district: string | null }[]>([]);
@@ -91,6 +92,36 @@ function FeedPage() {
       setLikedSet(new Set(((data as { post_id: string }[]) ?? []).map((r) => r.post_id)));
     })();
   }, [posts, user]);
+
+  // Realtime new-post banner
+  const [newCount, setNewCount] = useState(0);
+  const dismissTimer = useRef<number | null>(null);
+  const districtForSub = useMemo(() => {
+    if (filters.districtMode === "mine") return user?.district ?? null;
+    if (filters.districtMode === "specific") return filters.district;
+    return null; // 'all' — subscribe to everything
+  }, [filters, user]);
+
+  useEffect(() => {
+    setNewCount(0);
+    const filterStr = districtForSub ? `district=eq.${districtForSub}` : undefined;
+    const ch = supabase
+      .channel(`feed-${districtForSub ?? "all"}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "posts", ...(filterStr ? { filter: filterStr } : {}) },
+        (payload) => {
+          const np = payload.new as Post;
+          if (user && np.user_id === user.id) return; // skip own
+          setNewCount((c) => c + 1);
+          if (dismissTimer.current) window.clearTimeout(dismissTimer.current);
+          dismissTimer.current = window.setTimeout(() => setNewCount(0), 8000);
+        },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); if (dismissTimer.current) window.clearTimeout(dismissTimer.current); };
+  }, [districtForSub, user]);
+
 
   // Infinite scroll
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -196,10 +227,29 @@ function FeedPage() {
         </div>
       </section>
 
+      {/* New posts banner */}
+      {newCount > 0 && (
+        <div className="sticky top-2 z-20 px-4">
+          <button
+            onClick={() => {
+              setNewCount(0);
+              refresh();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="w-full bg-primary text-primary-foreground rounded-full h-10 px-4 shadow-lg flex items-center justify-center gap-2 font-semibold text-sm active:scale-[0.98]"
+          >
+            <ArrowUp className="h-4 w-4" />
+            <span>{`${newCount}টি নতুন পোস্ট দেখুন`}</span>
+          </button>
+        </div>
+      )}
+
       {/* Posts */}
-      <section className="px-4 space-y-4">
+      <section className="px-4 space-y-4 mt-2">
         {loading ? (
-          <div className="py-10"><LoadingSpinner /></div>
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => <PostSkeleton key={i} />)}
+          </div>
         ) : error ? (
           <p className="text-center text-sm text-destructive py-6">{error}</p>
         ) : posts.length === 0 ? (
@@ -217,14 +267,37 @@ function FeedPage() {
           ))
         )}
 
-        <div ref={sentinelRef} className="h-8" />
-        {loadingMore && <p className="text-center text-xs text-muted-foreground py-2">আরো লোড হচ্ছে...</p>}
-        {!hasMore && posts.length > 0 && <p className="text-center text-xs text-muted-foreground py-3">— শেষ —</p>}
+        <div ref={sentinelRef} className="h-2" />
+        {loadingMore && (
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => <PostSkeleton key={`m-${i}`} />)}
+          </div>
+        )}
+        {!hasMore && posts.length > 0 && (
+          <p className="text-center text-xs text-muted-foreground py-4">আর কোনো পোস্ট নেই</p>
+        )}
       </section>
 
       <FilterSheet open={filterOpen} onClose={() => setFilterOpen(false)} value={filters} onApply={(f) => { setFilters(f); setFilterOpen(false); }} />
       <CreatePostSheet open={createOpen} onClose={() => setCreateOpen(false)} onCreated={prepend} />
     </main>
+  );
+}
+
+function PostSkeleton() {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+      <div className="flex items-center gap-3">
+        <Skeleton className="h-11 w-11 rounded-full" />
+        <div className="flex-1 space-y-2">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-2.5 w-16" />
+        </div>
+      </div>
+      <Skeleton className="h-3 w-full" />
+      <Skeleton className="h-3 w-4/5" />
+      <Skeleton className="h-32 w-full rounded-xl" />
+    </div>
   );
 }
 

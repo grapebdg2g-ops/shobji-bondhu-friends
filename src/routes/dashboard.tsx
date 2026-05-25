@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Bell, TrendingUp, Repeat2, Bug, Newspaper, Home, BarChart3, User, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useNotifications } from "@/hooks/use-notifications";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -13,11 +14,14 @@ type Profile = { name: string; district: string | null };
 function Dashboard() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const { unreadCount } = useNotifications(userId);
 
   useEffect(() => {
     (async () => {
       const { data } = await supabase.auth.getSession();
       if (!data.session) return navigate({ to: "/login" });
+      setUserId(data.session.user.id);
       const { data: p } = await supabase
         .from("profiles").select("name, district")
         .eq("id", data.session.user.id).maybeSingle();
@@ -41,9 +45,17 @@ function Dashboard() {
             <MapPin className="h-4 w-4" />
             <span className="text-sm font-medium">{profile?.district ?? "—"}</span>
           </div>
-          <button className="relative h-10 w-10 rounded-full bg-white/15 flex items-center justify-center ring-2 ring-white/20">
+          <button
+            onClick={() => navigate({ to: "/notifications" })}
+            aria-label="বিজ্ঞপ্তি"
+            className="relative h-10 w-10 rounded-full bg-white/15 flex items-center justify-center ring-2 ring-white/20"
+          >
             <Bell className="h-5 w-5 text-white" />
-            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-400" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                {unreadCount > 9 ? "৯+" : unreadCount}
+              </span>
+            )}
           </button>
         </div>
         <div className="mt-5">
