@@ -2,15 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { ArrowLeft, Search, Plus, Home, BarChart3, Repeat2, User as UserIcon, Sprout, Leaf, Wrench, HardHat } from "lucide-react";
 import { useUser } from "@/contexts/user-context";
-import { useExchanges, type ExchangeType, type Exchange } from "@/hooks/use-exchanges";
+import { useExchanges, type ExchangeType } from "@/hooks/use-exchanges";
 import { ExchangeCard } from "@/components/krishi/exchange-card";
-import { BottomSheet } from "@/components/krishi/bottom-sheet";
-import { BengaliButton } from "@/components/krishi/bengali-button";
 import { EmptyState } from "@/components/krishi/empty-state";
 import { LoadingSpinner } from "@/components/krishi/loading-spinner";
+import { NewAdWizard } from "@/components/krishi/new-ad-wizard";
 import { DISTRICTS } from "@/lib/bd-data";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/exchange")({
   component: ExchangePage,
