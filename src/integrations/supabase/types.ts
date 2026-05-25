@@ -14,7 +14,141 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      exchanges: {
+        Row: {
+          created_at: string
+          description: string | null
+          district: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          is_free: boolean
+          price: number | null
+          title: string
+          type: string
+          unit: string | null
+          upazila: string | null
+          user_id: string
+          user_name: string
+          user_phone: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          district: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_free?: boolean
+          price?: number | null
+          title: string
+          type?: string
+          unit?: string | null
+          upazila?: string | null
+          user_id: string
+          user_name?: string
+          user_phone?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          district?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_free?: boolean
+          price?: number | null
+          title?: string
+          type?: string
+          unit?: string | null
+          upazila?: string | null
+          user_id?: string
+          user_name?: string
+          user_phone?: string | null
+        }
+        Relationships: []
+      }
+      prices: {
+        Row: {
+          category: string
+          created_at: string
+          district: string
+          id: string
+          market_name: string
+          previous_price: number | null
+          price: number
+          product_name: string
+          unit: string
+          upazila: string | null
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          district: string
+          id?: string
+          market_name: string
+          previous_price?: number | null
+          price: number
+          product_name: string
+          unit?: string
+          upazila?: string | null
+          user_id: string
+          user_name?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          district?: string
+          id?: string
+          market_name?: string
+          previous_price?: number | null
+          price?: number
+          product_name?: string
+          unit?: string
+          upazila?: string | null
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          crops: string[]
+          district: string | null
+          id: string
+          name: string
+          phone: string | null
+          role: string
+          upazila: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          crops?: string[]
+          district?: string | null
+          id: string
+          name?: string
+          phone?: string | null
+          role?: string
+          upazila?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          crops?: string[]
+          district?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          role?: string
+          upazila?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
