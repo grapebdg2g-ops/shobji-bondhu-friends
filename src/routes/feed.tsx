@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, SlidersHorizontal, ThumbsUp, MessageCircle, Share2, Plus, HelpCircle, Star, CloudRain, ChevronDown } from "lucide-react";
+import { ArrowLeft, SlidersHorizontal, ThumbsUp, MessageCircle, Share2, Plus, HelpCircle, Star, CloudRain, ChevronDown, ArrowUp } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/user-context";
@@ -11,6 +11,7 @@ import { CommentsSection } from "@/components/krishi/comments-section";
 import { DISTRICTS } from "@/lib/bd-data";
 import { LoadingSpinner } from "@/components/krishi/loading-spinner";
 import { EmptyState } from "@/components/krishi/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/feed")({
   component: FeedPage,
