@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Sprout } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import logo from "@/assets/logo.png";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -34,8 +34,8 @@ function Index() {
       style={{ background: "var(--gradient-brand)" }}
     >
       <div className="animate-in fade-in zoom-in duration-700 flex flex-col items-center gap-6">
-        <div className="flex h-28 w-28 items-center justify-center rounded-3xl bg-white/15 backdrop-blur-sm ring-4 ring-white/20 shadow-2xl">
-          <Sprout className="h-16 w-16 text-white" strokeWidth={2.2} />
+        <div className="flex h-28 w-28 items-center justify-center rounded-3xl bg-white/15 backdrop-blur-sm ring-4 ring-white/20 shadow-2xl overflow-hidden">
+          <img src={logo} alt="কৃষিবন্ধু লোগো" className="h-24 w-24 object-contain" />
         </div>
         <h1 className="text-5xl font-black tracking-tight text-white drop-shadow-lg">
           কৃষিবন্ধু

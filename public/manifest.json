@@ -1,0 +1,27 @@
+{
+  "name": "কৃষিবন্ধু — কৃষকের বিশ্বস্ত সঙ্গী",
+  "short_name": "কৃষিবন্ধু",
+  "description": "বাংলাদেশের কৃষকদের জন্য সামাজিক প্ল্যাটফর্ম — বাজার দর, বিনিময়, রোগ শনাক্ত ও সংবাদ।",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#2D6A4F",
+  "theme_color": "#2D6A4F",
+  "lang": "bn",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
