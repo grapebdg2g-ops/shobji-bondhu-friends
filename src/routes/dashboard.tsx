@@ -92,7 +92,7 @@ function Dashboard() {
             { label: "হোম", icon: Home, to: "/dashboard", active: true },
             { label: "দর", icon: BarChart3, to: "/prices", active: false },
             { label: "বিনিময়", icon: Repeat2, to: "/exchange", active: false },
-            { label: "প্রোফাইল", icon: User, to: "/dashboard", active: false },
+            { label: "প্রোফাইল", icon: User, to: "/profile", active: false },
           ].map(({ label, icon: Icon, to, active }) => (
             <Link key={label} to={to}
               className={`flex flex-col items-center gap-1 py-3 ${active ? "text-primary" : "text-muted-foreground"}`}>
