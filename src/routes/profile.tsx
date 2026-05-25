@@ -151,7 +151,7 @@ function ProfilePage() {
 
   return (
     <main className="min-h-screen bg-background pb-24">
-      <header className="px-4 pt-10 pb-20 rounded-b-3xl relative" style={{ background: "var(--gradient-brand)" }}>
+      <header className="px-4 pt-6 pb-10 rounded-b-3xl relative" style={{ background: "var(--gradient-brand)" }}>
         <button
           onClick={() => navigate({ to: "/dashboard" })}
           aria-label="ফিরে যান"
@@ -160,13 +160,13 @@ function ProfilePage() {
           <ArrowLeft className="h-5 w-5 text-white" />
         </button>
 
-        <div className="mt-4 flex flex-col items-center">
+        <div className="mt-3 flex flex-col items-center">
           <div className="relative">
-            <div className="h-28 w-28 rounded-full bg-white/20 ring-4 ring-white/40 overflow-hidden flex items-center justify-center">
+            <div className="h-24 w-24 rounded-full bg-white/20 ring-4 ring-white/40 overflow-hidden flex items-center justify-center">
               {full.avatar_url ? (
                 <img src={full.avatar_url} alt={full.name} className="h-full w-full object-cover" />
               ) : (
-                <span className="text-5xl font-bold text-white">{initials(full.name)}</span>
+                <span className="text-4xl font-bold text-white">{initials(full.name)}</span>
               )}
               {uploading && (
                 <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center">
@@ -199,7 +199,7 @@ function ProfilePage() {
         </div>
       </header>
 
-      <section className="px-4 -mt-12">
+      <section className="px-4 mt-4">
         <div className="grid grid-cols-3 gap-2">
           {[
             { label: "পোস্ট", count: counts.posts, sub: "সংখ্যা" },
