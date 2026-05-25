@@ -38,19 +38,19 @@ const SYSTEM_PROMPT = `তুমি একজন অভিজ্ঞ বাংল
 export const analyzeDisease = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => InputSchema.parse(d))
   .handler(async ({ data }): Promise<DiseaseResult> => {
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) throw new Error("AI সেবা প্রস্তুত নয়");
+    const apiKey = process.env.NEXT_PUBLIC_KIMI_API_KEY;
+    if (!apiKey) throw new Error("Kimi API key অনুপস্থিত");
 
     const dataUrl = `data:${data.mimeType};base64,${data.imageBase64}`;
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const res = await fetch("https://api.moonshot.ai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "kimi-latest",
         temperature: 0.3,
         response_format: { type: "json_object" },
         messages: [
@@ -71,9 +71,7 @@ export const analyzeDisease = createServerFn({ method: "POST" })
 
     if (!res.ok) {
       const errText = await res.text().catch(() => "");
-      console.error("AI gateway error:", res.status, errText);
-      if (res.status === 429) throw new Error("API ত্রুটি (অনেক বেশি অনুরোধ, একটু পরে চেষ্টা করুন)");
-      if (res.status === 402) throw new Error("API ত্রুটি (ক্রেডিট শেষ)");
+      console.error("Kimi API error:", res.status, errText);
       throw new Error(`API ত্রুটি (${res.status})`);
     }
 
