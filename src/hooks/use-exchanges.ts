@@ -20,9 +20,13 @@ export function useExchanges(filters: ExchangeFilters) {
 
   const load = useCallback(async () => {
     setError(null);
+    const isAuthed = !!(await supabase.auth.getSession()).data.session;
+    const cols = isAuthed
+      ? "*"
+      : "id,created_at,title,description,type,is_free,price,unit,district,upazila,image_url,is_active,user_name,user_id";
     let q = supabase
       .from("exchanges")
-      .select("*")
+      .select(cols)
       .eq("is_active", true)
       .limit(100);
     if (filters.district) q = q.eq("district", filters.district);
