@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PricesRouteImport } from './routes/prices'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as ExchangeRouteImport } from './routes/exchange'
@@ -26,6 +27,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const PricesRoute = PricesRouteImport.update({
   id: '/prices',
   path: '/prices',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/exchange': typeof ExchangeRoute
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
 }
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/exchange': typeof ExchangeRoute
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
 }
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/exchange': typeof ExchangeRoute
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
 }
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/exchange'
     | '/feed'
     | '/login'
+    | '/notifications'
     | '/prices'
     | '/register'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/exchange'
     | '/feed'
     | '/login'
+    | '/notifications'
     | '/prices'
     | '/register'
   id:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/exchange'
     | '/feed'
     | '/login'
+    | '/notifications'
     | '/prices'
     | '/register'
   fileRoutesById: FileRoutesById
@@ -130,6 +142,7 @@ export interface RootRouteChildren {
   ExchangeRoute: typeof ExchangeRoute
   FeedRoute: typeof FeedRoute
   LoginRoute: typeof LoginRoute
+  NotificationsRoute: typeof NotificationsRoute
   PricesRoute: typeof PricesRoute
   RegisterRoute: typeof RegisterRoute
 }
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/prices'
       fullPath: '/prices'
       preLoaderRoute: typeof PricesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -202,6 +222,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExchangeRoute: ExchangeRoute,
   FeedRoute: FeedRoute,
   LoginRoute: LoginRoute,
+  NotificationsRoute: NotificationsRoute,
   PricesRoute: PricesRoute,
   RegisterRoute: RegisterRoute,
 }
