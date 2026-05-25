@@ -384,6 +384,14 @@ function PreviewScreen({
 function AnalyzingScreen({ imageUrl, onCancel }: { imageUrl: string; onCancel: () => void }) {
   return (
     <div className="px-5 pt-6 space-y-6 text-center">
+      <button
+        onClick={onCancel}
+        className="mx-auto inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition active:scale-95"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        ফিরে যান
+      </button>
+
       <div className="relative mx-auto max-w-sm overflow-hidden rounded-2xl">
         <img src={imageUrl} alt="" className="w-full max-h-[50vh] object-contain bg-black blur-[2px] brightness-75" />
         <div className="absolute inset-0 pointer-events-none">
