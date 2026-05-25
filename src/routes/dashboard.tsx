@@ -29,7 +29,7 @@ function Dashboard() {
   const cards = [
     { label: "বাজার দর", icon: TrendingUp, bg: "bg-[#2D6A4F]", fg: "text-white", to: "/prices" as const },
     { label: "বিনিময়", icon: Repeat2, bg: "bg-[#1E5F8E]", fg: "text-white", to: "/exchange" as const },
-    { label: "রোগ শনাক্ত", icon: Bug, bg: "bg-[#E07A2C]", fg: "text-white", to: "/dashboard" as const },
+    { label: "রোগ শনাক্ত", icon: Bug, bg: "bg-[#E07A2C]", fg: "text-white", to: "/disease-detection" as const },
     { label: "সংবাদ ফিড", icon: Newspaper, bg: "bg-[#0E8B8B]", fg: "text-white", to: "/dashboard" as const },
   ];
 
