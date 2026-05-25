@@ -20,9 +20,14 @@ export function useExchanges(filters: ExchangeFilters) {
 
   const load = useCallback(async () => {
     setError(null);
+    const isAuthed = !!(await supabase.auth.getSession()).data.session;
     let q = supabase
       .from("exchanges")
-      .select("*")
+      .select(
+        isAuthed
+          ? "*"
+          : "id,created_at,title,description,type,is_free,price,unit,district,upazila,image_url,is_active,user_name,user_id",
+      )
       .eq("is_active", true)
       .limit(100);
     if (filters.district) q = q.eq("district", filters.district);
@@ -33,7 +38,7 @@ export function useExchanges(filters: ExchangeFilters) {
       : q.order("created_at", { ascending: false });
     const { data, error: e } = await q;
     if (e) setError("তালিকা লোড করা যায়নি");
-    else setItems((data ?? []) as Exchange[]);
+    else setItems(((data ?? []) as unknown) as Exchange[]);
     setLoading(false);
   }, [filters.district, filters.type, filters.freeOnly, filters.sort]);
 
