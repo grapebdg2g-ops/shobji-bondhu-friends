@@ -93,6 +93,38 @@ function FeedPage() {
     })();
   }, [posts, user]);
 
+  // Realtime new-post banner
+  const [newCount, setNewCount] = useState(0);
+  const dismissTimer = useRef<number | null>(null);
+  const districtForSub = useMemo(() => {
+    if (filters.districtMode === "mine") return user?.district ?? null;
+    if (filters.districtMode === "specific") return filters.district;
+    return null; // 'all' — subscribe to everything
+  }, [filters, user]);
+
+  useEffect(() => {
+    setNewCount(0);
+    const filterStr = districtForSub ? `district=eq.${districtForSub}` : undefined;
+    const ch = supabase
+      .channel(`feed-${districtForSub ?? "all"}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "posts", ...(filterStr ? { filter: filterStr } : {}) },
+        (payload) => {
+          const np = payload.new as Post;
+          if (user && np.user_id === user.id) return; // skip own
+          setNewCount((c) => c + 1);
+          if (dismissTimer.current) window.clearTimeout(dismissTimer.current);
+          dismissTimer.current = window.setTimeout(() => setNewCount(0), 8000);
+        },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); if (dismissTimer.current) window.clearTimeout(dismissTimer.current); };
+  }, [districtForSub, user]);
+
+  const { refresh } = useFeedRefresh();
+  // refresh is provided by useFeed
+
   // Infinite scroll
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
