@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Search, MoreVertical, CheckCircle2, Ban, ShieldAlert, UserCog, Eye } from "lucide-react";
+import { Search, MoreVertical, CheckCircle2, Ban, ShieldAlert, UserCog, Eye, Trash2 } from "lucide-react";
+import { hardDeleteUser } from "@/lib/admin.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/user-context";
 import type { AppRole } from "@/hooks/use-role";
@@ -65,6 +67,9 @@ function UsersPage() {
   const [verifyFor, setVerifyFor] = useState<AdminProfile | null>(null);
   const [suspendFor, setSuspendFor] = useState<AdminProfile | null>(null);
   const [warnFor, setWarnFor] = useState<AdminProfile | null>(null);
+  const [deleteFor, setDeleteFor] = useState<AdminProfile | null>(null);
+  const [deleteReason, setDeleteReason] = useState("");
+  const hardDeleteFn = useServerFn(hardDeleteUser);
 
   const { data: profiles = [], isLoading } = useQuery({
     queryKey: ["admin", "users", "profiles"],
@@ -205,6 +210,17 @@ function UsersPage() {
       toast.success("স্থগিতাদেশ তোলা হয়েছে");
       qc.invalidateQueries({ queryKey: ["admin", "users"] });
     },
+  });
+
+  const hardDelete = useMutation({
+    mutationFn: async ({ userId, reason }: { userId: string; reason: string }) =>
+      hardDeleteFn({ data: { userId, reason } }),
+    onSuccess: () => {
+      toast.success("অ্যাকাউন্ট স্থায়ীভাবে মুছে ফেলা হয়েছে");
+      qc.invalidateQueries({ queryKey: ["admin", "users"] });
+      setDeleteFor(null); setDeleteReason("");
+    },
+    onError: (e: Error) => toast.error(e.message || "মুছতে ব্যর্থ"),
   });
 
   const warnUser = useMutation({
@@ -348,6 +364,14 @@ function UsersPage() {
                             <Ban className="h-4 w-4" /> বরখাস্ত করুন
                           </DropdownMenuItem>
                         )}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onSelect={() => setDeleteFor(p)}
+                          disabled={p.id === user?.id}
+                          className="text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" /> স্থায়ীভাবে মুছুন
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </td>
@@ -381,6 +405,38 @@ function UsersPage() {
         onClose={() => setWarnFor(null)}
         onSubmit={(message) => warnFor && warnUser.mutate({ userId: warnFor.id, message })}
       />
+
+      <Dialog open={!!deleteFor} onOpenChange={(o) => !o && (setDeleteFor(null), setDeleteReason(""))}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-red-700">স্থায়ীভাবে মুছুন</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <p className="text-gray-700">
+              <b>{deleteFor?.name || "ব্যবহারকারী"}</b> এর অ্যাকাউন্ট ও সব ডেটা স্থায়ীভাবে মুছে যাবে।
+              এটি ফেরত আনা যাবে না।
+            </p>
+            <Textarea
+              value={deleteReason}
+              onChange={(e) => setDeleteReason(e.target.value)}
+              placeholder="কারণ (অডিট লগের জন্য)"
+              rows={3}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setDeleteFor(null); setDeleteReason(""); }}>
+              বাতিল
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={hardDelete.isPending || !deleteFor}
+              onClick={() => deleteFor && hardDelete.mutate({ userId: deleteFor.id, reason: deleteReason })}
+            >
+              {hardDelete.isPending ? "মুছছি..." : "হ্যাঁ, স্থায়ীভাবে মুছুন"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -27,6 +27,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as UUserIdRouteImport } from './routes/u.$userId'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
+import { Route as AdminProRouteImport } from './routes/admin.pro'
 import { Route as AdminPricesRouteImport } from './routes/admin.prices'
 import { Route as AdminNotifyRouteImport } from './routes/admin.notify'
 import { Route as AdminExchangesRouteImport } from './routes/admin.exchanges'
@@ -35,6 +36,7 @@ import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as ApiPublicHooksWeatherAlertsRouteImport } from './routes/api/public/hooks/weather-alerts'
+import { Route as ApiPublicHooksSendScheduledBroadcastsRouteImport } from './routes/api/public/hooks/send-scheduled-broadcasts'
 
 const WeatherRoute = WeatherRouteImport.update({
   id: '/weather',
@@ -126,6 +128,11 @@ const AdminReportsRoute = AdminReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminProRoute = AdminProRouteImport.update({
+  id: '/pro',
+  path: '/pro',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminPricesRoute = AdminPricesRouteImport.update({
   id: '/prices',
   path: '/prices',
@@ -167,6 +174,12 @@ const ApiPublicHooksWeatherAlertsRoute =
     path: '/api/public/hooks/weather-alerts',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksSendScheduledBroadcastsRoute =
+  ApiPublicHooksSendScheduledBroadcastsRouteImport.update({
+    id: '/api/public/hooks/send-scheduled-broadcasts',
+    path: '/api/public/hooks/send-scheduled-broadcasts',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -190,10 +203,12 @@ export interface FileRoutesByFullPath {
   '/admin/exchanges': typeof AdminExchangesRoute
   '/admin/notify': typeof AdminNotifyRoute
   '/admin/prices': typeof AdminPricesRoute
+  '/admin/pro': typeof AdminProRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/users': typeof AdminUsersRoute
   '/u/$userId': typeof UUserIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
 }
 export interface FileRoutesByTo {
@@ -217,10 +232,12 @@ export interface FileRoutesByTo {
   '/admin/exchanges': typeof AdminExchangesRoute
   '/admin/notify': typeof AdminNotifyRoute
   '/admin/prices': typeof AdminPricesRoute
+  '/admin/pro': typeof AdminProRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/users': typeof AdminUsersRoute
   '/u/$userId': typeof UUserIdRoute
   '/admin': typeof AdminIndexRoute
+  '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
 }
 export interface FileRoutesById {
@@ -246,10 +263,12 @@ export interface FileRoutesById {
   '/admin/exchanges': typeof AdminExchangesRoute
   '/admin/notify': typeof AdminNotifyRoute
   '/admin/prices': typeof AdminPricesRoute
+  '/admin/pro': typeof AdminProRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/users': typeof AdminUsersRoute
   '/u/$userId': typeof UUserIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
 }
 export interface FileRouteTypes {
@@ -276,10 +295,12 @@ export interface FileRouteTypes {
     | '/admin/exchanges'
     | '/admin/notify'
     | '/admin/prices'
+    | '/admin/pro'
     | '/admin/reports'
     | '/admin/users'
     | '/u/$userId'
     | '/admin/'
+    | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -303,10 +324,12 @@ export interface FileRouteTypes {
     | '/admin/exchanges'
     | '/admin/notify'
     | '/admin/prices'
+    | '/admin/pro'
     | '/admin/reports'
     | '/admin/users'
     | '/u/$userId'
     | '/admin'
+    | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
   id:
     | '__root__'
@@ -331,10 +354,12 @@ export interface FileRouteTypes {
     | '/admin/exchanges'
     | '/admin/notify'
     | '/admin/prices'
+    | '/admin/pro'
     | '/admin/reports'
     | '/admin/users'
     | '/u/$userId'
     | '/admin/'
+    | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
   fileRoutesById: FileRoutesById
 }
@@ -354,6 +379,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   WeatherRoute: typeof WeatherRoute
   UUserIdRoute: typeof UUserIdRoute
+  ApiPublicHooksSendScheduledBroadcastsRoute: typeof ApiPublicHooksSendScheduledBroadcastsRoute
   ApiPublicHooksWeatherAlertsRoute: typeof ApiPublicHooksWeatherAlertsRoute
 }
 
@@ -485,6 +511,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReportsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/pro': {
+      id: '/admin/pro'
+      path: '/pro'
+      fullPath: '/admin/pro'
+      preLoaderRoute: typeof AdminProRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/prices': {
       id: '/admin/prices'
       path: '/prices'
@@ -541,6 +574,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksWeatherAlertsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/send-scheduled-broadcasts': {
+      id: '/api/public/hooks/send-scheduled-broadcasts'
+      path: '/api/public/hooks/send-scheduled-broadcasts'
+      fullPath: '/api/public/hooks/send-scheduled-broadcasts'
+      preLoaderRoute: typeof ApiPublicHooksSendScheduledBroadcastsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -552,6 +592,7 @@ interface AdminRouteChildren {
   AdminExchangesRoute: typeof AdminExchangesRoute
   AdminNotifyRoute: typeof AdminNotifyRoute
   AdminPricesRoute: typeof AdminPricesRoute
+  AdminProRoute: typeof AdminProRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -565,6 +606,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminExchangesRoute: AdminExchangesRoute,
   AdminNotifyRoute: AdminNotifyRoute,
   AdminPricesRoute: AdminPricesRoute,
+  AdminProRoute: AdminProRoute,
   AdminReportsRoute: AdminReportsRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -588,18 +630,10 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   WeatherRoute: WeatherRoute,
   UUserIdRoute: UUserIdRoute,
+  ApiPublicHooksSendScheduledBroadcastsRoute:
+    ApiPublicHooksSendScheduledBroadcastsRoute,
   ApiPublicHooksWeatherAlertsRoute: ApiPublicHooksWeatherAlertsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -25,6 +25,8 @@ function NotifyPage() {
   const [link, setLink] = useState("/feed");
   const [icon, setIcon] = useState("🌿");
   const [confirming, setConfirming] = useState(false);
+  const [scheduleMode, setScheduleMode] = useState<"now" | "later">("now");
+  const [scheduledAt, setScheduledAt] = useState("");
 
   const { data: reach = 0 } = useQuery({
     queryKey: ["admin", "notify", "reach", target, value],
@@ -49,6 +51,21 @@ function NotifyPage() {
 
   const send = useMutation({
     mutationFn: async () => {
+      if (scheduleMode === "later") {
+        if (!scheduledAt) throw new Error("সময় দিন");
+        const when = new Date(scheduledAt);
+        if (isNaN(when.getTime()) || when.getTime() < Date.now()) throw new Error("ভবিষ্যৎ সময় দিন");
+        await supabase.from("notification_broadcasts").insert({
+          admin_id: user!.id, title, body, link, icon,
+          target_type: target, target_value: value || null,
+          scheduled_at: when.toISOString(), sent_count: 0,
+        });
+        await supabase.from("admin_actions").insert({
+          admin_id: user!.id, action_type: "broadcast_scheduled",
+          details: { title, target, value, scheduled_at: when.toISOString() } as never,
+        });
+        return -1;
+      }
       // resolve target users
       let q = supabase.from("profiles").select("id");
       if (target === "district" && value) q = q.eq("district", value);
@@ -58,7 +75,6 @@ function NotifyPage() {
       if (e1) throw e1;
       const ids = (users ?? []).map((u) => u.id);
 
-      // batched insert into notifications
       const rows = ids.map((id) => ({
         user_id: id, type: "broadcast", title, body, ref_type: "broadcast",
       }));
@@ -79,11 +95,12 @@ function NotifyPage() {
       return ids.length;
     },
     onSuccess: (count) => {
-      toast.success(`${toBn(count)} জনকে পাঠানো হয়েছে`);
-      setTitle(""); setBody(""); setConfirming(false);
+      if (count < 0) toast.success("নির্ধারিত সময়ে পাঠানো হবে");
+      else toast.success(`${toBn(count)} জনকে পাঠানো হয়েছে`);
+      setTitle(""); setBody(""); setConfirming(false); setScheduledAt("");
       qc.invalidateQueries({ queryKey: ["admin", "notify", "history"] });
     },
-    onError: () => { toast.error("পাঠাতে ব্যর্থ"); setConfirming(false); },
+    onError: (e: Error) => { toast.error(e.message || "পাঠাতে ব্যর্থ"); setConfirming(false); },
   });
 
   return (
@@ -146,8 +163,25 @@ function NotifyPage() {
           <p className="text-xs mt-2 text-gray-600">আনুমানিক প্রাপক: <b>~{toBn(reach)} জন</b></p>
         </div>
 
-        <Button disabled={!title || !body || send.isPending} onClick={() => setConfirming(true)}>
-          <Send className="h-4 w-4" /> পাঠান
+        <div className="flex flex-col gap-2 border-t border-gray-100 pt-3">
+          <div className="flex gap-2">
+            {(["now", "later"] as const).map((m) => (
+              <button key={m} onClick={() => setScheduleMode(m)}
+                className={`px-3 py-1.5 rounded-md text-sm font-semibold border ${scheduleMode === m ? "bg-purple-600 text-white border-purple-600" : "bg-white border-input"}`}>
+                {m === "now" ? "এখনই পাঠান" : "পরে নির্ধারণ করুন"}
+              </button>
+            ))}
+          </div>
+          {scheduleMode === "later" && (
+            <Input type="datetime-local" value={scheduledAt}
+              onChange={(e) => setScheduledAt(e.target.value)}
+              min={new Date(Date.now() + 60000).toISOString().slice(0, 16)} />
+          )}
+        </div>
+
+        <Button disabled={!title || !body || send.isPending || (scheduleMode === "later" && !scheduledAt)}
+          onClick={() => setConfirming(true)}>
+          <Send className="h-4 w-4" /> {scheduleMode === "later" ? "নির্ধারণ করুন" : "পাঠান"}
         </Button>
 
         {confirming && (

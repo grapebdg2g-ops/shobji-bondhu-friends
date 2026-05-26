@@ -414,6 +414,48 @@ export type Database = {
         }
         Relationships: []
       }
+      pro_subscriptions: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          expires_at: string | null
+          id: string
+          payment_ref: string | null
+          plan: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          expires_at?: string | null
+          id?: string
+          payment_ref?: string | null
+          plan?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          expires_at?: string | null
+          id?: string
+          payment_ref?: string | null
+          plan?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -530,6 +572,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      revenue_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          reference: string | null
+          status: string
+          subscription_id: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          id?: string
+          reference?: string | null
+          status?: string
+          subscription_id?: string | null
+          type?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          reference?: string | null
+          status?: string
+          subscription_id?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revenue_transactions_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "pro_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_reports: {
         Row: {

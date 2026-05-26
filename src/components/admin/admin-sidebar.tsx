@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Repeat2,
   ScrollText,
+  Crown,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -24,6 +25,7 @@ const ITEMS: Array<{ to: string; label: string; icon: typeof LayoutDashboard; ex
   { to: "/admin/diseases", label: "রোগ শনাক্ত লগ", icon: BugIcon },
   { to: "/admin/reports", label: "রিপোর্ট", icon: Flag },
   { to: "/admin/notify", label: "নোটিফিকেশন", icon: Bell },
+  { to: "/admin/pro", label: "Pro ও আয়", icon: Crown },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/admin/audit", label: "অ্যাকশন লগ", icon: ScrollText },
 ];
