@@ -141,7 +141,7 @@ function PricesPage() {
             <MapPin className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-primary" />
             <select
               value={district}
-              onChange={(e) => setDistrict(e.target.value)}
+              onChange={(e) => { setDistrict(e.target.value); setUpazila("all"); }}
               className="w-full appearance-none bg-white text-foreground font-semibold rounded-xl pl-9 pr-4 py-3 text-sm shadow-[var(--shadow-card)]"
             >
               {DISTRICTS.map((d) => (
@@ -155,6 +155,29 @@ function PricesPage() {
           </div>
         </div>
       </header>
+
+      {/* Upazila chips */}
+      {upazilaOptions.length > 0 && (
+        <div className="px-5 mt-3 overflow-x-auto">
+          <div className="flex gap-2 min-w-max pb-1">
+            <button
+              onClick={() => setUpazila("all")}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition ${upazila === "all" ? "bg-primary text-primary-foreground" : "bg-card text-foreground border border-border"}`}
+            >
+              সব উপজেলা
+            </button>
+            {upazilaOptions.map((u) => (
+              <button
+                key={u}
+                onClick={() => setUpazila(u)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition ${upazila === u ? "bg-primary text-primary-foreground" : "bg-card text-foreground border border-border"}`}
+              >
+                {u}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Filter chips */}
       <div className="px-5 mt-4 -mb-1 overflow-x-auto">
@@ -208,7 +231,9 @@ function PricesPage() {
                 <div className="flex justify-between items-start gap-3">
                   <div className="min-w-0 flex-1">
                     <h3 className="text-lg font-bold text-foreground truncate">{p.product_name}</h3>
-                    <p className="text-xs text-muted-foreground mt-1">{p.market_name}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {p.market_name}{p.upazila ? ` • ${p.upazila}` : ""}, {p.district}
+                    </p>
                   </div>
                   <div className="text-right shrink-0">
                     <div className="flex items-center gap-1 justify-end">
