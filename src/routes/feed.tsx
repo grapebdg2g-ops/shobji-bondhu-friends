@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, SlidersHorizontal, ThumbsUp, MessageCircle, Share2, Plus, HelpCircle, Star, CloudRain, ChevronDown, ArrowUp } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,6 +46,8 @@ function timeAgo(iso: string) {
 function FeedPage() {
   const navigate = useNavigate();
   const { user } = useUser();
+  const qc = useQueryClient();
+
 
   const [filters, setFilters] = useState<FeedFilters>({
     districtMode: "mine",
@@ -57,10 +60,10 @@ function FeedPage() {
 
   const { posts, loading, loadingMore, hasMore, error, loadMore, prepend, updateById, refresh } = useFeed(filters, user?.district ?? null);
 
-  // Active users (stories) — distinct recent posters
-  const [activeUsers, setActiveUsers] = useState<{ name: string; district: string | null }[]>([]);
-  useEffect(() => {
-    (async () => {
+  // Active users (stories) — distinct recent posters. Cached, refetched at most every 2 min.
+  const { data: activeUsers = [] } = useQuery({
+    queryKey: ["feed", "active-users"],
+    queryFn: async () => {
       const { data } = await supabase
         .from("posts")
         .select("user_name, user_district, created_at")
@@ -75,24 +78,29 @@ function FeedPage() {
         }
         if (unique.length >= 12) break;
       }
-      setActiveUsers(unique);
-    })();
-  }, [posts.length]);
+      return unique;
+    },
+    staleTime: 2 * 60_000,
+  });
 
-  // Liked posts by current user
-  const [likedSet, setLikedSet] = useState<Set<string>>(new Set());
-  useEffect(() => {
-    if (!user || posts.length === 0) return;
-    const ids = posts.map((p) => p.id);
-    (async () => {
+  // Liked posts by current user — keyed by user + visible post ids
+  const postIdsKey = useMemo(() => posts.map((p) => p.id).join(","), [posts]);
+  const { data: likedArr = [] } = useQuery({
+    queryKey: ["feed", "liked", user?.id ?? null, postIdsKey],
+    queryFn: async () => {
+      if (!user || posts.length === 0) return [] as string[];
+      const ids = posts.map((p) => p.id);
       const { data } = await supabase
         .from("post_likes")
         .select("post_id")
         .eq("user_id", user.id)
         .in("post_id", ids);
-      setLikedSet(new Set(((data as { post_id: string }[]) ?? []).map((r) => r.post_id)));
-    })();
-  }, [posts, user]);
+      return ((data as { post_id: string }[]) ?? []).map((r) => r.post_id);
+    },
+    enabled: !!user && posts.length > 0,
+    staleTime: 60_000,
+  });
+  const likedSet = useMemo(() => new Set(likedArr), [likedArr]);
 
   // Realtime new-post banner
   const [newCount, setNewCount] = useState(0);
@@ -139,31 +147,39 @@ function FeedPage() {
     return () => io.disconnect();
   }, [loadMore]);
 
+  const likedKey = useMemo(
+    () => ["feed", "liked", user?.id ?? null, postIdsKey] as const,
+    [user?.id, postIdsKey],
+  );
+  const setLiked = useCallback(
+    (postId: string, liked: boolean) => {
+      qc.setQueryData<string[]>(likedKey, (prev) => {
+        const set = new Set(prev ?? []);
+        if (liked) set.add(postId); else set.delete(postId);
+        return Array.from(set);
+      });
+    },
+    [qc, likedKey],
+  );
+
   const toggleLike = useCallback(async (post: Post) => {
     if (!user) { toast.error("লাইক করতে লগইন করুন"); return; }
     const liked = likedSet.has(post.id);
     // optimistic
-    setLikedSet((s) => {
-      const n = new Set(s);
-      if (liked) n.delete(post.id); else n.add(post.id);
-      return n;
-    });
+    setLiked(post.id, !liked);
     updateById(post.id, { likes_count: Math.max(0, post.likes_count + (liked ? -1 : 1)) });
 
     if (liked) {
       const { error } = await supabase.from("post_likes").delete().eq("post_id", post.id).eq("user_id", user.id);
-      if (error) { /* revert */ setLikedSet((s) => new Set(s).add(post.id)); updateById(post.id, { likes_count: post.likes_count }); return; }
+      if (error) { setLiked(post.id, true); updateById(post.id, { likes_count: post.likes_count }); return; }
       await supabase.rpc("decrement_likes", { post_id: post.id });
     } else {
       const { error } = await supabase.from("post_likes").insert({ post_id: post.id, user_id: user.id });
-      if (error) {
-        setLikedSet((s) => { const n = new Set(s); n.delete(post.id); return n; });
-        updateById(post.id, { likes_count: post.likes_count });
-        return;
-      }
+      if (error) { setLiked(post.id, false); updateById(post.id, { likes_count: post.likes_count }); return; }
       await supabase.rpc("increment_likes", { post_id: post.id });
     }
-  }, [likedSet, user, updateById]);
+  }, [likedSet, user, updateById, setLiked]);
+
 
   const share = async (p: Post) => {
     const url = typeof window !== "undefined" ? window.location.href : "";
