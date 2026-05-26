@@ -79,7 +79,7 @@ function CardBody({ item }: { item: Exchange }) {
         )}
       </div>
       <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground flex-wrap">
-        <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{item.district}</span>
+        <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{item.upazila ? `${item.upazila}, ${item.district}` : item.district}</span>
         <span className="inline-flex items-center gap-1"><UserIcon className="h-3 w-3" />{item.user_name || "কৃষক"}</span>
         <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />{timeAgoBn(item.created_at)}</span>
       </div>
