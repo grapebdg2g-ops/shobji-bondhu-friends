@@ -165,7 +165,7 @@ function ProfilePage() {
           <div className="relative">
             <div className="h-24 w-24 rounded-full bg-white/20 ring-4 ring-white/40 overflow-hidden flex items-center justify-center">
               {full.avatar_url ? (
-                <img src={full.avatar_url} alt={full.name} className="h-full w-full object-cover" />
+                <LazyImage src={full.avatar_url} alt={full.name} wrapperClassName="h-full w-full rounded-full" priority />
               ) : (
                 <span className="text-4xl font-bold text-white">{initials(full.name)}</span>
               )}
