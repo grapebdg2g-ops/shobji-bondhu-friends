@@ -57,6 +57,14 @@ function Dashboard() {
         <div className="mt-5">
           <p className="text-sm text-white/80">স্বাগতম,</p>
           <h1 className="text-2xl font-bold text-white truncate">{profile?.name || "কৃষক"}</h1>
+          <button
+            onClick={() => setCollapsed(false)}
+            aria-label="মেনু খুলুন"
+            className="mt-2 flex items-center gap-1.5 text-white/90 hover:text-white transition-colors"
+          >
+            <Menu className="h-5 w-5" />
+            <span className="text-sm font-medium">মেনু</span>
+          </button>
         </div>
       </header>
 
