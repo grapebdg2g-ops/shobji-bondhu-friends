@@ -280,9 +280,11 @@ function FeedPage() {
               key={p.id}
               post={p}
               liked={likedSet.has(p.id)}
+              currentUserId={user?.id ?? null}
               onLike={() => toggleLike(p)}
               onShare={() => share(p)}
               onCommentAdded={() => updateById(p.id, { comments_count: p.comments_count + 1 })}
+              onDeleted={() => removeById(p.id)}
             />
           ))
         )}
