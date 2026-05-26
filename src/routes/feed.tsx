@@ -46,6 +46,8 @@ function timeAgo(iso: string) {
 function FeedPage() {
   const navigate = useNavigate();
   const { user } = useUser();
+  const qc = useQueryClient();
+
 
   const [filters, setFilters] = useState<FeedFilters>({
     districtMode: "mine",
