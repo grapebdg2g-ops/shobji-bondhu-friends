@@ -4,7 +4,28 @@ export type { Forecast, CurrentWeather, HourlyPoint, DailyPoint } from "./weathe
 
 const BASE = "https://api.open-meteo.com/v1/forecast";
 
+// In-memory cache to dedupe concurrent requests and reduce 429s.
+// Key: "lat,lng" rounded. Value: { data, expiresAt } or in-flight promise.
+type CacheEntry = { promise: Promise<Forecast>; expiresAt: number };
+const cache = new Map<string, CacheEntry>();
+const CACHE_TTL_MS = 15 * 60_000; // 15 min
+
 export async function fetchForecast(lat: number, lng: number): Promise<Forecast> {
+  const key = `${lat.toFixed(2)},${lng.toFixed(2)}`;
+  const now = Date.now();
+  const hit = cache.get(key);
+  if (hit && hit.expiresAt > now) return hit.promise;
+
+  const promise = fetchForecastInner(lat, lng).catch((e) => {
+    // Don't cache failures
+    if (cache.get(key)?.promise === promise) cache.delete(key);
+    throw e;
+  });
+  cache.set(key, { promise, expiresAt: now + CACHE_TTL_MS });
+  return promise;
+}
+
+async function fetchForecastInner(lat: number, lng: number): Promise<Forecast> {
   const params = new URLSearchParams({
     latitude: lat.toString(),
     longitude: lng.toString(),
@@ -16,8 +37,24 @@ export async function fetchForecast(lat: number, lng: number): Promise<Forecast>
     forecast_days: "7",
   });
 
-  const res = await fetch(`${BASE}?${params}`);
-  if (!res.ok) throw new Error(`Open-Meteo ${res.status}`);
+  const url = `${BASE}?${params}`;
+  let res: Response | null = null;
+  let lastStatus = 0;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      res = await fetch(url, { headers: { "accept": "application/json" } });
+      if (res.ok) break;
+      lastStatus = res.status;
+      // Retry on 429 / 5xx
+      if (res.status !== 429 && res.status < 500) break;
+    } catch (e) {
+      lastStatus = -1;
+    }
+    // Exponential backoff with jitter: 400ms, 900ms, 1900ms
+    const delay = 400 * Math.pow(2, attempt) + Math.floor(Math.random() * 200);
+    await new Promise((r) => setTimeout(r, delay));
+  }
+  if (!res || !res.ok) throw new Error(`Open-Meteo ${res?.status ?? lastStatus}`);
   const data = await res.json() as any;
 
   const c = data.current;
