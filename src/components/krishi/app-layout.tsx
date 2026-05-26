@@ -1,4 +1,5 @@
 import { useRouterState } from "@tanstack/react-router";
+import { Menu } from "lucide-react";
 import { AppSidebar, useSidebar } from "./app-sidebar";
 import { useUser } from "@/contexts/user-context";
 
@@ -17,13 +18,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen w-full">
       <AppSidebar collapsed={collapsed} setCollapsed={setCollapsed} isMobile={isMobile} />
-      <div
-        className={`flex-1 min-w-0 transition-[margin] duration-[250ms] ease-in-out ${
-          isMobile ? "ml-16" : collapsed ? "ml-16" : "ml-64"
-        }`}
-      >
-        {children}
-      </div>
+      {collapsed && (
+        <button
+          onClick={() => setCollapsed(false)}
+          aria-label="মেনু খুলুন"
+          className="fixed top-3 left-3 z-30 h-10 w-10 rounded-lg bg-white shadow-md border border-gray-100 flex items-center justify-center hover:bg-[#F0FFF4] transition-colors"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+      )}
+      <div className="flex-1 min-w-0">{children}</div>
     </div>
   );
 }

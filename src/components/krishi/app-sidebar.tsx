@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import {
-  Menu, Home, TrendingUp, Repeat2, Bug, Newspaper,
-  CloudSun, Bell, User, Settings, LogOut, Phone, X,
+  Home, TrendingUp, Repeat2, Bug, Newspaper,
+  CloudSun, Bell, User, LogOut, Phone, X,
 } from "lucide-react";
 import { useUser } from "@/contexts/user-context";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -84,7 +84,7 @@ export function AppSidebar({
     { label: "আমার প্রোফাইল", to: "/profile", icon: User },
   ];
 
-  const closeOnNav = () => { if (isMobile) setCollapsed(true); };
+  const closeOnNav = () => setCollapsed(true);
 
   const handleLogout = async () => {
     await signOut();
@@ -92,11 +92,11 @@ export function AppSidebar({
   };
 
   const expanded = !collapsed;
-  const showOverlay = isMobile && expanded;
+  const showOverlay = expanded;
 
   return (
     <>
-      {/* Backdrop (mobile expanded) */}
+      {/* Backdrop when expanded (all screen sizes) */}
       {showOverlay && (
         <div
           className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm animate-fade-in"
@@ -106,22 +106,23 @@ export function AppSidebar({
       )}
 
       <aside
-        className={`fixed left-0 top-0 h-full z-40 bg-white border-r border-gray-100 shadow-lg flex flex-col transition-[width] duration-[250ms] ease-in-out ${
-          expanded ? "w-64" : "w-16"
+        className={`fixed left-0 top-0 h-full z-40 bg-white border-r border-gray-100 shadow-lg flex flex-col w-64 transition-transform duration-[250ms] ease-in-out ${
+          expanded ? "translate-x-0" : "-translate-x-full"
         }`}
         aria-label="মূল মেনু"
+        aria-hidden={!expanded}
       >
         {/* Toggle + Profile header */}
         <div className="p-3 border-b border-gray-100">
           <button
-            onClick={() => setCollapsed(!collapsed)}
-            aria-label={collapsed ? "মেনু খুলুন" : "মেনু বন্ধ করুন"}
+            onClick={() => setCollapsed(true)}
+            aria-label="মেনু বন্ধ করুন"
             className="h-10 w-10 rounded-lg flex items-center justify-center hover:bg-[#F0FFF4] transition-colors"
           >
-            {expanded && isMobile ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            <X className="h-5 w-5" />
           </button>
 
-          {expanded && user && (
+          {user && (
             <div className="mt-3 px-1 animate-fade-in">
               <div className="flex items-center gap-3">
                 <div
