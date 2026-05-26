@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, SlidersHorizontal, ThumbsUp, MessageCircle, Share2, Plus, HelpCircle, Star, CloudRain, ChevronDown, ArrowUp } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
