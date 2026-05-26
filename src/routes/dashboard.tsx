@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Bell, TrendingUp, Repeat2, Bug, Newspaper, MapPin } from "lucide-react";
+import { Bell, TrendingUp, Repeat2, Bug, Newspaper, MapPin, Menu } from "lucide-react";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useUser } from "@/contexts/user-context";
 import { WeatherAlertBanner } from "@/components/krishi/weather-alert-banner";
 import { DashboardWeatherWidget } from "@/components/krishi/dashboard-weather-widget";
+import { useSidebar } from "@/components/krishi/app-sidebar";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -15,6 +16,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const { user, loading } = useUser();
   const { unreadCount } = useNotifications(user?.id ?? null);
+  const { setCollapsed } = useSidebar();
 
   useEffect(() => {
     if (loading) return;
@@ -55,6 +57,14 @@ function Dashboard() {
         <div className="mt-5">
           <p className="text-sm text-white/80">স্বাগতম,</p>
           <h1 className="text-2xl font-bold text-white truncate">{profile?.name || "কৃষক"}</h1>
+          <button
+            onClick={() => setCollapsed(false)}
+            aria-label="মেনু খুলুন"
+            className="mt-2 flex items-center gap-1.5 text-white/90 hover:text-white transition-colors"
+          >
+            <Menu className="h-5 w-5" />
+            <span className="text-sm font-medium">মেনু</span>
+          </button>
         </div>
       </header>
 
