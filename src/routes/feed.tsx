@@ -60,7 +60,8 @@ function FeedPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
 
-  const { posts, loading, loadingMore, hasMore, error, loadMore, prepend, updateById, refresh } = useFeed(filters, user?.district ?? null, user?.upazila ?? null);
+  const { data: mutedIds = [] } = useMutedIds();
+  const { posts, loading, loadingMore, hasMore, error, loadMore, prepend, removeById, updateById, refresh } = useFeed(filters, user?.district ?? null, user?.upazila ?? null, mutedIds);
 
   // Active users (stories) — distinct recent posters. Cached, refetched at most every 2 min.
   const { data: activeUsers = [] } = useQuery({
