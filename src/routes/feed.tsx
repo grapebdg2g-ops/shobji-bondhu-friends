@@ -358,14 +358,11 @@ function PostCard({
       </div>
 
       {post.image_url && (
-        <div className="bg-muted">
-          <img
-            src={post.image_url}
-            alt=""
-            loading="lazy"
-            className="w-full aspect-[4/3] object-cover"
-          />
-        </div>
+        <LazyImage
+          src={post.image_url}
+          alt=""
+          wrapperClassName="w-full aspect-[4/3] bg-muted"
+        />
       )}
 
       <div className="px-4 py-2 flex items-center justify-around border-t border-border/60">
