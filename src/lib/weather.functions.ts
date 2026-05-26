@@ -51,3 +51,32 @@ export const savePushSubscription = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// Remove a push subscription by endpoint (current device) or all for user
+export const deletePushSubscription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({ endpoint: z.string().url().max(2048).optional() }).parse(input ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    let q = supabase.from("push_subscriptions").delete().eq("user_id", userId);
+    if (data.endpoint) q = q.eq("endpoint", data.endpoint);
+    const { error } = await q;
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Check if current user has any active subscription
+export const hasPushSubscription = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data, error } = await supabase
+      .from("push_subscriptions")
+      .select("id")
+      .eq("user_id", userId)
+      .limit(1);
+    if (error) throw new Error(error.message);
+    return { hasSubscription: !!data && data.length > 0 };
+  });
