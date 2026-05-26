@@ -25,8 +25,13 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminReportsRouteImport } from './routes/admin.reports'
+import { Route as AdminPricesRouteImport } from './routes/admin.prices'
 import { Route as AdminNotifyRouteImport } from './routes/admin.notify'
+import { Route as AdminExchangesRouteImport } from './routes/admin.exchanges'
+import { Route as AdminDiseasesRouteImport } from './routes/admin.diseases'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
+import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as ApiPublicHooksWeatherAlertsRouteImport } from './routes/api/public/hooks/weather-alerts'
 
@@ -110,14 +115,39 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminReportsRoute = AdminReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPricesRoute = AdminPricesRouteImport.update({
+  id: '/prices',
+  path: '/prices',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminNotifyRoute = AdminNotifyRouteImport.update({
   id: '/notify',
   path: '/notify',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminExchangesRoute = AdminExchangesRouteImport.update({
+  id: '/exchanges',
+  path: '/exchanges',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDiseasesRoute = AdminDiseasesRouteImport.update({
+  id: '/diseases',
+  path: '/diseases',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminContentRoute = AdminContentRouteImport.update({
   id: '/content',
   path: '/content',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAuditRoute = AdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
@@ -148,8 +178,13 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/content': typeof AdminContentRoute
+  '/admin/diseases': typeof AdminDiseasesRoute
+  '/admin/exchanges': typeof AdminExchangesRoute
   '/admin/notify': typeof AdminNotifyRoute
+  '/admin/prices': typeof AdminPricesRoute
+  '/admin/reports': typeof AdminReportsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -169,8 +204,13 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/content': typeof AdminContentRoute
+  '/admin/diseases': typeof AdminDiseasesRoute
+  '/admin/exchanges': typeof AdminExchangesRoute
   '/admin/notify': typeof AdminNotifyRoute
+  '/admin/prices': typeof AdminPricesRoute
+  '/admin/reports': typeof AdminReportsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin': typeof AdminIndexRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -192,8 +232,13 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/content': typeof AdminContentRoute
+  '/admin/diseases': typeof AdminDiseasesRoute
+  '/admin/exchanges': typeof AdminExchangesRoute
   '/admin/notify': typeof AdminNotifyRoute
+  '/admin/prices': typeof AdminPricesRoute
+  '/admin/reports': typeof AdminReportsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -216,8 +261,13 @@ export interface FileRouteTypes {
     | '/register'
     | '/weather'
     | '/admin/analytics'
+    | '/admin/audit'
     | '/admin/content'
+    | '/admin/diseases'
+    | '/admin/exchanges'
     | '/admin/notify'
+    | '/admin/prices'
+    | '/admin/reports'
     | '/admin/users'
     | '/admin/'
     | '/api/public/hooks/weather-alerts'
@@ -237,8 +287,13 @@ export interface FileRouteTypes {
     | '/register'
     | '/weather'
     | '/admin/analytics'
+    | '/admin/audit'
     | '/admin/content'
+    | '/admin/diseases'
+    | '/admin/exchanges'
     | '/admin/notify'
+    | '/admin/prices'
+    | '/admin/reports'
     | '/admin/users'
     | '/admin'
     | '/api/public/hooks/weather-alerts'
@@ -259,8 +314,13 @@ export interface FileRouteTypes {
     | '/register'
     | '/weather'
     | '/admin/analytics'
+    | '/admin/audit'
     | '/admin/content'
+    | '/admin/diseases'
+    | '/admin/exchanges'
     | '/admin/notify'
+    | '/admin/prices'
+    | '/admin/reports'
     | '/admin/users'
     | '/admin/'
     | '/api/public/hooks/weather-alerts'
@@ -398,6 +458,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/reports': {
+      id: '/admin/reports'
+      path: '/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminReportsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/prices': {
+      id: '/admin/prices'
+      path: '/prices'
+      fullPath: '/admin/prices'
+      preLoaderRoute: typeof AdminPricesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/notify': {
       id: '/admin/notify'
       path: '/notify'
@@ -405,11 +479,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminNotifyRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/exchanges': {
+      id: '/admin/exchanges'
+      path: '/exchanges'
+      fullPath: '/admin/exchanges'
+      preLoaderRoute: typeof AdminExchangesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/diseases': {
+      id: '/admin/diseases'
+      path: '/diseases'
+      fullPath: '/admin/diseases'
+      preLoaderRoute: typeof AdminDiseasesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/content': {
       id: '/admin/content'
       path: '/content'
       fullPath: '/admin/content'
       preLoaderRoute: typeof AdminContentRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/audit': {
+      id: '/admin/audit'
+      path: '/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAuditRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/analytics': {
@@ -431,16 +526,26 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminAuditRoute: typeof AdminAuditRoute
   AdminContentRoute: typeof AdminContentRoute
+  AdminDiseasesRoute: typeof AdminDiseasesRoute
+  AdminExchangesRoute: typeof AdminExchangesRoute
   AdminNotifyRoute: typeof AdminNotifyRoute
+  AdminPricesRoute: typeof AdminPricesRoute
+  AdminReportsRoute: typeof AdminReportsRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminAuditRoute: AdminAuditRoute,
   AdminContentRoute: AdminContentRoute,
+  AdminDiseasesRoute: AdminDiseasesRoute,
+  AdminExchangesRoute: AdminExchangesRoute,
   AdminNotifyRoute: AdminNotifyRoute,
+  AdminPricesRoute: AdminPricesRoute,
+  AdminReportsRoute: AdminReportsRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
@@ -467,13 +572,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

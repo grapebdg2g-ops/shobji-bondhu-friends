@@ -11,22 +11,25 @@ import {
   Bug as BugIcon,
   TrendingUp,
   Repeat2,
+  ScrollText,
 } from "lucide-react";
 import { useState } from "react";
 
 const ITEMS: Array<{ to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean }> = [
   { to: "/admin", label: "ওভারভিউ", icon: LayoutDashboard, exact: true },
   { to: "/admin/users", label: "ব্যবহারকারী", icon: Users },
-  { to: "/admin/content", label: "কন্টেন্ট ব্যবস্থাপনা", icon: FileText },
-  { to: "/admin/notify", label: "নোটিফিকেশন পাঠান", icon: Bell },
+  { to: "/admin/content", label: "কন্টেন্ট", icon: FileText },
+  { to: "/admin/prices", label: "বাজার দর", icon: TrendingUp },
+  { to: "/admin/exchanges", label: "বিনিময়", icon: Repeat2 },
+  { to: "/admin/diseases", label: "রোগ শনাক্ত লগ", icon: BugIcon },
+  { to: "/admin/reports", label: "রিপোর্ট", icon: Flag },
+  { to: "/admin/notify", label: "নোটিফিকেশন", icon: Bell },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/admin/audit", label: "অ্যাকশন লগ", icon: ScrollText },
 ];
 
 const REF: Array<{ to: string; label: string; icon: typeof TrendingUp }> = [
-  { to: "/prices", label: "বাজার দর", icon: TrendingUp },
-  { to: "/exchange", label: "বিনিময়", icon: Repeat2 },
-  { to: "/disease-detection", label: "রোগ লগ", icon: BugIcon },
-  { to: "/moderation", label: "রিপোর্ট", icon: Flag },
+  { to: "/dashboard", label: "মূল ড্যাশবোর্ড", icon: ExternalLink },
 ];
 
 export function AdminSidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
