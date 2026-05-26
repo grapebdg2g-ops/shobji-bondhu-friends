@@ -104,7 +104,7 @@ export function PWAManager() {
         const dismissedRecently =
           dismissedAt && Date.now() - dismissedAt < 7 * 24 * 60 * 60 * 1000;
 
-        if (visits >= 3 && !dismissedRecently) {
+        if (visits >= 1 && !dismissedRecently) {
           setShowInstall(true);
         }
       } catch {
