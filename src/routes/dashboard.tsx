@@ -87,22 +87,6 @@ function Dashboard() {
         </div>
       </section>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
-        <div className="grid grid-cols-4 max-w-md mx-auto">
-          {[
-            { label: "হোম", icon: Home, to: "/dashboard", active: true },
-            { label: "দর", icon: BarChart3, to: "/prices", active: false },
-            { label: "বিনিময়", icon: Repeat2, to: "/exchange", active: false },
-            { label: "প্রোফাইল", icon: User, to: "/profile", active: false },
-          ].map(({ label, icon: Icon, to, active }) => (
-            <Link key={label} to={to}
-              className={`flex flex-col items-center gap-1 py-3 ${active ? "text-primary" : "text-muted-foreground"}`}>
-              <Icon className="h-6 w-6" strokeWidth={active ? 2.5 : 2} />
-              <span className={`text-xs ${active ? "font-bold" : "font-medium"}`}>{label}</span>
-            </Link>
-          ))}
-        </div>
-      </nav>
     </main>
   );
 }
