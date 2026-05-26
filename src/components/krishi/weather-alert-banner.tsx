@@ -5,7 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronRight, CloudLightning, CloudRain, Thermometer } from "lucide-react";
 import { getWeatherForecast } from "@/lib/weather.functions";
-import { evaluateAlert, type WeatherAlert } from "@/lib/weather.server";
+import { evaluateAlert, type WeatherAlert } from "@/lib/weather-rules";
 
 const STYLES: Record<WeatherAlert["type"], { bg: string; border: string; icon: any }> = {
   STORM:      { bg: "bg-[#FFF3CD]", border: "border-[#F59E0B]", icon: CloudLightning },
