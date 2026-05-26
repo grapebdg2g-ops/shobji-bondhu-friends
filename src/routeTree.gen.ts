@@ -15,11 +15,13 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PricesRouteImport } from './routes/prices'
 import { Route as OfflineRouteImport } from './routes/offline'
 import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as ModerationRouteImport } from './routes/moderation'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as ExchangeRouteImport } from './routes/exchange'
 import { Route as DiseaseDetectionRouteImport } from './routes/disease-detection'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicHooksWeatherAlertsRouteImport } from './routes/api/public/hooks/weather-alerts'
 
@@ -53,6 +55,11 @@ const NotificationsRoute = NotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ModerationRoute = ModerationRouteImport.update({
+  id: '/moderation',
+  path: '/moderation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -78,6 +85,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -92,11 +104,13 @@ const ApiPublicHooksWeatherAlertsRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
   '/disease-detection': typeof DiseaseDetectionRoute
   '/exchange': typeof ExchangeRoute
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
+  '/moderation': typeof ModerationRoute
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
   '/prices': typeof PricesRoute
@@ -107,11 +121,13 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
   '/disease-detection': typeof DiseaseDetectionRoute
   '/exchange': typeof ExchangeRoute
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
+  '/moderation': typeof ModerationRoute
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
   '/prices': typeof PricesRoute
@@ -123,11 +139,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
   '/disease-detection': typeof DiseaseDetectionRoute
   '/exchange': typeof ExchangeRoute
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
+  '/moderation': typeof ModerationRoute
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
   '/prices': typeof PricesRoute
@@ -140,11 +158,13 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/dashboard'
     | '/disease-detection'
     | '/exchange'
     | '/feed'
     | '/login'
+    | '/moderation'
     | '/notifications'
     | '/offline'
     | '/prices'
@@ -155,11 +175,13 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/dashboard'
     | '/disease-detection'
     | '/exchange'
     | '/feed'
     | '/login'
+    | '/moderation'
     | '/notifications'
     | '/offline'
     | '/prices'
@@ -170,11 +192,13 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/dashboard'
     | '/disease-detection'
     | '/exchange'
     | '/feed'
     | '/login'
+    | '/moderation'
     | '/notifications'
     | '/offline'
     | '/prices'
@@ -186,11 +210,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   DashboardRoute: typeof DashboardRoute
   DiseaseDetectionRoute: typeof DiseaseDetectionRoute
   ExchangeRoute: typeof ExchangeRoute
   FeedRoute: typeof FeedRoute
   LoginRoute: typeof LoginRoute
+  ModerationRoute: typeof ModerationRoute
   NotificationsRoute: typeof NotificationsRoute
   OfflineRoute: typeof OfflineRoute
   PricesRoute: typeof PricesRoute
@@ -244,6 +270,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/moderation': {
+      id: '/moderation'
+      path: '/moderation'
+      fullPath: '/moderation'
+      preLoaderRoute: typeof ModerationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -279,6 +312,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -298,11 +338,13 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   DashboardRoute: DashboardRoute,
   DiseaseDetectionRoute: DiseaseDetectionRoute,
   ExchangeRoute: ExchangeRoute,
   FeedRoute: FeedRoute,
   LoginRoute: LoginRoute,
+  ModerationRoute: ModerationRoute,
   NotificationsRoute: NotificationsRoute,
   OfflineRoute: OfflineRoute,
   PricesRoute: PricesRoute,
@@ -314,3 +356,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
