@@ -61,7 +61,7 @@ function ContentPage() {
         .select(fields)
         .order("created_at", { ascending: false })
         .limit(100);
-      return (data as Array<Record<string, unknown>>) ?? [];
+      return ((data ?? []) as unknown) as Array<Record<string, unknown>>;
     },
   });
 
