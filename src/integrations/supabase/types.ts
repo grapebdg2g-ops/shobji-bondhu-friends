@@ -236,6 +236,7 @@ export type Database = {
           image_url: string | null
           likes_count: number
           type: string
+          upazila: string | null
           user_district: string | null
           user_id: string
           user_name: string
@@ -250,6 +251,7 @@ export type Database = {
           image_url?: string | null
           likes_count?: number
           type?: string
+          upazila?: string | null
           user_district?: string | null
           user_id: string
           user_name?: string
@@ -264,6 +266,7 @@ export type Database = {
           image_url?: string | null
           likes_count?: number
           type?: string
+          upazila?: string | null
           user_district?: string | null
           user_id?: string
           user_name?: string
@@ -374,6 +377,7 @@ export type Database = {
           endpoint: string
           id: string
           p256dh: string
+          upazila: string | null
           user_agent: string | null
           user_id: string
         }
@@ -384,6 +388,7 @@ export type Database = {
           endpoint: string
           id?: string
           p256dh: string
+          upazila?: string | null
           user_agent?: string | null
           user_id: string
         }
@@ -394,6 +399,7 @@ export type Database = {
           endpoint?: string
           id?: string
           p256dh?: string
+          upazila?: string | null
           user_agent?: string | null
           user_id?: string
         }
@@ -406,6 +412,7 @@ export type Database = {
           district: string
           id: string
           sent_at: string
+          upazila: string | null
         }
         Insert: {
           alert_type: string
@@ -413,6 +420,7 @@ export type Database = {
           district: string
           id?: string
           sent_at?: string
+          upazila?: string | null
         }
         Update: {
           alert_type?: string
@@ -420,6 +428,7 @@ export type Database = {
           district?: string
           id?: string
           sent_at?: string
+          upazila?: string | null
         }
         Relationships: []
       }
