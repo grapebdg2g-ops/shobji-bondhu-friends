@@ -28,6 +28,7 @@ import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminPricesRouteImport } from './routes/admin.prices'
 import { Route as AdminNotifyRouteImport } from './routes/admin.notify'
+import { Route as AdminExchangesRouteImport } from './routes/admin.exchanges'
 import { Route as AdminDiseasesRouteImport } from './routes/admin.diseases'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
@@ -128,6 +129,11 @@ const AdminNotifyRoute = AdminNotifyRouteImport.update({
   path: '/notify',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminExchangesRoute = AdminExchangesRouteImport.update({
+  id: '/exchanges',
+  path: '/exchanges',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminDiseasesRoute = AdminDiseasesRouteImport.update({
   id: '/diseases',
   path: '/diseases',
@@ -168,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/diseases': typeof AdminDiseasesRoute
+  '/admin/exchanges': typeof AdminExchangesRoute
   '/admin/notify': typeof AdminNotifyRoute
   '/admin/prices': typeof AdminPricesRoute
   '/admin/reports': typeof AdminReportsRoute
@@ -192,6 +199,7 @@ export interface FileRoutesByTo {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/diseases': typeof AdminDiseasesRoute
+  '/admin/exchanges': typeof AdminExchangesRoute
   '/admin/notify': typeof AdminNotifyRoute
   '/admin/prices': typeof AdminPricesRoute
   '/admin/reports': typeof AdminReportsRoute
@@ -218,6 +226,7 @@ export interface FileRoutesById {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/diseases': typeof AdminDiseasesRoute
+  '/admin/exchanges': typeof AdminExchangesRoute
   '/admin/notify': typeof AdminNotifyRoute
   '/admin/prices': typeof AdminPricesRoute
   '/admin/reports': typeof AdminReportsRoute
@@ -245,6 +254,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/content'
     | '/admin/diseases'
+    | '/admin/exchanges'
     | '/admin/notify'
     | '/admin/prices'
     | '/admin/reports'
@@ -269,6 +279,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/content'
     | '/admin/diseases'
+    | '/admin/exchanges'
     | '/admin/notify'
     | '/admin/prices'
     | '/admin/reports'
@@ -294,6 +305,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/content'
     | '/admin/diseases'
+    | '/admin/exchanges'
     | '/admin/notify'
     | '/admin/prices'
     | '/admin/reports'
@@ -455,6 +467,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminNotifyRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/exchanges': {
+      id: '/admin/exchanges'
+      path: '/exchanges'
+      fullPath: '/admin/exchanges'
+      preLoaderRoute: typeof AdminExchangesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/diseases': {
       id: '/admin/diseases'
       path: '/diseases'
@@ -490,6 +509,7 @@ interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminDiseasesRoute: typeof AdminDiseasesRoute
+  AdminExchangesRoute: typeof AdminExchangesRoute
   AdminNotifyRoute: typeof AdminNotifyRoute
   AdminPricesRoute: typeof AdminPricesRoute
   AdminReportsRoute: typeof AdminReportsRoute
@@ -501,6 +521,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminContentRoute: AdminContentRoute,
   AdminDiseasesRoute: AdminDiseasesRoute,
+  AdminExchangesRoute: AdminExchangesRoute,
   AdminNotifyRoute: AdminNotifyRoute,
   AdminPricesRoute: AdminPricesRoute,
   AdminReportsRoute: AdminReportsRoute,
