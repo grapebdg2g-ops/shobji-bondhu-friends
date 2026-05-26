@@ -4,7 +4,28 @@ export type { Forecast, CurrentWeather, HourlyPoint, DailyPoint } from "./weathe
 
 const BASE = "https://api.open-meteo.com/v1/forecast";
 
+// In-memory cache to dedupe concurrent requests and reduce 429s.
+// Key: "lat,lng" rounded. Value: { data, expiresAt } or in-flight promise.
+type CacheEntry = { promise: Promise<Forecast>; expiresAt: number };
+const cache = new Map<string, CacheEntry>();
+const CACHE_TTL_MS = 15 * 60_000; // 15 min
+
 export async function fetchForecast(lat: number, lng: number): Promise<Forecast> {
+  const key = `${lat.toFixed(2)},${lng.toFixed(2)}`;
+  const now = Date.now();
+  const hit = cache.get(key);
+  if (hit && hit.expiresAt > now) return hit.promise;
+
+  const promise = fetchForecastInner(lat, lng).catch((e) => {
+    // Don't cache failures
+    if (cache.get(key)?.promise === promise) cache.delete(key);
+    throw e;
+  });
+  cache.set(key, { promise, expiresAt: now + CACHE_TTL_MS });
+  return promise;
+}
+
+async function fetchForecastInner(lat: number, lng: number): Promise<Forecast> {
   const params = new URLSearchParams({
     latitude: lat.toString(),
     longitude: lng.toString(),
