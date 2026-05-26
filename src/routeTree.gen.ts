@@ -25,6 +25,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminNotifyRouteImport } from './routes/admin.notify'
 import { Route as AdminDiseasesRouteImport } from './routes/admin.diseases'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
@@ -111,6 +112,11 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminReportsRoute = AdminReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminNotifyRoute = AdminNotifyRouteImport.update({
   id: '/notify',
   path: '/notify',
@@ -157,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/admin/content': typeof AdminContentRoute
   '/admin/diseases': typeof AdminDiseasesRoute
   '/admin/notify': typeof AdminNotifyRoute
+  '/admin/reports': typeof AdminReportsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -179,6 +186,7 @@ export interface FileRoutesByTo {
   '/admin/content': typeof AdminContentRoute
   '/admin/diseases': typeof AdminDiseasesRoute
   '/admin/notify': typeof AdminNotifyRoute
+  '/admin/reports': typeof AdminReportsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin': typeof AdminIndexRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -203,6 +211,7 @@ export interface FileRoutesById {
   '/admin/content': typeof AdminContentRoute
   '/admin/diseases': typeof AdminDiseasesRoute
   '/admin/notify': typeof AdminNotifyRoute
+  '/admin/reports': typeof AdminReportsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -228,6 +237,7 @@ export interface FileRouteTypes {
     | '/admin/content'
     | '/admin/diseases'
     | '/admin/notify'
+    | '/admin/reports'
     | '/admin/users'
     | '/admin/'
     | '/api/public/hooks/weather-alerts'
@@ -250,6 +260,7 @@ export interface FileRouteTypes {
     | '/admin/content'
     | '/admin/diseases'
     | '/admin/notify'
+    | '/admin/reports'
     | '/admin/users'
     | '/admin'
     | '/api/public/hooks/weather-alerts'
@@ -273,6 +284,7 @@ export interface FileRouteTypes {
     | '/admin/content'
     | '/admin/diseases'
     | '/admin/notify'
+    | '/admin/reports'
     | '/admin/users'
     | '/admin/'
     | '/api/public/hooks/weather-alerts'
@@ -410,6 +422,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/reports': {
+      id: '/admin/reports'
+      path: '/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminReportsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/notify': {
       id: '/admin/notify'
       path: '/notify'
@@ -453,6 +472,7 @@ interface AdminRouteChildren {
   AdminContentRoute: typeof AdminContentRoute
   AdminDiseasesRoute: typeof AdminDiseasesRoute
   AdminNotifyRoute: typeof AdminNotifyRoute
+  AdminReportsRoute: typeof AdminReportsRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -462,6 +482,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminContentRoute: AdminContentRoute,
   AdminDiseasesRoute: AdminDiseasesRoute,
   AdminNotifyRoute: AdminNotifyRoute,
+  AdminReportsRoute: AdminReportsRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
