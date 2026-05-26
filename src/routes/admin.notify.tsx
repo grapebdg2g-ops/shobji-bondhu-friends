@@ -25,6 +25,8 @@ function NotifyPage() {
   const [link, setLink] = useState("/feed");
   const [icon, setIcon] = useState("🌿");
   const [confirming, setConfirming] = useState(false);
+  const [scheduleMode, setScheduleMode] = useState<"now" | "later">("now");
+  const [scheduledAt, setScheduledAt] = useState("");
 
   const { data: reach = 0 } = useQuery({
     queryKey: ["admin", "notify", "reach", target, value],
@@ -49,6 +51,21 @@ function NotifyPage() {
 
   const send = useMutation({
     mutationFn: async () => {
+      if (scheduleMode === "later") {
+        if (!scheduledAt) throw new Error("সময় দিন");
+        const when = new Date(scheduledAt);
+        if (isNaN(when.getTime()) || when.getTime() < Date.now()) throw new Error("ভবিষ্যৎ সময় দিন");
+        await supabase.from("notification_broadcasts").insert({
+          admin_id: user!.id, title, body, link, icon,
+          target_type: target, target_value: value || null,
+          scheduled_at: when.toISOString(), sent_count: 0,
+        });
+        await supabase.from("admin_actions").insert({
+          admin_id: user!.id, action_type: "broadcast_scheduled",
+          details: { title, target, value, scheduled_at: when.toISOString() } as never,
+        });
+        return -1;
+      }
       // resolve target users
       let q = supabase.from("profiles").select("id");
       if (target === "district" && value) q = q.eq("district", value);
@@ -58,7 +75,6 @@ function NotifyPage() {
       if (e1) throw e1;
       const ids = (users ?? []).map((u) => u.id);
 
-      // batched insert into notifications
       const rows = ids.map((id) => ({
         user_id: id, type: "broadcast", title, body, ref_type: "broadcast",
       }));
@@ -79,11 +95,12 @@ function NotifyPage() {
       return ids.length;
     },
     onSuccess: (count) => {
-      toast.success(`${toBn(count)} জনকে পাঠানো হয়েছে`);
-      setTitle(""); setBody(""); setConfirming(false);
+      if (count < 0) toast.success("নির্ধারিত সময়ে পাঠানো হবে");
+      else toast.success(`${toBn(count)} জনকে পাঠানো হয়েছে`);
+      setTitle(""); setBody(""); setConfirming(false); setScheduledAt("");
       qc.invalidateQueries({ queryKey: ["admin", "notify", "history"] });
     },
-    onError: () => { toast.error("পাঠাতে ব্যর্থ"); setConfirming(false); },
+    onError: (e: Error) => { toast.error(e.message || "পাঠাতে ব্যর্থ"); setConfirming(false); },
   });
 
   return (
