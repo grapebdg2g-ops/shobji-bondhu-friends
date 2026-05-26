@@ -84,7 +84,7 @@ export function AppSidebar({
     { label: "আমার প্রোফাইল", to: "/profile", icon: User },
   ];
 
-  const closeOnNav = () => { if (isMobile) setCollapsed(true); };
+  const closeOnNav = () => setCollapsed(true);
 
   const handleLogout = async () => {
     await signOut();
