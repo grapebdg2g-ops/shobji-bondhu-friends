@@ -45,9 +45,9 @@ const ROLE_BN: Record<AppRole, string> = {
   farmer: "কৃষক", expert: "বিশেষজ্ঞ", moderator: "মডারেটর", admin: "প্রশাসক",
 };
 
-async function logAction(adminId: string, action_type: string, target_id: string | null, details: object) {
+async function logAction(adminId: string, action_type: string, target_id: string | null, details: Record<string, unknown>) {
   await supabase.from("admin_actions").insert({
-    admin_id: adminId, action_type, target_id, details,
+    admin_id: adminId, action_type, target_id, details: details as never,
   });
 }
 
