@@ -1,34 +1,26 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Bell, TrendingUp, Repeat2, Bug, Newspaper, Home, BarChart3, User, MapPin } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useNotifications } from "@/hooks/use-notifications";
+import { useUser } from "@/contexts/user-context";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
   head: () => ({ meta: [{ title: "হোম — কৃষিবন্ধু" }] }),
 });
 
-type Profile = { name: string; district: string | null };
-
 function Dashboard() {
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
-  const { unreadCount } = useNotifications(userId);
+  const { user, loading } = useUser();
+  const { unreadCount } = useNotifications(user?.id ?? null);
 
   useEffect(() => {
-    (async () => {
-      const { data } = await supabase.auth.getSession();
-      if (!data.session) return navigate({ to: "/login" });
-      setUserId(data.session.user.id);
-      const { data: p } = await supabase
-        .from("profiles").select("name, district")
-        .eq("id", data.session.user.id).maybeSingle();
-      if (!p?.district) return navigate({ to: "/register" });
-      setProfile(p as Profile);
-    })();
-  }, [navigate]);
+    if (loading) return;
+    if (!user) { navigate({ to: "/login" }); return; }
+    if (!user.district) navigate({ to: "/register" });
+  }, [loading, user, navigate]);
+
+  const profile = user ? { name: user.name, district: user.district } : null;
 
   const cards = [
     { label: "বাজার দর", icon: TrendingUp, bg: "bg-[#2D6A4F]", fg: "text-white", to: "/prices" as const },
