@@ -138,7 +138,10 @@ export function AppSidebar({
                   {user.name?.[0] ?? "ক"}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-gray-900 truncate">{user.name || "কৃষক"}</p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-bold text-gray-900 truncate">{user.name || "কৃষক"}</p>
+                    <RoleBadge role={role} verified />
+                  </div>
                   <p className="text-xs text-gray-500 truncate">
                     {user.district ?? "—"}{user.upazila ? ` • ${user.upazila}` : ""}
                   </p>
@@ -153,6 +156,12 @@ export function AppSidebar({
           <MenuGroup items={primary} pathname={pathname} expanded={expanded} onNav={closeOnNav} />
           <Divider expanded={expanded} />
           <MenuGroup items={secondary} pathname={pathname} expanded={expanded} onNav={closeOnNav} />
+          {staffItems.length > 0 && (
+            <>
+              <Divider expanded={expanded} />
+              <MenuGroup items={staffItems} pathname={pathname} expanded={expanded} onNav={closeOnNav} />
+            </>
+          )}
           <Divider expanded={expanded} />
           <MenuGroup items={account} pathname={pathname} expanded={expanded} onNav={closeOnNav} />
 
