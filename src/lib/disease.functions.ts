@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const InputSchema = z.object({
   imageBase64: z.string().min(100).max(8_000_000),
@@ -36,8 +37,23 @@ const SYSTEM_PROMPT = `তুমি একজন অভিজ্ঞ বাংল
 যদি ছবিতে রোগ স্পষ্ট না হয় বা ফসলের ছবি না হয়, detected=false দাও।`;
 
 export const analyzeDisease = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => InputSchema.parse(d))
-  .handler(async ({ data }): Promise<DiseaseResult> => {
+  .handler(async ({ data, context }): Promise<DiseaseResult> => {
+    const { supabase, userId } = context;
+
+    // Rate limit: max 10 analyses per user per hour
+    const oneHourAgo = new Date(Date.now() - 3600_000).toISOString();
+    const { count, error: countErr } = await supabase
+      .from("disease_history")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .gte("created_at", oneHourAgo);
+    if (countErr) console.error("rate-limit count error:", countErr);
+    if ((count ?? 0) >= 10) {
+      throw new Error("প্রতি ঘণ্টায় সর্বোচ্চ ১০টি বিশ্লেষণ করা যাবে, একটু পর আবার চেষ্টা করুন");
+    }
+
     const apiKey = process.env.NEXT_PUBLIC_KIMI_API_KEY;
     if (!apiKey) throw new Error("Kimi API key অনুপস্থিত");
 
