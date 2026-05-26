@@ -11,6 +11,7 @@ import { useUser } from "@/contexts/user-context";
 import { BottomSheet } from "@/components/krishi/bottom-sheet";
 import { EmptyState } from "@/components/krishi/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LazyImage } from "@/components/krishi/lazy-image";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -164,7 +165,7 @@ function ProfilePage() {
           <div className="relative">
             <div className="h-24 w-24 rounded-full bg-white/20 ring-4 ring-white/40 overflow-hidden flex items-center justify-center">
               {full.avatar_url ? (
-                <img src={full.avatar_url} alt={full.name} className="h-full w-full object-cover" />
+                <LazyImage src={full.avatar_url} alt={full.name} wrapperClassName="h-full w-full rounded-full" priority />
               ) : (
                 <span className="text-4xl font-bold text-white">{initials(full.name)}</span>
               )}
@@ -490,7 +491,7 @@ function MyPostsTab({ userId, onChange }: { userId: string; onChange: (d: number
               <div className="flex items-start justify-between gap-3">
                 <p className="text-sm text-foreground line-clamp-3 whitespace-pre-wrap flex-1">{p.content}</p>
                 {p.image_url && (
-                  <img src={p.image_url} alt="" className="h-16 w-16 rounded-lg object-cover shrink-0" loading="lazy" />
+                  <LazyImage src={p.image_url} alt="" wrapperClassName="h-16 w-16 rounded-lg shrink-0" />
                 )}
               </div>
               <div className="flex items-center justify-between mt-2 text-[11px] text-muted-foreground">
@@ -612,7 +613,7 @@ function MyExchangesTab({ userId, onChange }: { userId: string; onChange: (d: nu
         <article key={e.id} className={`rounded-2xl border bg-card p-3 ${e.is_active ? "border-border" : "border-dashed border-muted-foreground/40 opacity-70"}`}>
           <div className="flex items-start gap-3">
             {e.image_url ? (
-              <img src={e.image_url} alt="" className="h-14 w-14 rounded-lg object-cover shrink-0" loading="lazy" />
+              <LazyImage src={e.image_url} alt="" wrapperClassName="h-14 w-14 rounded-lg shrink-0" />
             ) : (
               <div className="h-14 w-14 rounded-lg bg-muted shrink-0" />
             )}
