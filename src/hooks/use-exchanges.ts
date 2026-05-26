@@ -44,13 +44,17 @@ export function useExchanges(filters: ExchangeFilters) {
 
   useEffect(() => { setLoading(true); load(); }, [load]);
 
+  // Keep latest load in a ref so realtime channel doesn't resubscribe on filter change
+  const loadRef = useRef(load);
+  useEffect(() => { loadRef.current = load; }, [load]);
+
   useEffect(() => {
     const ch = supabase
       .channel("exchanges-rt")
-      .on("postgres_changes", { event: "*", schema: "public", table: "exchanges" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "exchanges" }, () => loadRef.current())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [load]);
+  }, []);
 
   const filtered = useMemo(() => {
     const q = filters.query.trim().toLowerCase();
