@@ -22,12 +22,12 @@ const ITEMS: Array<{ to: string; label: string; icon: typeof LayoutDashboard; ex
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
 ];
 
-const REF = [
+const REF: Array<{ to: string; label: string; icon: typeof TrendingUp }> = [
   { to: "/prices", label: "বাজার দর", icon: TrendingUp },
   { to: "/exchange", label: "বিনিময়", icon: Repeat2 },
   { to: "/disease-detection", label: "রোগ লগ", icon: BugIcon },
   { to: "/moderation", label: "রিপোর্ট", icon: Flag },
-] as const;
+];
 
 export function AdminSidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
