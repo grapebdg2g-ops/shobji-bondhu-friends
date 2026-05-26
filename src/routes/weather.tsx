@@ -73,11 +73,11 @@ function WeatherPage() {
       {isLoading && (
         <div className="px-5 mt-6"><div className="rounded-2xl bg-card p-8 text-center text-muted-foreground">লোড হচ্ছে…</div></div>
       )}
-      {error && (
+      {(error || (data && !data.forecast)) && (
         <div className="px-5 mt-6"><div className="rounded-2xl bg-destructive/10 border border-destructive p-4 text-sm text-destructive">আবহাওয়া তথ্য আনা যায়নি।</div></div>
       )}
 
-      {data && <WeatherContent forecast={data.forecast} />}
+      {data?.forecast && <WeatherContent forecast={data.forecast} />}
     </main>
   );
 }
