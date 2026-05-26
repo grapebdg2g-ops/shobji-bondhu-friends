@@ -222,6 +222,8 @@ function UsersPage() {
     },
     onError: (e: Error) => toast.error(e.message || "মুছতে ব্যর্থ"),
   });
+
+  const warnUser = useMutation({
     mutationFn: async ({ userId, message }: { userId: string; message: string }) => {
       await supabase.from("notifications").insert({
         user_id: userId, type: "warn", title: "⚠️ সতর্কবার্তা", body: message,
