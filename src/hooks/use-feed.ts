@@ -35,6 +35,7 @@ export function useFeed(
   filters: FeedFilters,
   myDistrict: string | null,
   myUpazila: string | null = null,
+  mutedIds: string[] = [],
 ) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,8 +63,11 @@ export function useFeed(
     if (filters.types.length > 0 && filters.types.length < 4) {
       q = q.in("type", filters.types);
     }
+    if (mutedIds.length > 0) {
+      q = q.not("user_id", "in", `(${mutedIds.join(",")})`);
+    }
     return q;
-  }, [filters, myDistrict, myUpazila]);
+  }, [filters, myDistrict, myUpazila, mutedIds]);
 
   const load = useCallback(async (reset: boolean) => {
     const myReq = ++reqIdRef.current;

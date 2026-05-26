@@ -1,6 +1,9 @@
 import { useState, type ReactNode } from "react";
 import { MapPin, User as UserIcon, Clock, Sprout, Leaf, Wrench, HardHat, Phone } from "lucide-react";
 import type { Exchange, ExchangeType } from "@/hooks/use-exchanges";
+import { ContentMenu } from "@/components/krishi/content-menu";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const TYPE_META: Record<ExchangeType, { label: string; icon: typeof Sprout; tint: string }> = {
   seed: { label: "বীজ", icon: Sprout, tint: "bg-emerald-100 text-emerald-700" },
@@ -66,7 +69,20 @@ function CardBody({ item }: { item: Exchange }) {
   const wa = toWaLink(item.user_phone);
   return (
     <div className="flex-1 min-w-0">
-      <h3 className="text-base font-bold text-foreground leading-snug line-clamp-2">{item.title}</h3>
+      <div className="flex items-start gap-1">
+        <h3 className="flex-1 text-base font-bold text-foreground leading-snug line-clamp-2">{item.title}</h3>
+        <ContentMenu
+          contentType="exchange"
+          contentId={item.id}
+          authorId={item.user_id}
+          authorName={item.user_name}
+          onDelete={async () => {
+            const { error } = await supabase.from("exchanges").delete().eq("id", item.id);
+            if (error) toast.error("মুছে ফেলা যায়নি");
+            else { toast.success("মুছে ফেলা হয়েছে"); window.location.reload(); }
+          }}
+        />
+      </div>
       <div className="mt-1 flex items-center gap-2 flex-wrap">
         <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${meta.tint}`}>{meta.label}</span>
         {item.is_free ? (

@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/user-context";
 import { useFeed, type FeedFilters, type Post, type PostType } from "@/hooks/use-feed";
+import { useMutedIds } from "@/hooks/use-muted-users";
+import { ContentMenu } from "@/components/krishi/content-menu";
 import { BottomSheet } from "@/components/krishi/bottom-sheet";
 import { CreatePostSheet } from "@/components/krishi/create-post-sheet";
 import { CommentsSection } from "@/components/krishi/comments-section";
@@ -58,7 +60,8 @@ function FeedPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
 
-  const { posts, loading, loadingMore, hasMore, error, loadMore, prepend, updateById, refresh } = useFeed(filters, user?.district ?? null, user?.upazila ?? null);
+  const { data: mutedIds = [] } = useMutedIds();
+  const { posts, loading, loadingMore, hasMore, error, loadMore, prepend, removeById, updateById, refresh } = useFeed(filters, user?.district ?? null, user?.upazila ?? null, mutedIds);
 
   // Active users (stories) — distinct recent posters. Cached, refetched at most every 2 min.
   const { data: activeUsers = [] } = useQuery({
@@ -277,9 +280,11 @@ function FeedPage() {
               key={p.id}
               post={p}
               liked={likedSet.has(p.id)}
+              currentUserId={user?.id ?? null}
               onLike={() => toggleLike(p)}
               onShare={() => share(p)}
               onCommentAdded={() => updateById(p.id, { comments_count: p.comments_count + 1 })}
+              onDeleted={() => removeById(p.id)}
             />
           ))
         )}
@@ -321,21 +326,35 @@ function PostSkeleton() {
 function PostCard({
   post,
   liked,
+  currentUserId,
   onLike,
   onShare,
   onCommentAdded,
+  onDeleted,
 }: {
   post: Post;
   liked: boolean;
+  currentUserId: string | null;
   onLike: () => void;
   onShare: () => void;
   onCommentAdded: () => void;
+  onDeleted: () => void;
 }) {
   const meta = TYPE_META[post.type];
   const [expanded, setExpanded] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const long = post.content.length > 180;
   const text = expanded || !long ? post.content : post.content.slice(0, 180) + "...";
+
+  const handleDelete = async () => {
+    const { error } = await supabase.from("posts").delete().eq("id", post.id);
+    if (error) {
+      toast.error("মুছে ফেলা যায়নি");
+      return;
+    }
+    toast.success("পোস্ট মুছে ফেলা হয়েছে");
+    onDeleted();
+  };
 
   return (
     <article className={`rounded-2xl border-2 ${meta.border} shadow-sm overflow-hidden`}>
@@ -347,7 +366,16 @@ function PostCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
               <p className="font-semibold text-foreground text-sm truncate">{post.user_name}</p>
-              <span className="text-[10px] text-muted-foreground shrink-0">{timeAgo(post.created_at)}</span>
+              <div className="flex items-center gap-1 shrink-0">
+                <span className="text-[10px] text-muted-foreground">{timeAgo(post.created_at)}</span>
+                <ContentMenu
+                  contentType="post"
+                  contentId={post.id}
+                  authorId={post.user_id}
+                  authorName={post.user_name}
+                  onDelete={handleDelete}
+                />
+              </div>
             </div>
             <p className="text-xs text-muted-foreground">
               {post.upazila ? `${post.upazila}, ${post.district ?? "—"}` : post.district ?? "—"}
