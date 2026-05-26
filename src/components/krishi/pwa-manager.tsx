@@ -26,9 +26,15 @@ function isPreviewOrIframe() {
 export function PWAManager() {
   const [showInstall, setShowInstall] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BIPEvent | null>(null);
-  const [online, setOnline] = useState(
-    typeof navigator === "undefined" ? true : navigator.onLine
-  );
+  const [online, setOnline] = useState(true);
+  const [hydrated, setHydrated] = useState(false);
+  const [inPreview, setInPreview] = useState(true);
+
+  useEffect(() => {
+    setHydrated(true);
+    setInPreview(isPreviewOrIframe());
+    setOnline(navigator.onLine);
+  }, []);
 
   // Service worker registration — production only, never in iframe/preview
   useEffect(() => {
