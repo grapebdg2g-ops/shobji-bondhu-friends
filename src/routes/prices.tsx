@@ -120,12 +120,16 @@ function PricesPage() {
     };
   }, [district, loadPrices]);
 
+  const { data: mutedIds = [] } = useMutedIds();
+  const mutedSet = useMemo(() => new Set(mutedIds), [mutedIds]);
+
   const filtered = useMemo(() => {
     let r = prices;
     if (upazila !== "all") r = r.filter((p) => p.upazila === upazila);
     if (category !== "সব") r = r.filter((p) => p.category === category);
+    if (mutedSet.size > 0) r = r.filter((p) => !mutedSet.has(p.user_id));
     return r;
-  }, [prices, category, upazila]);
+  }, [prices, category, upazila, mutedSet]);
 
   return (
     <main className="min-h-screen bg-background pb-28">
