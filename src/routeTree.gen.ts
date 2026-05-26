@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WeatherRouteImport } from './routes/weather'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PricesRouteImport } from './routes/prices'
@@ -22,6 +23,11 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicHooksWeatherAlertsRouteImport } from './routes/api/public/hooks/weather-alerts'
 
+const WeatherRoute = WeatherRouteImport.update({
+  id: '/weather',
+  path: '/weather',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/prices': typeof PricesRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/weather': typeof WeatherRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
 }
 export interface FileRoutesByTo {
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/prices': typeof PricesRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/weather': typeof WeatherRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
 }
 export interface FileRoutesById {
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/prices': typeof PricesRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/weather': typeof WeatherRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
 }
 export interface FileRouteTypes {
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/prices'
     | '/profile'
     | '/register'
+    | '/weather'
     | '/api/public/hooks/weather-alerts'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/prices'
     | '/profile'
     | '/register'
+    | '/weather'
     | '/api/public/hooks/weather-alerts'
   id:
     | '__root__'
@@ -169,6 +180,7 @@ export interface FileRouteTypes {
     | '/prices'
     | '/profile'
     | '/register'
+    | '/weather'
     | '/api/public/hooks/weather-alerts'
   fileRoutesById: FileRoutesById
 }
@@ -184,11 +196,19 @@ export interface RootRouteChildren {
   PricesRoute: typeof PricesRoute
   ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
+  WeatherRoute: typeof WeatherRoute
   ApiPublicHooksWeatherAlertsRoute: typeof ApiPublicHooksWeatherAlertsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/weather': {
+      id: '/weather'
+      path: '/weather'
+      fullPath: '/weather'
+      preLoaderRoute: typeof WeatherRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -288,8 +308,19 @@ const rootRouteChildren: RootRouteChildren = {
   PricesRoute: PricesRoute,
   ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
+  WeatherRoute: WeatherRoute,
   ApiPublicHooksWeatherAlertsRoute: ApiPublicHooksWeatherAlertsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

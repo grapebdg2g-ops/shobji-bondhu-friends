@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { Bell, TrendingUp, Repeat2, Bug, Newspaper, Home, BarChart3, User, MapPin } from "lucide-react";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useUser } from "@/contexts/user-context";
+import { WeatherAlertBanner } from "@/components/krishi/weather-alert-banner";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
