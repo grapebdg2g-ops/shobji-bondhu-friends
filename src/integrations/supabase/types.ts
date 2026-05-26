@@ -326,14 +326,24 @@ export type Database = {
           crops: string[]
           district: string | null
           exchanges_count: number
+          expert_institution: string | null
+          expert_specialty: string | null
           id: string
+          is_suspended: boolean
+          is_verified: boolean
+          last_active: string | null
           name: string
           phone: string | null
           posts_count: number
           prices_count: number
           role: string
+          suspension_reason: string | null
+          suspension_until: string | null
+          total_reports: number
           upazila: string | null
           updated_at: string
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -342,14 +352,24 @@ export type Database = {
           crops?: string[]
           district?: string | null
           exchanges_count?: number
+          expert_institution?: string | null
+          expert_specialty?: string | null
           id: string
+          is_suspended?: boolean
+          is_verified?: boolean
+          last_active?: string | null
           name?: string
           phone?: string | null
           posts_count?: number
           prices_count?: number
           role?: string
+          suspension_reason?: string | null
+          suspension_until?: string | null
+          total_reports?: number
           upazila?: string | null
           updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -358,14 +378,24 @@ export type Database = {
           crops?: string[]
           district?: string | null
           exchanges_count?: number
+          expert_institution?: string | null
+          expert_specialty?: string | null
           id?: string
+          is_suspended?: boolean
+          is_verified?: boolean
+          last_active?: string | null
           name?: string
           phone?: string | null
           posts_count?: number
           prices_count?: number
           role?: string
+          suspension_reason?: string | null
+          suspension_until?: string | null
+          total_reports?: number
           upazila?: string | null
           updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: []
       }
@@ -405,6 +435,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          granted_at: string
+          granted_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       weather_alerts_sent: {
         Row: {
           alert_type: string
@@ -438,11 +492,19 @@ export type Database = {
     }
     Functions: {
       decrement_likes: { Args: { post_id: string }; Returns: undefined }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       increment_comments: { Args: { post_id: string }; Returns: undefined }
       increment_likes: { Args: { post_id: string }; Returns: undefined }
+      is_active_user: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "farmer" | "expert" | "moderator" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -569,6 +631,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["farmer", "expert", "moderator", "admin"],
+    },
   },
 } as const

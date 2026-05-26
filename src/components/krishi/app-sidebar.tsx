@@ -2,16 +2,20 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import {
   Home, TrendingUp, Repeat2, Bug, Newspaper,
-  CloudSun, Bell, User, LogOut, Phone, X,
+  CloudSun, Bell, User, LogOut, Phone, X, Shield, UserCog,
 } from "lucide-react";
 import { useUser } from "@/contexts/user-context";
 import { useNotifications } from "@/hooks/use-notifications";
+import { useRole } from "@/hooks/use-role";
+import { RoleBadge } from "@/components/krishi/role-badge";
 
 const BRAND = "#2D6A4F";
 
 type Item = {
   label: string;
-  to: "/dashboard" | "/prices" | "/exchange" | "/disease-detection" | "/feed" | "/weather" | "/notifications" | "/profile";
+  to:
+    | "/dashboard" | "/prices" | "/exchange" | "/disease-detection" | "/feed"
+    | "/weather" | "/notifications" | "/profile" | "/moderation" | "/admin";
   icon: typeof Home;
   badge?: number;
 };
@@ -66,6 +70,7 @@ export function AppSidebar({
   const router = useRouter();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { unreadCount } = useNotifications(user?.id ?? null);
+  const { role, isStaff, isAdmin } = useRole();
 
   const primary: Item[] = [
     { label: "হোম", to: "/dashboard", icon: Home },
@@ -81,6 +86,9 @@ export function AppSidebar({
   const account: Item[] = [
     { label: "আমার প্রোফাইল", to: "/profile", icon: User },
   ];
+  const staffItems: Item[] = [];
+  if (isStaff) staffItems.push({ label: "মডারেশন", to: "/moderation", icon: Shield });
+  if (isAdmin) staffItems.push({ label: "অ্যাডমিন প্যানেল", to: "/admin", icon: UserCog });
 
   const closeOnNav = () => setCollapsed(true);
 
@@ -130,7 +138,10 @@ export function AppSidebar({
                   {user.name?.[0] ?? "ক"}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-gray-900 truncate">{user.name || "কৃষক"}</p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-bold text-gray-900 truncate">{user.name || "কৃষক"}</p>
+                    <RoleBadge role={role} verified />
+                  </div>
                   <p className="text-xs text-gray-500 truncate">
                     {user.district ?? "—"}{user.upazila ? ` • ${user.upazila}` : ""}
                   </p>
@@ -145,6 +156,12 @@ export function AppSidebar({
           <MenuGroup items={primary} pathname={pathname} expanded={expanded} onNav={closeOnNav} />
           <Divider expanded={expanded} />
           <MenuGroup items={secondary} pathname={pathname} expanded={expanded} onNav={closeOnNav} />
+          {staffItems.length > 0 && (
+            <>
+              <Divider expanded={expanded} />
+              <MenuGroup items={staffItems} pathname={pathname} expanded={expanded} onNav={closeOnNav} />
+            </>
+          )}
           <Divider expanded={expanded} />
           <MenuGroup items={account} pathname={pathname} expanded={expanded} onNav={closeOnNav} />
 
