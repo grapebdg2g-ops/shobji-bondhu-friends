@@ -1,8 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ArrowLeft, Plus, MapPin, TrendingUp, TrendingDown,
-  Home, BarChart3, Repeat2, User, Sprout,
+  ArrowLeft, Plus, MapPin, TrendingUp, TrendingDown, Sprout,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DISTRICTS, getUpazilas } from "@/lib/bd-data";

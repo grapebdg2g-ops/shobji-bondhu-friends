@@ -1,6 +1,6 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowLeft, Search, Plus, Home, BarChart3, Repeat2, User as UserIcon, Sprout, Leaf, Wrench, HardHat } from "lucide-react";
+import { ArrowLeft, Search, Plus, Sprout, Leaf, Wrench, HardHat } from "lucide-react";
 import { useUser } from "@/contexts/user-context";
 import { useExchanges, type ExchangeType } from "@/hooks/use-exchanges";
 import { ExchangeCard } from "@/components/krishi/exchange-card";

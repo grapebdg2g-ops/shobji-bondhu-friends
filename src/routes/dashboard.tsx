@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Bell, TrendingUp, Repeat2, Bug, Newspaper, Home, BarChart3, User, MapPin } from "lucide-react";
+import { Bell, TrendingUp, Repeat2, Bug, Newspaper, MapPin } from "lucide-react";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useUser } from "@/contexts/user-context";
 import { WeatherAlertBanner } from "@/components/krishi/weather-alert-banner";
