@@ -150,7 +150,7 @@ export function PWAManager() {
 
   return (
     <>
-      {!online && (
+      {hydrated && !inPreview && !online && (
         <div className="fixed top-0 left-0 right-0 z-[60] bg-[#E07A2C] text-white text-sm font-semibold py-2 px-4 flex items-center justify-center gap-2 shadow">
           <WifiOff className="h-4 w-4" />
           <span>📡 অফলাইন মোড — সীমিত সুবিধা</span>
