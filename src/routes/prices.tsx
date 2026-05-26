@@ -279,20 +279,22 @@ function AddPriceSheet({
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!productName.trim() || !price || !marketName.trim()) {
+    const cleanProduct = sanitize(productName);
+    const cleanMarket = sanitize(marketName);
+    if (!cleanProduct || !price || !cleanMarket) {
       toast.error("সব ঘর পূরণ করুন");
       return;
     }
     setSubmitting(true);
     const { error } = await supabase.from("prices").insert({
-      product_name: productName.trim(),
+      product_name: cleanProduct,
       price: Number(price),
       unit,
-      market_name: marketName.trim(),
+      market_name: cleanMarket,
       district: defaultDistrict || profile.district,
       category,
       user_id: profile.id,
-      user_name: profile.name,
+      user_name: sanitize(profile.name),
     });
     setSubmitting(false);
     if (error) {
