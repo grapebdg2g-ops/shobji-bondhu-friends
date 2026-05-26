@@ -262,7 +262,13 @@ function PricesPage() {
                   </div>
                 </div>
                 <div className="mt-3 pt-3 border-t border-border flex justify-between items-center text-xs text-muted-foreground">
-                  <span>{p.user_name || "অজ্ঞাত"}</span>
+                  {p.user_id ? (
+                    <Link to="/u/$userId" params={{ userId: p.user_id }} className="hover:underline">
+                      {p.user_name || "অজ্ঞাত"}
+                    </Link>
+                  ) : (
+                    <span>{p.user_name || "অজ্ঞাত"}</span>
+                  )}
                   <span>{timeAgo(p.created_at)}</span>
                 </div>
               </article>
