@@ -50,7 +50,7 @@ function FeedPage() {
 
 
   const [filters, setFilters] = useState<FeedFilters>({
-    districtMode: "mine",
+    districtMode: user?.upazila ? "myUpazila" : "myDistrict",
     district: null,
     crop: null,
     types: [],
@@ -58,7 +58,7 @@ function FeedPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
 
-  const { posts, loading, loadingMore, hasMore, error, loadMore, prepend, updateById, refresh } = useFeed(filters, user?.district ?? null);
+  const { posts, loading, loadingMore, hasMore, error, loadMore, prepend, updateById, refresh } = useFeed(filters, user?.district ?? null, user?.upazila ?? null);
 
   // Active users (stories) — distinct recent posters. Cached, refetched at most every 2 min.
   const { data: activeUsers = [] } = useQuery({
@@ -106,9 +106,9 @@ function FeedPage() {
   const [newCount, setNewCount] = useState(0);
   const dismissTimer = useRef<number | null>(null);
   const districtForSub = useMemo(() => {
-    if (filters.districtMode === "mine") return user?.district ?? null;
+    if (filters.districtMode === "myUpazila" || filters.districtMode === "myDistrict") return user?.district ?? null;
     if (filters.districtMode === "specific") return filters.district;
-    return null; // 'all' — subscribe to everything
+    return null; // 'all'
   }, [filters, user]);
 
   useEffect(() => {
@@ -349,7 +349,9 @@ function PostCard({
               <p className="font-semibold text-foreground text-sm truncate">{post.user_name}</p>
               <span className="text-[10px] text-muted-foreground shrink-0">{timeAgo(post.created_at)}</span>
             </div>
-            <p className="text-xs text-muted-foreground">{post.district ?? "—"}</p>
+            <p className="text-xs text-muted-foreground">
+              {post.upazila ? `${post.upazila}, ${post.district ?? "—"}` : post.district ?? "—"}
+            </p>
             <div className="flex items-center gap-2 mt-2 flex-wrap">
               {meta.badge && (
                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${meta.iconColor} bg-white/80 border border-current/20`}>
@@ -436,8 +438,9 @@ function FilterSheet({
           <p className="text-sm font-bold text-foreground mb-2">কোন জেলার পোস্ট দেখবেন?</p>
           <div className="flex gap-2 flex-wrap">
             {([
-              { v: "mine", l: "আমার জেলা" },
-              { v: "all", l: "সব জেলা" },
+              { v: "myUpazila", l: "আমার উপজেলা" },
+              { v: "myDistrict", l: "আমার জেলা" },
+              { v: "all", l: "সব বাংলাদেশ" },
               { v: "specific", l: "নির্দিষ্ট জেলা" },
             ] as const).map((o) => (
               <button

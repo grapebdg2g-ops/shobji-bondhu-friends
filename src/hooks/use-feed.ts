@@ -15,6 +15,7 @@ export type Post = {
   likes_count: number;
   comments_count: number;
   district: string | null;
+  upazila: string | null;
   created_at: string;
 };
 
