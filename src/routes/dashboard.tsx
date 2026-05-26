@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { Bell, TrendingUp, Repeat2, Bug, Newspaper, Home, BarChart3, User, MapPin } from "lucide-react";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useUser } from "@/contexts/user-context";
+import { WeatherAlertBanner } from "@/components/krishi/weather-alert-banner";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -56,7 +57,10 @@ function Dashboard() {
         </div>
       </header>
 
+      <WeatherAlertBanner district={profile?.district} />
+
       <section className="px-5 -mt-10">
+        {/* If banner shows, the -mt-10 still overlaps gracefully because the banner has its own mt-4 */}
         <div className="grid grid-cols-2 gap-3">
           {cards.map(({ label, icon: Icon, bg, fg, to }) => (
             <Link
