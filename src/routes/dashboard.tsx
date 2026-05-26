@@ -16,6 +16,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const { user, loading } = useUser();
   const { unreadCount } = useNotifications(user?.id ?? null);
+  const { setCollapsed } = useSidebar();
 
   useEffect(() => {
     if (loading) return;
