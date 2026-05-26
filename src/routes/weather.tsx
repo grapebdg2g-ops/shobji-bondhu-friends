@@ -7,6 +7,7 @@ import { getWeatherForecast } from "@/lib/weather.functions";
 import { weatherCodeBn } from "@/lib/weather-rules";
 import { useUser } from "@/contexts/user-context";
 import type { Forecast, DailyPoint } from "@/lib/weather-types";
+import { NotificationToggle } from "@/components/krishi/notification-toggle";
 
 export const Route = createFileRoute("/weather")({
   component: WeatherPage,
@@ -64,6 +65,9 @@ function WeatherPage() {
         <h1 className="text-2xl font-bold text-white">আবহাওয়া</h1>
         <p className="text-sm text-white/80 mt-0.5">{district}</p>
       </header>
+
+      <div className="px-5"><NotificationToggle /></div>
+
 
       {isLoading && (
         <div className="px-5 mt-6"><div className="rounded-2xl bg-card p-8 text-center text-muted-foreground">লোড হচ্ছে…</div></div>
