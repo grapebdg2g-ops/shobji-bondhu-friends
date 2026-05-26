@@ -13,6 +13,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { UserProvider } from "@/contexts/user-context";
 
 import { AppErrorBoundary } from "@/components/krishi/app-error-boundary";
+import { PWAManager } from "@/components/krishi/pwa-manager";
 
 function NotFoundComponent() {
   return (
@@ -128,6 +129,7 @@ function RootComponent() {
       <AppErrorBoundary>
         <UserProvider>
           <Outlet />
+          <PWAManager />
           <Toaster richColors position="top-center" />
         </UserProvider>
       </AppErrorBoundary>
