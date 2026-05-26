@@ -1,5 +1,5 @@
 // Pure rules — safe to import from both client and server.
-import type { Forecast } from "./weather.server";
+import type { Forecast } from "./weather-types";
 
 export type AlertType = "STORM" | "HEAVY_RAIN" | "HEAT_WAVE" | "GOOD";
 export type Severity = "high" | "medium" | "low";

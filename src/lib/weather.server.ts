@@ -1,37 +1,6 @@
-// Server-only helpers for Open-Meteo + alert evaluation. NEVER import from client code.
-
-export type CurrentWeather = {
-  temperature: number;
-  weather_code: number;
-  precipitation_prob: number;
-  wind_speed: number;
-  humidity: number;
-  is_day: boolean;
-  time: string;
-};
-
-export type HourlyPoint = {
-  time: string; // ISO
-  temperature: number;
-  precipitation_probability: number;
-  weather_code: number;
-};
-
-export type DailyPoint = {
-  date: string; // YYYY-MM-DD
-  temp_max: number;
-  temp_min: number;
-  precipitation_sum: number;
-  precipitation_probability_max: number;
-  weather_code: number;
-};
-
-export type Forecast = {
-  current: CurrentWeather;
-  hourly: HourlyPoint[]; // next 24h
-  daily: DailyPoint[]; // next 7 days
-  past_rainfall: { date: string; rainfall: number }[]; // last 7 days
-};
+// Server-only helpers for Open-Meteo. NEVER import from client code.
+import type { Forecast, CurrentWeather, HourlyPoint, DailyPoint } from "./weather-types";
+export type { Forecast, CurrentWeather, HourlyPoint, DailyPoint } from "./weather-types";
 
 const BASE = "https://api.open-meteo.com/v1/forecast";
 
