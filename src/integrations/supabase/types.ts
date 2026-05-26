@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_actions: {
+        Row: {
+          action_type: string
+          admin_id: string
+          created_at: string
+          details: Json
+          id: string
+          target_id: string | null
+        }
+        Insert: {
+          action_type: string
+          admin_id: string
+          created_at?: string
+          details?: Json
+          id?: string
+          target_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          admin_id?: string
+          created_at?: string
+          details?: Json
+          id?: string
+          target_id?: string | null
+        }
+        Relationships: []
+      }
       app_installs: {
         Row: {
           id: string
@@ -122,6 +149,54 @@ export type Database = {
           user_id?: string
           user_name?: string
           user_phone?: string | null
+        }
+        Relationships: []
+      }
+      notification_broadcasts: {
+        Row: {
+          admin_id: string
+          body: string
+          created_at: string
+          icon: string | null
+          id: string
+          link: string | null
+          opened_count: number
+          scheduled_at: string | null
+          sent_at: string | null
+          sent_count: number
+          target_type: string
+          target_value: string | null
+          title: string
+        }
+        Insert: {
+          admin_id: string
+          body: string
+          created_at?: string
+          icon?: string | null
+          id?: string
+          link?: string | null
+          opened_count?: number
+          scheduled_at?: string | null
+          sent_at?: string | null
+          sent_count?: number
+          target_type?: string
+          target_value?: string | null
+          title: string
+        }
+        Update: {
+          admin_id?: string
+          body?: string
+          created_at?: string
+          icon?: string | null
+          id?: string
+          link?: string | null
+          opened_count?: number
+          scheduled_at?: string | null
+          sent_at?: string | null
+          sent_count?: number
+          target_type?: string
+          target_value?: string | null
+          title?: string
         }
         Relationships: []
       }
@@ -432,6 +507,48 @@ export type Database = {
           upazila?: string | null
           user_agent?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_reports: {
+        Row: {
+          content_id: string | null
+          content_type: string
+          created_at: string
+          description: string | null
+          id: string
+          reason: string
+          reported_user_id: string | null
+          reporter_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+        }
+        Insert: {
+          content_id?: string | null
+          content_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          reason: string
+          reported_user_id?: string | null
+          reporter_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Update: {
+          content_id?: string | null
+          content_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          reason?: string
+          reported_user_id?: string | null
+          reporter_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
         }
         Relationships: []
       }
