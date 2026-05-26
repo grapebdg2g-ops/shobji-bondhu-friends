@@ -1,6 +1,9 @@
 import { useState, type ReactNode } from "react";
 import { MapPin, User as UserIcon, Clock, Sprout, Leaf, Wrench, HardHat, Phone } from "lucide-react";
 import type { Exchange, ExchangeType } from "@/hooks/use-exchanges";
+import { ContentMenu } from "@/components/krishi/content-menu";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const TYPE_META: Record<ExchangeType, { label: string; icon: typeof Sprout; tint: string }> = {
   seed: { label: "বীজ", icon: Sprout, tint: "bg-emerald-100 text-emerald-700" },
