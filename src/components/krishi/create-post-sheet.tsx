@@ -94,6 +94,7 @@ export function CreatePostSheet({
       image_url: imageUrl,
       crop_tag: s.crop === "সব ফসল" ? null : s.crop,
       district: user.district,
+      upazila: user.upazila,
     };
 
     const { data, error } = await supabase.from("posts").insert(payload).select("*").single();

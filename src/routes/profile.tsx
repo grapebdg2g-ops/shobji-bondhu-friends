@@ -17,7 +17,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
-import { DISTRICTS } from "@/lib/bd-data";
+import { DISTRICTS, getUpazilas } from "@/lib/bd-data";
 import { sanitize, sanitizeOptional } from "@/lib/sanitize";
 
 export const Route = createFileRoute("/profile")({
@@ -361,7 +361,7 @@ function EditProfileSheet({
         <Field label="জেলা">
           <select
             value={district}
-            onChange={(e) => setDistrict(e.target.value)}
+            onChange={(e) => { setDistrict(e.target.value); setUpazila(""); }}
             className="w-full h-11 px-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
           >
             <option value="">— নির্বাচন করুন —</option>
@@ -372,11 +372,19 @@ function EditProfileSheet({
         </Field>
 
         <Field label="উপজেলা">
-          <input
+          <select
             value={upazila}
-            onChange={(e) => setUpazila(e.target.value.slice(0, 80))}
-            className="w-full h-11 px-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-          />
+            disabled={!district}
+            onChange={(e) => setUpazila(e.target.value)}
+            className="w-full h-11 px-3 rounded-xl border border-input bg-background text-sm disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary/30"
+          >
+            <option value="">
+              {district ? "— উপজেলা বেছে নিন —" : "আগে জেলা বেছে নিন"}
+            </option>
+            {getUpazilas(district).map((u) => (
+              <option key={u} value={u}>{u}</option>
+            ))}
+          </select>
         </Field>
 
         <Field label="ফসলের ধরন">

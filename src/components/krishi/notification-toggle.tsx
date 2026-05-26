@@ -1,9 +1,21 @@
-import { Bell, BellOff, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Bell, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
 
 export function NotificationToggle() {
   const { status, supported, busy, enable, disable } = usePushNotifications();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  // Render a stable, SSR-safe placeholder until client mount to avoid hydration mismatch.
+  if (!mounted || status === "loading") {
+    return (
+      <div className="mt-4 rounded-xl border border-border bg-card p-3 flex items-center justify-center text-muted-foreground text-sm">
+        <Loader2 className="h-4 w-4 animate-spin mr-2" /> লোড হচ্ছে…
+      </div>
+    );
+  }
 
   if (!supported || status === "unsupported") {
     return (
@@ -15,13 +27,6 @@ export function NotificationToggle() {
     );
   }
 
-  if (status === "loading") {
-    return (
-      <div className="mt-4 rounded-xl border border-border bg-card p-3 flex items-center justify-center text-muted-foreground text-sm">
-        <Loader2 className="h-4 w-4 animate-spin mr-2" /> লোড হচ্ছে…
-      </div>
-    );
-  }
 
   if (status === "denied") {
     return (

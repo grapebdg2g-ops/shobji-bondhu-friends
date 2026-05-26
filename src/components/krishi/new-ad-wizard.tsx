@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { BottomSheet } from "@/components/krishi/bottom-sheet";
 import { BengaliButton } from "@/components/krishi/bengali-button";
 import { supabase } from "@/integrations/supabase/client";
-import { DISTRICTS } from "@/lib/bd-data";
+import { DISTRICTS, getUpazilas } from "@/lib/bd-data";
 import type { Exchange, ExchangeType } from "@/hooks/use-exchanges";
 import { sanitize, sanitizeOptional } from "@/lib/sanitize";
 
@@ -343,19 +343,24 @@ export function NewAdWizard({
           <Field label="জেলা">
             <select
               value={state.district}
-              onChange={(e) => dispatch({ type: "set", patch: { district: e.target.value } })}
+              onChange={(e) => dispatch({ type: "set", patch: { district: e.target.value, upazila: "" } })}
               className="w-full h-11 px-3 rounded-lg border border-border bg-background text-sm"
             >
               {DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
             </select>
           </Field>
           <Field label="উপজেলা">
-            <input
+            <select
               value={state.upazila}
+              disabled={!state.district}
               onChange={(e) => dispatch({ type: "set", patch: { upazila: e.target.value } })}
-              placeholder="উপজেলার নাম"
-              className="w-full h-11 px-3 rounded-lg border border-border bg-background text-sm"
-            />
+              className="w-full h-11 px-3 rounded-lg border border-border bg-background text-sm disabled:opacity-60"
+            >
+              <option value="">— উপজেলা বেছে নিন —</option>
+              {getUpazilas(state.district).map((u) => (
+                <option key={u} value={u}>{u}</option>
+              ))}
+            </select>
           </Field>
           <Field label="ফোন নম্বর">
             <input

@@ -41,3 +41,13 @@ export function getDistrictLatLng(district: string | null | undefined): [number,
   if (!district) return [23.8103, 90.4125]; // Dhaka fallback
   return DISTRICT_LATLNG[district] ?? [23.8103, 90.4125];
 }
+
+/** Prefer upazila coordinates when known; fall back to district centroid. */
+export function getDistrictUpazilaLatLng(
+  district: string | null | undefined,
+  upazila: string | null | undefined,
+): [number, number] {
+  const u = getUpazilaCoords(district, upazila);
+  if (u) return u;
+  return getDistrictLatLng(district);
+}

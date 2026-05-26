@@ -5,7 +5,7 @@ import {
   Home, BarChart3, Repeat2, User, Sprout,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { DISTRICTS } from "@/lib/bd-data";
+import { DISTRICTS, getUpazilas } from "@/lib/bd-data";
 import { toast } from "sonner";
 import { useUser } from "@/contexts/user-context";
 import { BengaliButton } from "@/components/krishi/bengali-button";
@@ -27,6 +27,7 @@ type Price = {
   unit: string;
   market_name: string;
   district: string;
+  upazila: string | null;
   category: string;
   user_name: string;
   previous_price: number | null;
@@ -60,6 +61,7 @@ function PricesPage() {
   const navigate = useNavigate();
   const { user, loading: userLoading } = useUser();
   const [district, setDistrict] = useState<string>("");
+  const [upazila, setUpazila] = useState<string>("all");
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]>("সব");
   const [prices, setPrices] = useState<Price[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,8 +72,13 @@ function PricesPage() {
     if (userLoading) return;
     if (!user) { navigate({ to: "/login" }); return; }
     if (!user.district) { navigate({ to: "/register" }); return; }
-    if (!district) setDistrict(user.district);
+    if (!district) {
+      setDistrict(user.district);
+      setUpazila(user.upazila ?? "all");
+    }
   }, [user, userLoading, district, navigate]);
+
+  const upazilaOptions = useMemo(() => getUpazilas(district), [district]);
 
   const loadPrices = useCallback(async (d: string) => {
     setLoading(true);
@@ -112,9 +119,11 @@ function PricesPage() {
   }, [district, loadPrices]);
 
   const filtered = useMemo(() => {
-    if (category === "সব") return prices;
-    return prices.filter((p) => p.category === category);
-  }, [prices, category]);
+    let r = prices;
+    if (upazila !== "all") r = r.filter((p) => p.upazila === upazila);
+    if (category !== "সব") r = r.filter((p) => p.category === category);
+    return r;
+  }, [prices, category, upazila]);
 
   return (
     <main className="min-h-screen bg-background pb-28">
@@ -132,7 +141,7 @@ function PricesPage() {
             <MapPin className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-primary" />
             <select
               value={district}
-              onChange={(e) => setDistrict(e.target.value)}
+              onChange={(e) => { setDistrict(e.target.value); setUpazila("all"); }}
               className="w-full appearance-none bg-white text-foreground font-semibold rounded-xl pl-9 pr-4 py-3 text-sm shadow-[var(--shadow-card)]"
             >
               {DISTRICTS.map((d) => (
@@ -146,6 +155,29 @@ function PricesPage() {
           </div>
         </div>
       </header>
+
+      {/* Upazila chips */}
+      {upazilaOptions.length > 0 && (
+        <div className="px-5 mt-3 overflow-x-auto">
+          <div className="flex gap-2 min-w-max pb-1">
+            <button
+              onClick={() => setUpazila("all")}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition ${upazila === "all" ? "bg-primary text-primary-foreground" : "bg-card text-foreground border border-border"}`}
+            >
+              সব উপজেলা
+            </button>
+            {upazilaOptions.map((u) => (
+              <button
+                key={u}
+                onClick={() => setUpazila(u)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition ${upazila === u ? "bg-primary text-primary-foreground" : "bg-card text-foreground border border-border"}`}
+              >
+                {u}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Filter chips */}
       <div className="px-5 mt-4 -mb-1 overflow-x-auto">
@@ -199,7 +231,9 @@ function PricesPage() {
                 <div className="flex justify-between items-start gap-3">
                   <div className="min-w-0 flex-1">
                     <h3 className="text-lg font-bold text-foreground truncate">{p.product_name}</h3>
-                    <p className="text-xs text-muted-foreground mt-1">{p.market_name}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {p.market_name}{p.upazila ? ` • ${p.upazila}` : ""}, {p.district}
+                    </p>
                   </div>
                   <div className="text-right shrink-0">
                     <div className="flex items-center gap-1 justify-end">
@@ -253,7 +287,7 @@ function PricesPage() {
       {user && (
         <AddPriceSheet
           open={open}
-          profile={{ id: user.id, name: user.name, district: user.district ?? "" }}
+          profile={{ id: user.id, name: user.name, district: user.district ?? "", upazila: user.upazila ?? null }}
           defaultDistrict={district}
           onClose={() => setOpen(false)}
         />
@@ -266,7 +300,7 @@ function AddPriceSheet({
   open, profile, defaultDistrict, onClose,
 }: {
   open: boolean;
-  profile: { id: string; name: string; district: string };
+  profile: { id: string; name: string; district: string; upazila: string | null };
   defaultDistrict: string;
   onClose: () => void;
 }) {
@@ -292,6 +326,7 @@ function AddPriceSheet({
       unit,
       market_name: cleanMarket,
       district: defaultDistrict || profile.district,
+      upazila: profile.upazila,
       category,
       user_id: profile.id,
       user_name: sanitize(profile.name),

@@ -42,11 +42,12 @@ function WeatherPage() {
   const navigate = useNavigate();
   const { user } = useUser();
   const district = user?.district ?? "ঢাকা";
+  const upazila = user?.upazila ?? null;
 
   const fetchForecast = useServerFn(getWeatherForecast);
   const { data, isLoading, error } = useQuery({
-    queryKey: ["weather-full", district],
-    queryFn: () => fetchForecast({ data: { district } }),
+    queryKey: ["weather-full", district, upazila],
+    queryFn: () => fetchForecast({ data: { district, upazila } }),
     enabled: !!district,
     staleTime: 15 * 60_000,
   });
@@ -63,7 +64,7 @@ function WeatherPage() {
           <span className="text-sm font-medium">পেছনে</span>
         </button>
         <h1 className="text-2xl font-bold text-white">আবহাওয়া</h1>
-        <p className="text-sm text-white/80 mt-0.5">{district}</p>
+        <p className="text-sm text-white/80 mt-0.5">📍 {upazila ? `${upazila}, ${district}` : district}</p>
       </header>
 
       <div className="px-5"><NotificationToggle /></div>

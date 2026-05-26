@@ -15,11 +15,15 @@ export type Post = {
   likes_count: number;
   comments_count: number;
   district: string | null;
+  upazila: string | null;
   created_at: string;
 };
 
+export type FeedScope = "myUpazila" | "myDistrict" | "all" | "specific";
+
 export type FeedFilters = {
-  districtMode: "mine" | "all" | "specific";
+  /** Backwards-compat: kept as `districtMode` but now supports `myUpazila`. */
+  districtMode: FeedScope;
   district: string | null;
   crop: string | null;
   types: PostType[];
@@ -27,7 +31,11 @@ export type FeedFilters = {
 
 const PAGE_SIZE = 10;
 
-export function useFeed(filters: FeedFilters, myDistrict: string | null) {
+export function useFeed(
+  filters: FeedFilters,
+  myDistrict: string | null,
+  myUpazila: string | null = null,
+) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -43,7 +51,9 @@ export function useFeed(filters: FeedFilters, myDistrict: string | null) {
       .order("created_at", { ascending: false })
       .range(from, to);
 
-    if (filters.districtMode === "mine" && myDistrict) {
+    if (filters.districtMode === "myUpazila" && myDistrict && myUpazila) {
+      q = q.eq("district", myDistrict).eq("upazila", myUpazila);
+    } else if (filters.districtMode === "myDistrict" && myDistrict) {
       q = q.eq("district", myDistrict);
     } else if (filters.districtMode === "specific" && filters.district) {
       q = q.eq("district", filters.district);
@@ -53,7 +63,7 @@ export function useFeed(filters: FeedFilters, myDistrict: string | null) {
       q = q.in("type", filters.types);
     }
     return q;
-  }, [filters, myDistrict]);
+  }, [filters, myDistrict, myUpazila]);
 
   const load = useCallback(async (reset: boolean) => {
     const myReq = ++reqIdRef.current;
