@@ -13,6 +13,7 @@ import { EmptyState } from "@/components/krishi/empty-state";
 import { BottomSheet } from "@/components/krishi/bottom-sheet";
 import { PriceCardSkeleton } from "@/components/krishi/price-card-skeleton";
 import { sanitize } from "@/lib/sanitize";
+import { ContentMenu } from "@/components/krishi/content-menu";
 
 export const Route = createFileRoute("/prices")({
   component: PricesPage,
@@ -28,6 +29,7 @@ type Price = {
   district: string;
   upazila: string | null;
   category: string;
+  user_id: string;
   user_name: string;
   previous_price: number | null;
   created_at: string;
@@ -227,22 +229,36 @@ function PricesPage() {
             const diff = p.previous_price != null ? p.price - p.previous_price : 0;
             return (
               <article key={p.id} className="rounded-2xl bg-card border border-border p-4 shadow-[var(--shadow-card)]">
-                <div className="flex justify-between items-start gap-3">
+                <div className="flex justify-between items-start gap-2">
                   <div className="min-w-0 flex-1">
                     <h3 className="text-lg font-bold text-foreground truncate">{p.product_name}</h3>
                     <p className="text-xs text-muted-foreground mt-1">
                       {p.market_name}{p.upazila ? ` • ${p.upazila}` : ""}, {p.district}
                     </p>
                   </div>
-                  <div className="text-right shrink-0">
-                    <div className="flex items-center gap-1 justify-end">
-                      <span className="text-2xl font-extrabold text-primary leading-none">
-                        ৳{toBn(p.price)}
-                      </span>
-                      {diff > 0 && <TrendingUp className="h-5 w-5 text-red-500" />}
-                      {diff < 0 && <TrendingDown className="h-5 w-5 text-green-600" />}
+                  <div className="flex items-start gap-1 shrink-0">
+                    <div className="text-right">
+                      <div className="flex items-center gap-1 justify-end">
+                        <span className="text-2xl font-extrabold text-primary leading-none">
+                          ৳{toBn(p.price)}
+                        </span>
+                        {diff > 0 && <TrendingUp className="h-5 w-5 text-red-500" />}
+                        {diff < 0 && <TrendingDown className="h-5 w-5 text-green-600" />}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">প্রতি {p.unit}</p>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">প্রতি {p.unit}</p>
+                    <ContentMenu
+                      contentType="price"
+                      contentId={p.id}
+                      authorId={p.user_id}
+                      authorName={p.user_name}
+                      onDelete={async () => {
+                        const { error } = await supabase.from("prices").delete().eq("id", p.id);
+                        if (error) { toast.error("মুছে ফেলা যায়নি"); return; }
+                        setPrices((cur) => cur.filter((x) => x.id !== p.id));
+                        toast.success("মুছে ফেলা হয়েছে");
+                      }}
+                    />
                   </div>
                 </div>
                 <div className="mt-3 pt-3 border-t border-border flex justify-between items-center text-xs text-muted-foreground">

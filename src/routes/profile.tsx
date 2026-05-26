@@ -4,8 +4,9 @@ import imageCompression from "browser-image-compression";
 import { toast } from "sonner";
 import {
   ArrowLeft, Camera, Edit3, Trash2, Power, Pencil, LogOut,
-  Bell, Globe, Info, Star, HelpCircle, ChevronRight, MapPin, Plus,
+  Bell, Globe, Info, Star, HelpCircle, ChevronRight, MapPin, Plus, BellOff,
 } from "lucide-react";
+import { MutedUsersSheet } from "@/components/krishi/muted-users-sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/user-context";
 import { BottomSheet } from "@/components/krishi/bottom-sheet";
@@ -729,6 +730,7 @@ function SettingsList({ onLogout }: { onLogout: () => void }) {
   const [langOpen, setLangOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [mutedOpen, setMutedOpen] = useState(false);
 
   const [prefs, setPrefs] = useState(() => {
     if (typeof window === "undefined") return { price: true, posts: true, comments: true, exchange: true };
@@ -749,11 +751,14 @@ function SettingsList({ onLogout }: { onLogout: () => void }) {
     <>
       <div className="rounded-2xl bg-card border border-border overflow-hidden">
         <SettingRow icon={Bell} label="নোটিফিকেশন সেটিংস" onClick={() => setNotifOpen(true)} />
+        <SettingRow icon={BellOff} label="মিউট করা ব্যবহারকারীরা" onClick={() => setMutedOpen(true)} />
         <SettingRow icon={Globe} label="ভাষা" value="বাংলা" onClick={() => setLangOpen(true)} />
         <SettingRow icon={Info} label="অ্যাপ সম্পর্কে" onClick={() => setAboutOpen(true)} />
         <SettingRow icon={Star} label="অ্যাপ রেট করুন" onClick={rate} />
         <SettingRow icon={HelpCircle} label="সাহায্য ও সাপোর্ট" onClick={() => setHelpOpen(true)} last />
       </div>
+
+      <MutedUsersSheet open={mutedOpen} onClose={() => setMutedOpen(false)} />
 
       <button
         type="button"
