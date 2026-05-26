@@ -12,8 +12,10 @@ function Index() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const t = setTimeout(async () => {
+    let cancelled = false;
+    (async () => {
       const { data } = await supabase.auth.getSession();
+      if (cancelled) return;
       if (!data.session) {
         navigate({ to: "/login" });
         return;
@@ -23,9 +25,10 @@ function Index() {
         .select("district")
         .eq("id", data.session.user.id)
         .maybeSingle();
+      if (cancelled) return;
       navigate({ to: profile?.district ? "/dashboard" : "/register" });
-    }, 1800);
-    return () => clearTimeout(t);
+    })();
+    return () => { cancelled = true; };
   }, [navigate]);
 
   return (
