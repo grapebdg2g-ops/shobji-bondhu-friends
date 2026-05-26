@@ -491,7 +491,7 @@ function MyPostsTab({ userId, onChange }: { userId: string; onChange: (d: number
               <div className="flex items-start justify-between gap-3">
                 <p className="text-sm text-foreground line-clamp-3 whitespace-pre-wrap flex-1">{p.content}</p>
                 {p.image_url && (
-                  <img src={p.image_url} alt="" className="h-16 w-16 rounded-lg object-cover shrink-0" loading="lazy" />
+                  <LazyImage src={p.image_url} alt="" wrapperClassName="h-16 w-16 rounded-lg shrink-0" />
                 )}
               </div>
               <div className="flex items-center justify-between mt-2 text-[11px] text-muted-foreground">
