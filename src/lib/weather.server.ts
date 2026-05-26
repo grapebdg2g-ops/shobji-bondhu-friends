@@ -33,7 +33,6 @@ async function fetchForecastInner(lat: number, lng: number): Promise<Forecast> {
     hourly: "temperature_2m,precipitation_probability,weather_code",
     daily: "temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weather_code",
     timezone: "Asia/Dhaka",
-    past_days: "7",
     forecast_days: "7",
   });
 
