@@ -25,6 +25,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminNotifyRouteImport } from './routes/admin.notify'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as ApiPublicHooksWeatherAlertsRouteImport } from './routes/api/public/hooks/weather-alerts'
 
@@ -108,6 +109,11 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminNotifyRoute = AdminNotifyRouteImport.update({
+  id: '/notify',
+  path: '/notify',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminContentRoute = AdminContentRouteImport.update({
   id: '/content',
   path: '/content',
@@ -136,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/weather': typeof WeatherRoute
   '/admin/content': typeof AdminContentRoute
+  '/admin/notify': typeof AdminNotifyRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -155,6 +162,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/weather': typeof WeatherRoute
   '/admin/content': typeof AdminContentRoute
+  '/admin/notify': typeof AdminNotifyRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin': typeof AdminIndexRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -176,6 +184,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/weather': typeof WeatherRoute
   '/admin/content': typeof AdminContentRoute
+  '/admin/notify': typeof AdminNotifyRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -198,6 +207,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/weather'
     | '/admin/content'
+    | '/admin/notify'
     | '/admin/users'
     | '/admin/'
     | '/api/public/hooks/weather-alerts'
@@ -217,6 +227,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/weather'
     | '/admin/content'
+    | '/admin/notify'
     | '/admin/users'
     | '/admin'
     | '/api/public/hooks/weather-alerts'
@@ -237,6 +248,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/weather'
     | '/admin/content'
+    | '/admin/notify'
     | '/admin/users'
     | '/admin/'
     | '/api/public/hooks/weather-alerts'
@@ -374,6 +386,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/notify': {
+      id: '/admin/notify'
+      path: '/notify'
+      fullPath: '/admin/notify'
+      preLoaderRoute: typeof AdminNotifyRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/content': {
       id: '/admin/content'
       path: '/content'
@@ -393,12 +412,14 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminContentRoute: typeof AdminContentRoute
+  AdminNotifyRoute: typeof AdminNotifyRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminContentRoute: AdminContentRoute,
+  AdminNotifyRoute: AdminNotifyRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
@@ -425,3 +446,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
