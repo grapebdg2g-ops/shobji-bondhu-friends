@@ -147,31 +147,39 @@ function FeedPage() {
     return () => io.disconnect();
   }, [loadMore]);
 
+  const likedKey = useMemo(
+    () => ["feed", "liked", user?.id ?? null, postIdsKey] as const,
+    [user?.id, postIdsKey],
+  );
+  const setLiked = useCallback(
+    (postId: string, liked: boolean) => {
+      qc.setQueryData<string[]>(likedKey, (prev) => {
+        const set = new Set(prev ?? []);
+        if (liked) set.add(postId); else set.delete(postId);
+        return Array.from(set);
+      });
+    },
+    [qc, likedKey],
+  );
+
   const toggleLike = useCallback(async (post: Post) => {
     if (!user) { toast.error("লাইক করতে লগইন করুন"); return; }
     const liked = likedSet.has(post.id);
     // optimistic
-    setLikedSet((s) => {
-      const n = new Set(s);
-      if (liked) n.delete(post.id); else n.add(post.id);
-      return n;
-    });
+    setLiked(post.id, !liked);
     updateById(post.id, { likes_count: Math.max(0, post.likes_count + (liked ? -1 : 1)) });
 
     if (liked) {
       const { error } = await supabase.from("post_likes").delete().eq("post_id", post.id).eq("user_id", user.id);
-      if (error) { /* revert */ setLikedSet((s) => new Set(s).add(post.id)); updateById(post.id, { likes_count: post.likes_count }); return; }
+      if (error) { setLiked(post.id, true); updateById(post.id, { likes_count: post.likes_count }); return; }
       await supabase.rpc("decrement_likes", { post_id: post.id });
     } else {
       const { error } = await supabase.from("post_likes").insert({ post_id: post.id, user_id: user.id });
-      if (error) {
-        setLikedSet((s) => { const n = new Set(s); n.delete(post.id); return n; });
-        updateById(post.id, { likes_count: post.likes_count });
-        return;
-      }
+      if (error) { setLiked(post.id, false); updateById(post.id, { likes_count: post.likes_count }); return; }
       await supabase.rpc("increment_likes", { post_id: post.id });
     }
-  }, [likedSet, user, updateById]);
+  }, [likedSet, user, updateById, setLiked]);
+
 
   const share = async (p: Post) => {
     const url = typeof window !== "undefined" ? window.location.href : "";
