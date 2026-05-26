@@ -14,6 +14,7 @@ import { BottomSheet } from "@/components/krishi/bottom-sheet";
 import { PriceCardSkeleton } from "@/components/krishi/price-card-skeleton";
 import { sanitize } from "@/lib/sanitize";
 import { ContentMenu } from "@/components/krishi/content-menu";
+import { useMutedIds } from "@/hooks/use-muted-users";
 
 export const Route = createFileRoute("/prices")({
   component: PricesPage,
