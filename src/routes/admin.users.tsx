@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Search, MoreVertical, CheckCircle2, Ban, ShieldAlert, UserCog, Eye } from "lucide-react";
+import { Search, MoreVertical, CheckCircle2, Ban, ShieldAlert, UserCog, Eye, Trash2 } from "lucide-react";
+import { hardDeleteUser } from "@/lib/admin.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/user-context";
 import type { AppRole } from "@/hooks/use-role";
@@ -65,6 +67,9 @@ function UsersPage() {
   const [verifyFor, setVerifyFor] = useState<AdminProfile | null>(null);
   const [suspendFor, setSuspendFor] = useState<AdminProfile | null>(null);
   const [warnFor, setWarnFor] = useState<AdminProfile | null>(null);
+  const [deleteFor, setDeleteFor] = useState<AdminProfile | null>(null);
+  const [deleteReason, setDeleteReason] = useState("");
+  const hardDeleteFn = useServerFn(hardDeleteUser);
 
   const { data: profiles = [], isLoading } = useQuery({
     queryKey: ["admin", "users", "profiles"],
@@ -207,7 +212,16 @@ function UsersPage() {
     },
   });
 
-  const warnUser = useMutation({
+  const hardDelete = useMutation({
+    mutationFn: async ({ userId, reason }: { userId: string; reason: string }) =>
+      hardDeleteFn({ data: { userId, reason } }),
+    onSuccess: () => {
+      toast.success("অ্যাকাউন্ট স্থায়ীভাবে মুছে ফেলা হয়েছে");
+      qc.invalidateQueries({ queryKey: ["admin", "users"] });
+      setDeleteFor(null); setDeleteReason("");
+    },
+    onError: (e: Error) => toast.error(e.message || "মুছতে ব্যর্থ"),
+  });
     mutationFn: async ({ userId, message }: { userId: string; message: string }) => {
       await supabase.from("notifications").insert({
         user_id: userId, type: "warn", title: "⚠️ সতর্কবার্তা", body: message,
