@@ -73,7 +73,7 @@ export function DashboardWeatherWidget({
     );
   }
 
-  if (error || !data) {
+  if (error || !data || !data.forecast) {
     return (
       <section className="px-5 mt-4">
         <div className="rounded-2xl bg-card border border-border p-4 text-sm text-muted-foreground">

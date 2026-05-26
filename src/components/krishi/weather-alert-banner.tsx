@@ -24,7 +24,7 @@ export function WeatherAlertBanner({ district }: { district: string | null | und
     gcTime: 60 * 60_000,
   });
 
-  const alert: WeatherAlert | null = data && district ? evaluateAlert(district, data.forecast) : null;
+  const alert: WeatherAlert | null = data?.forecast && district ? evaluateAlert(district, data.forecast) : null;
   // Only show dangerous conditions in the banner (per spec)
   const showable = alert && alert.type !== "GOOD" ? alert : null;
 
