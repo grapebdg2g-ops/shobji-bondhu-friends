@@ -364,6 +364,14 @@ function UsersPage() {
                             <Ban className="h-4 w-4" /> বরখাস্ত করুন
                           </DropdownMenuItem>
                         )}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onSelect={() => setDeleteFor(p)}
+                          disabled={p.id === user?.id}
+                          className="text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" /> স্থায়ীভাবে মুছুন
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </td>
