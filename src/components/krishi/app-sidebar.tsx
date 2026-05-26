@@ -2,16 +2,20 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import {
   Home, TrendingUp, Repeat2, Bug, Newspaper,
-  CloudSun, Bell, User, LogOut, Phone, X,
+  CloudSun, Bell, User, LogOut, Phone, X, Shield, UserCog,
 } from "lucide-react";
 import { useUser } from "@/contexts/user-context";
 import { useNotifications } from "@/hooks/use-notifications";
+import { useRole } from "@/hooks/use-role";
+import { RoleBadge } from "@/components/krishi/role-badge";
 
 const BRAND = "#2D6A4F";
 
 type Item = {
   label: string;
-  to: "/dashboard" | "/prices" | "/exchange" | "/disease-detection" | "/feed" | "/weather" | "/notifications" | "/profile";
+  to:
+    | "/dashboard" | "/prices" | "/exchange" | "/disease-detection" | "/feed"
+    | "/weather" | "/notifications" | "/profile" | "/moderation" | "/admin";
   icon: typeof Home;
   badge?: number;
 };
