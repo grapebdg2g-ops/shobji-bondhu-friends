@@ -17,10 +17,16 @@ export const getWeatherForecast = createServerFn({ method: "POST" })
       upazila: z.string().min(1).max(100).nullable().optional(),
     }).parse(input),
   )
-  .handler(async ({ data }): Promise<{ district: string; upazila: string | null; forecast: Forecast }> => {
+  .handler(async ({ data }): Promise<{ district: string; upazila: string | null; forecast: Forecast | null; error: string | null }> => {
     const [lat, lng] = getDistrictUpazilaLatLng(data.district, data.upazila ?? null);
-    const forecast = await fetchForecast(lat, lng);
-    return { district: data.district, upazila: data.upazila ?? null, forecast };
+    try {
+      const forecast = await fetchForecast(lat, lng);
+      return { district: data.district, upazila: data.upazila ?? null, forecast, error: null };
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "weather unavailable";
+      console.warn("[weather] fetch failed:", msg);
+      return { district: data.district, upazila: data.upazila ?? null, forecast: null, error: msg };
+    }
   });
 
 // Save or refresh the current device's push subscription
