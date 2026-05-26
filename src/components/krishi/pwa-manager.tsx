@@ -33,11 +33,10 @@ export function PWAManager() {
   // Service worker registration — production only, never in iframe/preview
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (!("serviceWorker" in navigator)) return;
 
     const inPreview = isPreviewOrIframe();
     const isProd = import.meta.env.PROD;
-
-    if (!("serviceWorker" in navigator)) return;
 
     if (inPreview || !isProd) {
       // Clean up any previously registered SW in preview/dev contexts
@@ -47,9 +46,13 @@ export function PWAManager() {
       return;
     }
 
-    navigator.serviceWorker.register("/sw.js").catch((err) => {
-      console.warn("SW registration failed:", err);
-    });
+    // Dynamically import workbox-window so it's never bundled into preview/dev
+    import("workbox-window")
+      .then(({ Workbox }) => {
+        const wb = new Workbox("/sw.js", { scope: "/" });
+        wb.register().catch((err) => console.warn("SW registration failed:", err));
+      })
+      .catch((err) => console.warn("workbox-window load failed:", err));
   }, []);
 
   // Online/offline tracking
