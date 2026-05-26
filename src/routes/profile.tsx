@@ -613,7 +613,7 @@ function MyExchangesTab({ userId, onChange }: { userId: string; onChange: (d: nu
         <article key={e.id} className={`rounded-2xl border bg-card p-3 ${e.is_active ? "border-border" : "border-dashed border-muted-foreground/40 opacity-70"}`}>
           <div className="flex items-start gap-3">
             {e.image_url ? (
-              <img src={e.image_url} alt="" className="h-14 w-14 rounded-lg object-cover shrink-0" loading="lazy" />
+              <LazyImage src={e.image_url} alt="" wrapperClassName="h-14 w-14 rounded-lg shrink-0" />
             ) : (
               <div className="h-14 w-14 rounded-lg bg-muted shrink-0" />
             )}
