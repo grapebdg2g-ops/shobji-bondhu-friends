@@ -163,8 +163,25 @@ function NotifyPage() {
           <p className="text-xs mt-2 text-gray-600">আনুমানিক প্রাপক: <b>~{toBn(reach)} জন</b></p>
         </div>
 
-        <Button disabled={!title || !body || send.isPending} onClick={() => setConfirming(true)}>
-          <Send className="h-4 w-4" /> পাঠান
+        <div className="flex flex-col gap-2 border-t border-gray-100 pt-3">
+          <div className="flex gap-2">
+            {(["now", "later"] as const).map((m) => (
+              <button key={m} onClick={() => setScheduleMode(m)}
+                className={`px-3 py-1.5 rounded-md text-sm font-semibold border ${scheduleMode === m ? "bg-purple-600 text-white border-purple-600" : "bg-white border-input"}`}>
+                {m === "now" ? "এখনই পাঠান" : "পরে নির্ধারণ করুন"}
+              </button>
+            ))}
+          </div>
+          {scheduleMode === "later" && (
+            <Input type="datetime-local" value={scheduledAt}
+              onChange={(e) => setScheduledAt(e.target.value)}
+              min={new Date(Date.now() + 60000).toISOString().slice(0, 16)} />
+          )}
+        </div>
+
+        <Button disabled={!title || !body || send.isPending || (scheduleMode === "later" && !scheduledAt)}
+          onClick={() => setConfirming(true)}>
+          <Send className="h-4 w-4" /> {scheduleMode === "later" ? "নির্ধারণ করুন" : "পাঠান"}
         </Button>
 
         {confirming && (
