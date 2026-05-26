@@ -31,6 +31,7 @@ import { Route as AdminNotifyRouteImport } from './routes/admin.notify'
 import { Route as AdminExchangesRouteImport } from './routes/admin.exchanges'
 import { Route as AdminDiseasesRouteImport } from './routes/admin.diseases'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
+import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as ApiPublicHooksWeatherAlertsRouteImport } from './routes/api/public/hooks/weather-alerts'
 
@@ -144,6 +145,11 @@ const AdminContentRoute = AdminContentRouteImport.update({
   path: '/content',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAuditRoute = AdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -172,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/diseases': typeof AdminDiseasesRoute
   '/admin/exchanges': typeof AdminExchangesRoute
@@ -197,6 +204,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/diseases': typeof AdminDiseasesRoute
   '/admin/exchanges': typeof AdminExchangesRoute
@@ -224,6 +232,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/diseases': typeof AdminDiseasesRoute
   '/admin/exchanges': typeof AdminExchangesRoute
@@ -252,6 +261,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/weather'
     | '/admin/analytics'
+    | '/admin/audit'
     | '/admin/content'
     | '/admin/diseases'
     | '/admin/exchanges'
@@ -277,6 +287,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/weather'
     | '/admin/analytics'
+    | '/admin/audit'
     | '/admin/content'
     | '/admin/diseases'
     | '/admin/exchanges'
@@ -303,6 +314,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/weather'
     | '/admin/analytics'
+    | '/admin/audit'
     | '/admin/content'
     | '/admin/diseases'
     | '/admin/exchanges'
@@ -488,6 +500,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminContentRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/audit': {
+      id: '/admin/audit'
+      path: '/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/analytics': {
       id: '/admin/analytics'
       path: '/analytics'
@@ -507,6 +526,7 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminAuditRoute: typeof AdminAuditRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminDiseasesRoute: typeof AdminDiseasesRoute
   AdminExchangesRoute: typeof AdminExchangesRoute
@@ -519,6 +539,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminAuditRoute: AdminAuditRoute,
   AdminContentRoute: AdminContentRoute,
   AdminDiseasesRoute: AdminDiseasesRoute,
   AdminExchangesRoute: AdminExchangesRoute,
