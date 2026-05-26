@@ -35,6 +35,7 @@ import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as ApiPublicHooksWeatherAlertsRouteImport } from './routes/api/public/hooks/weather-alerts'
+import { Route as ApiPublicHooksSendScheduledBroadcastsRouteImport } from './routes/api/public/hooks/send-scheduled-broadcasts'
 
 const WeatherRoute = WeatherRouteImport.update({
   id: '/weather',
@@ -167,6 +168,12 @@ const ApiPublicHooksWeatherAlertsRoute =
     path: '/api/public/hooks/weather-alerts',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksSendScheduledBroadcastsRoute =
+  ApiPublicHooksSendScheduledBroadcastsRouteImport.update({
+    id: '/api/public/hooks/send-scheduled-broadcasts',
+    path: '/api/public/hooks/send-scheduled-broadcasts',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -194,6 +201,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRoute
   '/u/$userId': typeof UUserIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
 }
 export interface FileRoutesByTo {
@@ -221,6 +229,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersRoute
   '/u/$userId': typeof UUserIdRoute
   '/admin': typeof AdminIndexRoute
+  '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
 }
 export interface FileRoutesById {
@@ -250,6 +259,7 @@ export interface FileRoutesById {
   '/admin/users': typeof AdminUsersRoute
   '/u/$userId': typeof UUserIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
 }
 export interface FileRouteTypes {
@@ -280,6 +290,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/u/$userId'
     | '/admin/'
+    | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -307,6 +318,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/u/$userId'
     | '/admin'
+    | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
   id:
     | '__root__'
@@ -335,6 +347,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/u/$userId'
     | '/admin/'
+    | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
   fileRoutesById: FileRoutesById
 }
@@ -354,6 +367,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   WeatherRoute: typeof WeatherRoute
   UUserIdRoute: typeof UUserIdRoute
+  ApiPublicHooksSendScheduledBroadcastsRoute: typeof ApiPublicHooksSendScheduledBroadcastsRoute
   ApiPublicHooksWeatherAlertsRoute: typeof ApiPublicHooksWeatherAlertsRoute
 }
 
@@ -541,6 +555,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksWeatherAlertsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/send-scheduled-broadcasts': {
+      id: '/api/public/hooks/send-scheduled-broadcasts'
+      path: '/api/public/hooks/send-scheduled-broadcasts'
+      fullPath: '/api/public/hooks/send-scheduled-broadcasts'
+      preLoaderRoute: typeof ApiPublicHooksSendScheduledBroadcastsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -588,6 +609,8 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   WeatherRoute: WeatherRoute,
   UUserIdRoute: UUserIdRoute,
+  ApiPublicHooksSendScheduledBroadcastsRoute:
+    ApiPublicHooksSendScheduledBroadcastsRoute,
   ApiPublicHooksWeatherAlertsRoute: ApiPublicHooksWeatherAlertsRoute,
 }
 export const routeTree = rootRouteImport
