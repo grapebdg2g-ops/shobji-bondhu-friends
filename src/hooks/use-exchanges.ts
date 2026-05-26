@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -13,48 +14,59 @@ export type ExchangeFilters = {
   sort: "newest" | "cheapest";
 };
 
+type ServerFilters = Omit<ExchangeFilters, "query">;
+
+const exchangesKey = (f: ServerFilters) =>
+  ["exchanges", f.district, f.type, f.freeOnly, f.sort] as const;
+
+async function fetchExchanges(filters: ServerFilters): Promise<Exchange[]> {
+  const isAuthed = !!(await supabase.auth.getSession()).data.session;
+  let q = supabase
+    .from("exchanges")
+    .select(
+      isAuthed
+        ? "*"
+        : "id,created_at,title,description,type,is_free,price,unit,district,upazila,image_url,is_active,user_name,user_id",
+    )
+    .eq("is_active", true)
+    .limit(100);
+  if (filters.district) q = q.eq("district", filters.district);
+  if (filters.type !== "all") q = q.eq("type", filters.type);
+  if (filters.freeOnly) q = q.eq("is_free", true);
+  q = filters.sort === "cheapest"
+    ? q.order("is_free", { ascending: false }).order("price", { ascending: true, nullsFirst: false })
+    : q.order("created_at", { ascending: false });
+  const { data, error } = await q;
+  if (error) throw error;
+  return ((data ?? []) as unknown) as Exchange[];
+}
+
 export function useExchanges(filters: ExchangeFilters) {
-  const [items, setItems] = useState<Exchange[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const qc = useQueryClient();
+  const serverFilters: ServerFilters = {
+    district: filters.district,
+    type: filters.type,
+    freeOnly: filters.freeOnly,
+    sort: filters.sort,
+  };
+  const key = exchangesKey(serverFilters);
 
-  const load = useCallback(async () => {
-    setError(null);
-    const isAuthed = !!(await supabase.auth.getSession()).data.session;
-    let q = supabase
-      .from("exchanges")
-      .select(
-        isAuthed
-          ? "*"
-          : "id,created_at,title,description,type,is_free,price,unit,district,upazila,image_url,is_active,user_name,user_id",
-      )
-      .eq("is_active", true)
-      .limit(100);
-    if (filters.district) q = q.eq("district", filters.district);
-    if (filters.type !== "all") q = q.eq("type", filters.type);
-    if (filters.freeOnly) q = q.eq("is_free", true);
-    q = filters.sort === "cheapest"
-      ? q.order("is_free", { ascending: false }).order("price", { ascending: true, nullsFirst: false })
-      : q.order("created_at", { ascending: false });
-    const { data, error: e } = await q;
-    if (e) setError("তালিকা লোড করা যায়নি");
-    else setItems(((data ?? []) as unknown) as Exchange[]);
-    setLoading(false);
-  }, [filters.district, filters.type, filters.freeOnly, filters.sort]);
+  const { data: items = [], isLoading, error, refetch } = useQuery({
+    queryKey: key,
+    queryFn: () => fetchExchanges(serverFilters),
+    staleTime: 30_000,
+  });
 
-  useEffect(() => { setLoading(true); load(); }, [load]);
-
-  // Keep latest load in a ref so realtime channel doesn't resubscribe on filter change
-  const loadRef = useRef(load);
-  useEffect(() => { loadRef.current = load; }, [load]);
-
+  // Realtime: just invalidate active filter sets — Query will refetch only what's mounted
   useEffect(() => {
     const ch = supabase
       .channel("exchanges-rt")
-      .on("postgres_changes", { event: "*", schema: "public", table: "exchanges" }, () => loadRef.current())
+      .on("postgres_changes", { event: "*", schema: "public", table: "exchanges" }, () => {
+        qc.invalidateQueries({ queryKey: ["exchanges"] });
+      })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, []);
+  }, [qc]);
 
   const filtered = useMemo(() => {
     const q = filters.query.trim().toLowerCase();
@@ -66,16 +78,26 @@ export function useExchanges(filters: ExchangeFilters) {
   }, [items, filters.query]);
 
   const addOptimistic = useCallback((item: Exchange) => {
-    setItems((prev) => [item, ...prev]);
-  }, []);
+    qc.setQueryData<Exchange[]>(key, (prev) => [item, ...(prev ?? [])]);
+  }, [qc, key]);
 
   const replaceOptimistic = useCallback((tempId: string, real: Exchange) => {
-    setItems((prev) => prev.map((i) => (i.id === tempId ? real : i)));
-  }, []);
+    qc.setQueryData<Exchange[]>(key, (prev) =>
+      (prev ?? []).map((i) => (i.id === tempId ? real : i)),
+    );
+  }, [qc, key]);
 
   const removeOptimistic = useCallback((id: string) => {
-    setItems((prev) => prev.filter((i) => i.id !== id));
-  }, []);
+    qc.setQueryData<Exchange[]>(key, (prev) => (prev ?? []).filter((i) => i.id !== id));
+  }, [qc, key]);
 
-  return { items: filtered, loading, error, refresh: load, addOptimistic, replaceOptimistic, removeOptimistic };
+  return {
+    items: filtered,
+    loading: isLoading,
+    error: error ? "তালিকা লোড করা যায়নি" : null,
+    refresh: () => refetch(),
+    addOptimistic,
+    replaceOptimistic,
+    removeOptimistic,
+  };
 }
