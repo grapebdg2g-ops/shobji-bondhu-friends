@@ -5,7 +5,7 @@ import {
   Home, BarChart3, Repeat2, User, Sprout,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { DISTRICTS } from "@/lib/bd-data";
+import { DISTRICTS, getUpazilas } from "@/lib/bd-data";
 import { toast } from "sonner";
 import { useUser } from "@/contexts/user-context";
 import { BengaliButton } from "@/components/krishi/bengali-button";
@@ -27,6 +27,7 @@ type Price = {
   unit: string;
   market_name: string;
   district: string;
+  upazila: string | null;
   category: string;
   user_name: string;
   previous_price: number | null;
@@ -60,6 +61,7 @@ function PricesPage() {
   const navigate = useNavigate();
   const { user, loading: userLoading } = useUser();
   const [district, setDistrict] = useState<string>("");
+  const [upazila, setUpazila] = useState<string>("all");
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]>("সব");
   const [prices, setPrices] = useState<Price[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,8 +72,13 @@ function PricesPage() {
     if (userLoading) return;
     if (!user) { navigate({ to: "/login" }); return; }
     if (!user.district) { navigate({ to: "/register" }); return; }
-    if (!district) setDistrict(user.district);
+    if (!district) {
+      setDistrict(user.district);
+      setUpazila(user.upazila ?? "all");
+    }
   }, [user, userLoading, district, navigate]);
+
+  const upazilaOptions = useMemo(() => getUpazilas(district), [district]);
 
   const loadPrices = useCallback(async (d: string) => {
     setLoading(true);
@@ -112,9 +119,11 @@ function PricesPage() {
   }, [district, loadPrices]);
 
   const filtered = useMemo(() => {
-    if (category === "সব") return prices;
-    return prices.filter((p) => p.category === category);
-  }, [prices, category]);
+    let r = prices;
+    if (upazila !== "all") r = r.filter((p) => p.upazila === upazila);
+    if (category !== "সব") r = r.filter((p) => p.category === category);
+    return r;
+  }, [prices, category, upazila]);
 
   return (
     <main className="min-h-screen bg-background pb-28">
