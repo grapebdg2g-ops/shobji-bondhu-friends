@@ -1,0 +1,1 @@
+CREATE POLICY "Admins view all disease history" ON public.disease_history FOR SELECT TO authenticated USING (has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'moderator'::app_role));
