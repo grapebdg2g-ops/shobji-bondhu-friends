@@ -3,6 +3,7 @@ import { Send, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/user-context";
+import { sanitize } from "@/lib/sanitize";
 
 type Comment = {
   id: string;
@@ -49,7 +50,7 @@ export function CommentsSection({
   }, [postId]);
 
   const submit = async () => {
-    const trimmed = text.trim();
+    const trimmed = sanitize(text);
     if (!trimmed || sending) return;
     if (!user) { toast.error("মন্তব্য করতে লগইন করুন"); return; }
     if (trimmed.length > 200) { toast.error("মন্তব্য ২০০ অক্ষরের মধ্যে রাখুন"); return; }

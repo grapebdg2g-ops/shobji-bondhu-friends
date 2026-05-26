@@ -8,6 +8,7 @@ import { BengaliButton } from "@/components/krishi/bengali-button";
 import { supabase } from "@/integrations/supabase/client";
 import { DISTRICTS } from "@/lib/bd-data";
 import type { Exchange, ExchangeType } from "@/hooks/use-exchanges";
+import { sanitize, sanitizeOptional } from "@/lib/sanitize";
 
 type State = {
   step: 1 | 2 | 3 | 4; // 4 = success
@@ -168,17 +169,17 @@ export function NewAdWizard({
       }
     }
     const { data, error } = await supabase.from("exchanges").insert({
-      title: state.title.trim(),
-      description: state.description.trim() || null,
+      title: sanitize(state.title),
+      description: sanitizeOptional(state.description),
       type: state.type!,
       is_free: state.isFree,
       price: state.isFree ? null : Number(state.price),
       unit: state.isFree ? null : state.unit,
       image_url: imageUrl,
       district: state.district,
-      upazila: state.upazila || null,
+      upazila: sanitizeOptional(state.upazila),
       user_id: userId,
-      user_name: userName,
+      user_name: sanitize(userName),
       user_phone: state.phone,
     }).select().single();
     setSubmitting(false);

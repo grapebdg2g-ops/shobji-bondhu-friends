@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import { DISTRICTS } from "@/lib/bd-data";
+import { sanitize, sanitizeOptional } from "@/lib/sanitize";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -331,17 +332,17 @@ function EditProfileSheet({
     setCrops((x) => (x.includes(c) ? x.filter((y) => y !== c) : [...x, c]));
 
   const submit = async () => {
-    const trimmed = name.trim();
-    if (!trimmed) { toast.error("নাম দিন"); return; }
-    if (trimmed.length > 100) { toast.error("নাম ১০০ অক্ষরের মধ্যে"); return; }
+    const cleanName = sanitize(name);
+    if (!cleanName) { toast.error("নাম দিন"); return; }
+    if (cleanName.length > 100) { toast.error("নাম ১০০ অক্ষরের মধ্যে"); return; }
     if (bio.length > 150) { toast.error("পরিচিতি ১৫০ অক্ষরের মধ্যে"); return; }
     setSaving(true);
     await onSave({
-      name: trimmed,
+      name: cleanName,
       district: district || null,
-      upazila: upazila.trim() || null,
+      upazila: sanitizeOptional(upazila),
       crops,
-      bio: bio.trim() || null,
+      bio: sanitizeOptional(bio),
     });
     setSaving(false);
   };

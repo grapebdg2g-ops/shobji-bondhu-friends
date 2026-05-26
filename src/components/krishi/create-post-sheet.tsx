@@ -6,6 +6,7 @@ import { BottomSheet } from "@/components/krishi/bottom-sheet";
 import { supabase } from "@/integrations/supabase/client";
 import type { Post, PostType } from "@/hooks/use-feed";
 import { useUser } from "@/contexts/user-context";
+import { sanitize } from "@/lib/sanitize";
 
 const CROPS = ["ধান", "আলু", "টমেটো", "পেঁয়াজ", "সবজি", "সব ফসল"];
 
@@ -66,7 +67,7 @@ export function CreatePostSheet({
   const submit = async () => {
     if (!user) { toast.error("পোস্ট করতে লগইন করুন"); return; }
     if (!s.type) return;
-    const text = s.content.trim();
+    const text = sanitize(s.content);
     if (!text) { toast.error("কিছু লিখুন"); return; }
     if (text.length > 500) { toast.error("৫০০ অক্ষরের মধ্যে রাখুন"); return; }
     setSubmitting(true);
