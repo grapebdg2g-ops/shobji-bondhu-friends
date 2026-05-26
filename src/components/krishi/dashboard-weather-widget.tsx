@@ -85,16 +85,6 @@ export function DashboardWeatherWidget({
   }
 
   const f: Forecast = data.forecast;
-      <section className="px-5 mt-4">
-        <div className="rounded-2xl bg-card border border-border p-4 text-sm text-muted-foreground">
-          আবহাওয়া তথ্য আনা যায়নি।{" "}
-          <button onClick={() => refetch()} className="text-primary font-semibold">আবার চেষ্টা</button>
-        </div>
-      </section>
-    );
-  }
-
-  const f: Forecast = data.forecast;
   const c = f.current;
   const today = f.daily[0];
   const advice = farmingAdvice(c, today);
