@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_installs: {
+        Row: {
+          id: string
+          installed_at: string
+          platform: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          installed_at?: string
+          platform?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          installed_at?: string
+          platform?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       disease_history: {
         Row: {
           created_at: string
