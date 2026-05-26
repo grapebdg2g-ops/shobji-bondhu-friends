@@ -326,21 +326,35 @@ function PostSkeleton() {
 function PostCard({
   post,
   liked,
+  currentUserId,
   onLike,
   onShare,
   onCommentAdded,
+  onDeleted,
 }: {
   post: Post;
   liked: boolean;
+  currentUserId: string | null;
   onLike: () => void;
   onShare: () => void;
   onCommentAdded: () => void;
+  onDeleted: () => void;
 }) {
   const meta = TYPE_META[post.type];
   const [expanded, setExpanded] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const long = post.content.length > 180;
   const text = expanded || !long ? post.content : post.content.slice(0, 180) + "...";
+
+  const handleDelete = async () => {
+    const { error } = await supabase.from("posts").delete().eq("id", post.id);
+    if (error) {
+      toast.error("মুছে ফেলা যায়নি");
+      return;
+    }
+    toast.success("পোস্ট মুছে ফেলা হয়েছে");
+    onDeleted();
+  };
 
   return (
     <article className={`rounded-2xl border-2 ${meta.border} shadow-sm overflow-hidden`}>
@@ -352,7 +366,16 @@ function PostCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
               <p className="font-semibold text-foreground text-sm truncate">{post.user_name}</p>
-              <span className="text-[10px] text-muted-foreground shrink-0">{timeAgo(post.created_at)}</span>
+              <div className="flex items-center gap-1 shrink-0">
+                <span className="text-[10px] text-muted-foreground">{timeAgo(post.created_at)}</span>
+                <ContentMenu
+                  contentType="post"
+                  contentId={post.id}
+                  authorId={post.user_id}
+                  authorName={post.user_name}
+                  onDelete={handleDelete}
+                />
+              </div>
             </div>
             <p className="text-xs text-muted-foreground">
               {post.upazila ? `${post.upazila}, ${post.district ?? "—"}` : post.district ?? "—"}
