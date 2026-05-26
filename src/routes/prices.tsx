@@ -287,7 +287,7 @@ function PricesPage() {
       {user && (
         <AddPriceSheet
           open={open}
-          profile={{ id: user.id, name: user.name, district: user.district ?? "" }}
+          profile={{ id: user.id, name: user.name, district: user.district ?? "", upazila: user.upazila ?? null }}
           defaultDistrict={district}
           onClose={() => setOpen(false)}
         />
@@ -300,7 +300,7 @@ function AddPriceSheet({
   open, profile, defaultDistrict, onClose,
 }: {
   open: boolean;
-  profile: { id: string; name: string; district: string };
+  profile: { id: string; name: string; district: string; upazila: string | null };
   defaultDistrict: string;
   onClose: () => void;
 }) {
@@ -326,6 +326,7 @@ function AddPriceSheet({
       unit,
       market_name: cleanMarket,
       district: defaultDistrict || profile.district,
+      upazila: profile.upazila,
       category,
       user_id: profile.id,
       user_name: sanitize(profile.name),
