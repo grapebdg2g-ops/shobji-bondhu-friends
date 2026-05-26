@@ -66,6 +66,9 @@ function WeatherPage() {
         <p className="text-sm text-white/80 mt-0.5">{district}</p>
       </header>
 
+      <div className="px-5"><NotificationToggle /></div>
+
+
       {isLoading && (
         <div className="px-5 mt-6"><div className="rounded-2xl bg-card p-8 text-center text-muted-foreground">লোড হচ্ছে…</div></div>
       )}
