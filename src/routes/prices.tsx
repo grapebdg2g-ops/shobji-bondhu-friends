@@ -1,8 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ArrowLeft, Plus, MapPin, TrendingUp, TrendingDown,
-  Home, BarChart3, Repeat2, User, Sprout,
+  ArrowLeft, Plus, MapPin, TrendingUp, TrendingDown, Sprout,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DISTRICTS, getUpazilas } from "@/lib/bd-data";
@@ -265,23 +264,6 @@ function PricesPage() {
         <Plus className="h-7 w-7" strokeWidth={2.5} />
       </button>
 
-      {/* Bottom nav */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
-        <div className="grid grid-cols-4 max-w-md mx-auto">
-          {[
-            { label: "হোম", icon: Home, to: "/dashboard" as const, active: false },
-            { label: "দর", icon: BarChart3, to: "/prices" as const, active: true },
-            { label: "বিনিময়", icon: Repeat2, to: "/dashboard" as const, active: false },
-            { label: "প্রোফাইল", icon: User, to: "/dashboard" as const, active: false },
-          ].map(({ label, icon: Icon, to, active }) => (
-            <Link key={label} to={to}
-              className={`flex flex-col items-center gap-1 py-3 ${active ? "text-primary" : "text-muted-foreground"}`}>
-              <Icon className="h-6 w-6" strokeWidth={active ? 2.5 : 2} />
-              <span className={`text-xs ${active ? "font-bold" : "font-medium"}`}>{label}</span>
-            </Link>
-          ))}
-        </div>
-      </nav>
 
       {/* Add price sheet */}
       {user && (

@@ -1,6 +1,6 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowLeft, Search, Plus, Home, BarChart3, Repeat2, User as UserIcon, Sprout, Leaf, Wrench, HardHat } from "lucide-react";
+import { ArrowLeft, Search, Plus, Sprout, Leaf, Wrench, HardHat } from "lucide-react";
 import { useUser } from "@/contexts/user-context";
 import { useExchanges, type ExchangeType } from "@/hooks/use-exchanges";
 import { ExchangeCard } from "@/components/krishi/exchange-card";
@@ -120,22 +120,6 @@ function ExchangePage() {
         onCreated={addOptimistic}
       />
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
-        <div className="grid grid-cols-4 max-w-md mx-auto">
-          {[
-            { label: "হোম", icon: Home, to: "/dashboard" as const, active: false },
-            { label: "দর", icon: BarChart3, to: "/prices" as const, active: false },
-            { label: "বিনিময়", icon: Repeat2, to: "/exchange" as const, active: true },
-            { label: "প্রোফাইল", icon: UserIcon, to: "/dashboard" as const, active: false },
-          ].map(({ label, icon: Icon, to, active }) => (
-            <Link key={label} to={to}
-              className={`flex flex-col items-center gap-1 py-3 ${active ? "text-primary" : "text-muted-foreground"}`}>
-              <Icon className="h-6 w-6" strokeWidth={active ? 2.5 : 2} />
-              <span className={`text-xs ${active ? "font-bold" : "font-medium"}`}>{label}</span>
-            </Link>
-          ))}
-        </div>
-      </nav>
     </main>
   );
 }
