@@ -12,6 +12,7 @@ import { DISTRICTS } from "@/lib/bd-data";
 
 import { EmptyState } from "@/components/krishi/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LazyImage } from "@/components/krishi/lazy-image";
 
 export const Route = createFileRoute("/feed")({
   component: FeedPage,
