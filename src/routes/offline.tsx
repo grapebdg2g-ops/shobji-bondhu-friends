@@ -27,14 +27,14 @@ function OfflinePage() {
   ];
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-background px-6 py-10">
+    <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-primary/10 via-background to-background px-6 py-10">
       <div className="w-full max-w-md text-center space-y-6">
-        <div className="mx-auto h-28 w-28 rounded-full bg-muted flex items-center justify-center">
-          <WifiOff className="h-14 w-14 text-muted-foreground" />
+        <div className="mx-auto h-28 w-28 rounded-full bg-primary/15 flex items-center justify-center ring-4 ring-primary/20">
+          <WifiOff className="h-14 w-14 text-primary" />
         </div>
 
         <div>
-          <h1 className="text-2xl font-bold text-foreground">
+          <h1 className="text-2xl font-bold text-primary">
             আপনি অফলাইনে আছেন
           </h1>
           <p className="mt-1 text-muted-foreground">ইন্টারনেট সংযোগ নেই</p>
