@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Check } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { DISTRICTS, CROPS } from "@/lib/bd-data";
+import { DISTRICTS, CROPS, getUpazilas } from "@/lib/bd-data";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/register")({
@@ -70,7 +70,10 @@ function RegisterPage() {
 
         <div>
           <Label className="text-base font-semibold">জেলা</Label>
-          <Select value={district} onValueChange={setDistrict}>
+          <Select
+            value={district}
+            onValueChange={(v) => { setDistrict(v); setUpazila(""); }}
+          >
             <SelectTrigger className="h-13 text-base mt-1.5"><SelectValue placeholder="জেলা নির্বাচন করুন" /></SelectTrigger>
             <SelectContent className="max-h-72">
               {DISTRICTS.map((d) => <SelectItem key={d} value={d} className="text-base">{d}</SelectItem>)}
@@ -79,9 +82,17 @@ function RegisterPage() {
         </div>
 
         <div>
-          <Label htmlFor="upz" className="text-base font-semibold">উপজেলা</Label>
-          <Input id="upz" required value={upazila} onChange={(e) => setUpazila(e.target.value)}
-            className="h-13 text-base mt-1.5" placeholder="উপজেলার নাম" />
+          <Label className="text-base font-semibold">উপজেলা</Label>
+          <Select value={upazila} onValueChange={setUpazila} disabled={!district}>
+            <SelectTrigger className="h-13 text-base mt-1.5">
+              <SelectValue placeholder={district ? "উপজেলা নির্বাচন করুন" : "আগে জেলা বেছে নিন"} />
+            </SelectTrigger>
+            <SelectContent className="max-h-72">
+              {getUpazilas(district).map((u) => (
+                <SelectItem key={u} value={u} className="text-base">{u}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div>
