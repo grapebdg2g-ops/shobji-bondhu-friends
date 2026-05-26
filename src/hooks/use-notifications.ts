@@ -40,7 +40,7 @@ export function useNotifications(userId: string | null) {
   useEffect(() => {
     if (!userId) return;
     const ch = supabase
-      .channel(`notifs-${userId}`)
+      .channel(`notifs-${userId}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
