@@ -70,6 +70,7 @@ export function AppSidebar({
   const router = useRouter();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { unreadCount } = useNotifications(user?.id ?? null);
+  const { role, isStaff, isAdmin } = useRole();
 
   const primary: Item[] = [
     { label: "হোম", to: "/dashboard", icon: Home },
@@ -85,6 +86,9 @@ export function AppSidebar({
   const account: Item[] = [
     { label: "আমার প্রোফাইল", to: "/profile", icon: User },
   ];
+  const staffItems: Item[] = [];
+  if (isStaff) staffItems.push({ label: "মডারেশন", to: "/moderation", icon: Shield });
+  if (isAdmin) staffItems.push({ label: "অ্যাডমিন প্যানেল", to: "/admin", icon: UserCog });
 
   const closeOnNav = () => setCollapsed(true);
 
