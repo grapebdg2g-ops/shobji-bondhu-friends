@@ -16,8 +16,24 @@ export async function fetchForecast(lat: number, lng: number): Promise<Forecast>
     forecast_days: "7",
   });
 
-  const res = await fetch(`${BASE}?${params}`);
-  if (!res.ok) throw new Error(`Open-Meteo ${res.status}`);
+  const url = `${BASE}?${params}`;
+  let res: Response | null = null;
+  let lastStatus = 0;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      res = await fetch(url, { headers: { "accept": "application/json" } });
+      if (res.ok) break;
+      lastStatus = res.status;
+      // Retry on 429 / 5xx
+      if (res.status !== 429 && res.status < 500) break;
+    } catch (e) {
+      lastStatus = -1;
+    }
+    // Exponential backoff with jitter: 400ms, 900ms, 1900ms
+    const delay = 400 * Math.pow(2, attempt) + Math.floor(Math.random() * 200);
+    await new Promise((r) => setTimeout(r, delay));
+  }
+  if (!res || !res.ok) throw new Error(`Open-Meteo ${res?.status ?? lastStatus}`);
   const data = await res.json() as any;
 
   const c = data.current;
