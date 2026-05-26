@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, SlidersHorizontal, ThumbsUp, MessageCircle, Share2, Plus, HelpCircle, Star, CloudRain, ChevronDown, ArrowUp } from "lucide-react";
@@ -365,7 +365,13 @@ function PostCard({
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
-              <p className="font-semibold text-foreground text-sm truncate">{post.user_name}</p>
+              <Link
+                to="/u/$userId"
+                params={{ userId: post.user_id }}
+                className="font-semibold text-foreground text-sm truncate hover:underline"
+              >
+                {post.user_name}
+              </Link>
               <div className="flex items-center gap-1 shrink-0">
                 <span className="text-[10px] text-muted-foreground">{timeAgo(post.created_at)}</span>
                 <ContentMenu
