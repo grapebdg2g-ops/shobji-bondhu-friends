@@ -26,9 +26,15 @@ function isPreviewOrIframe() {
 export function PWAManager() {
   const [showInstall, setShowInstall] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BIPEvent | null>(null);
-  const [online, setOnline] = useState(
-    typeof navigator === "undefined" ? true : navigator.onLine
-  );
+  const [online, setOnline] = useState(true);
+  const [hydrated, setHydrated] = useState(false);
+  const [inPreview, setInPreview] = useState(true);
+
+  useEffect(() => {
+    setHydrated(true);
+    setInPreview(isPreviewOrIframe());
+    setOnline(navigator.onLine);
+  }, []);
 
   // Service worker registration — production only, never in iframe/preview
   useEffect(() => {
@@ -98,7 +104,7 @@ export function PWAManager() {
         const dismissedRecently =
           dismissedAt && Date.now() - dismissedAt < 7 * 24 * 60 * 60 * 1000;
 
-        if (visits >= 3 && !dismissedRecently) {
+        if (visits >= 1 && !dismissedRecently) {
           setShowInstall(true);
         }
       } catch {
@@ -144,7 +150,7 @@ export function PWAManager() {
 
   return (
     <>
-      {!online && (
+      {hydrated && !inPreview && !online && (
         <div className="fixed top-0 left-0 right-0 z-[60] bg-[#E07A2C] text-white text-sm font-semibold py-2 px-4 flex items-center justify-center gap-2 shadow">
           <WifiOff className="h-4 w-4" />
           <span>📡 অফলাইন মোড — সীমিত সুবিধা</span>
