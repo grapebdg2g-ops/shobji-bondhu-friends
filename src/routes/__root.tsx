@@ -130,9 +130,11 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AppErrorBoundary>
         <UserProvider>
-          <AppLayout>
-            <Outlet />
-          </AppLayout>
+          <SidebarProvider>
+            <AppLayout>
+              <Outlet />
+            </AppLayout>
+          </SidebarProvider>
           <PWAManager />
           <Toaster richColors position="top-center" />
         </UserProvider>
