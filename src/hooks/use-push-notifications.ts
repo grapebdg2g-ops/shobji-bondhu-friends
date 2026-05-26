@@ -88,6 +88,7 @@ export function usePushNotifications() {
           p256dh,
           auth,
           district: user.district ?? null,
+          upazila: user.upazila ?? null,
           user_agent: navigator.userAgent.slice(0, 512),
         },
       });

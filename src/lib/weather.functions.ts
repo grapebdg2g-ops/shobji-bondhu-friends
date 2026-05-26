@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { getDistrictLatLng } from "@/lib/bd-data";
+import { getDistrictUpazilaLatLng } from "@/lib/bd-data";
 import { fetchForecast, type Forecast } from "@/lib/weather.server";
 
 // Expose VAPID public key to client (publishable — designed for browsers)
@@ -9,15 +9,18 @@ export const getVapidPublicKey = createServerFn({ method: "GET" }).handler(async
   return { publicKey: process.env.VAPID_PUBLIC_KEY ?? "" };
 });
 
-// Public-ish: takes a district name, returns forecast. Cached at client via TanStack Query.
+// Public-ish: takes a district (and optional upazila), returns forecast.
 export const getWeatherForecast = createServerFn({ method: "POST" })
   .inputValidator((input) =>
-    z.object({ district: z.string().min(1).max(100) }).parse(input),
+    z.object({
+      district: z.string().min(1).max(100),
+      upazila: z.string().min(1).max(100).nullable().optional(),
+    }).parse(input),
   )
-  .handler(async ({ data }): Promise<{ district: string; forecast: Forecast }> => {
-    const [lat, lng] = getDistrictLatLng(data.district);
+  .handler(async ({ data }): Promise<{ district: string; upazila: string | null; forecast: Forecast }> => {
+    const [lat, lng] = getDistrictUpazilaLatLng(data.district, data.upazila ?? null);
     const forecast = await fetchForecast(lat, lng);
-    return { district: data.district, forecast };
+    return { district: data.district, upazila: data.upazila ?? null, forecast };
   });
 
 // Save or refresh the current device's push subscription
@@ -29,12 +32,12 @@ export const savePushSubscription = createServerFn({ method: "POST" })
       p256dh: z.string().min(1).max(512),
       auth: z.string().min(1).max(256),
       district: z.string().min(1).max(100).nullable().optional(),
+      upazila: z.string().min(1).max(100).nullable().optional(),
       user_agent: z.string().max(512).optional(),
     }).parse(input),
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    // Upsert by endpoint
     const { error } = await supabase
       .from("push_subscriptions")
       .upsert(
@@ -44,6 +47,7 @@ export const savePushSubscription = createServerFn({ method: "POST" })
           p256dh: data.p256dh,
           auth: data.auth,
           district: data.district ?? null,
+          upazila: data.upazila ?? null,
           user_agent: data.user_agent ?? null,
         },
         { onConflict: "endpoint" },
