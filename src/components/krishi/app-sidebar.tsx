@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import {
-  Menu, Home, TrendingUp, Repeat2, Bug, Newspaper,
-  CloudSun, Bell, User, Settings, LogOut, Phone, X,
+  Home, TrendingUp, Repeat2, Bug, Newspaper,
+  CloudSun, Bell, User, LogOut, Phone, X,
 } from "lucide-react";
 import { useUser } from "@/contexts/user-context";
 import { useNotifications } from "@/hooks/use-notifications";
