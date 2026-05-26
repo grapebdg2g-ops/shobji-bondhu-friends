@@ -7,6 +7,7 @@ import { getWeatherForecast } from "@/lib/weather.functions";
 import { weatherCodeBn } from "@/lib/weather-rules";
 import { useUser } from "@/contexts/user-context";
 import type { Forecast, DailyPoint } from "@/lib/weather-types";
+import { NotificationToggle } from "@/components/krishi/notification-toggle";
 
 export const Route = createFileRoute("/weather")({
   component: WeatherPage,
