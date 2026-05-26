@@ -11,6 +11,7 @@ import { useUser } from "@/contexts/user-context";
 import { BottomSheet } from "@/components/krishi/bottom-sheet";
 import { EmptyState } from "@/components/krishi/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LazyImage } from "@/components/krishi/lazy-image";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
