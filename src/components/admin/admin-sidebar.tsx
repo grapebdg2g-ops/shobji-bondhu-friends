@@ -14,13 +14,13 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-const ITEMS = [
+const ITEMS: Array<{ to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean }> = [
   { to: "/admin", label: "ওভারভিউ", icon: LayoutDashboard, exact: true },
   { to: "/admin/users", label: "ব্যবহারকারী", icon: Users },
   { to: "/admin/content", label: "কন্টেন্ট ব্যবস্থাপনা", icon: FileText },
   { to: "/admin/notify", label: "নোটিফিকেশন পাঠান", icon: Bell },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-] as const;
+];
 
 const REF = [
   { to: "/prices", label: "বাজার দর", icon: TrendingUp },
