@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { MapPin, User as UserIcon, Clock, Sprout, Leaf, Wrench, HardHat, Phone } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import type { Exchange, ExchangeType } from "@/hooks/use-exchanges";
 import { ContentMenu } from "@/components/krishi/content-menu";
 import { supabase } from "@/integrations/supabase/client";
