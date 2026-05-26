@@ -80,7 +80,7 @@ function LoginPage() {
     <main className="min-h-screen bg-background flex flex-col">
       <header className="flex flex-col items-center gap-3 px-6 pt-12 pb-8" style={{ background: "var(--gradient-brand)" }}>
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 ring-2 ring-white/25 overflow-hidden">
-          <img src={logo} alt="কৃষিবন্ধু লোগো" className="h-14 w-14 object-contain" />
+          <img src={logo} alt="কৃষিবন্ধু লোগো" width={56} height={56} decoding="async" className="h-14 w-14 object-contain" />
         </div>
         <h1 className="text-2xl font-bold text-white">কৃষিবন্ধু</h1>
         <p className="text-sm text-white/85">প্রবেশ করুন আপনার অ্যাকাউন্টে</p>
