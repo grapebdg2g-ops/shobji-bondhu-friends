@@ -13,6 +13,7 @@ import { ErrorMessage } from "@/components/krishi/error-message";
 import { EmptyState } from "@/components/krishi/empty-state";
 import { BottomSheet } from "@/components/krishi/bottom-sheet";
 import { PriceCardSkeleton } from "@/components/krishi/price-card-skeleton";
+import { sanitize } from "@/lib/sanitize";
 
 export const Route = createFileRoute("/prices")({
   component: PricesPage,
