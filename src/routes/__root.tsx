@@ -15,6 +15,7 @@ import { UserProvider } from "@/contexts/user-context";
 import { AppErrorBoundary } from "@/components/krishi/app-error-boundary";
 import { PWAManager } from "@/components/krishi/pwa-manager";
 import { AppLayout } from "@/components/krishi/app-layout";
+import { SidebarProvider } from "@/components/krishi/app-sidebar";
 
 function NotFoundComponent() {
   return (
@@ -129,9 +130,11 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AppErrorBoundary>
         <UserProvider>
-          <AppLayout>
-            <Outlet />
-          </AppLayout>
+          <SidebarProvider>
+            <AppLayout>
+              <Outlet />
+            </AppLayout>
+          </SidebarProvider>
           <PWAManager />
           <Toaster richColors position="top-center" />
         </UserProvider>

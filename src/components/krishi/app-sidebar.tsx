@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import {
   Home, TrendingUp, Repeat2, Bug, Newspaper,
@@ -28,31 +28,29 @@ function useMediaQuery(query: string) {
   return matches;
 }
 
-const STORAGE_KEY = "sidebar_collapsed";
+type SidebarCtx = {
+  collapsed: boolean;
+  setCollapsed: (v: boolean) => void;
+  isMobile: boolean;
+};
 
-export function useSidebar() {
+const SidebarContext = createContext<SidebarCtx | null>(null);
+
+export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [collapsed, setCollapsed] = useState<boolean>(true);
-  const [hydrated, setHydrated] = useState(false);
+  return (
+    <SidebarContext.Provider value={{ collapsed, setCollapsed, isMobile }}>
+      {children}
+    </SidebarContext.Provider>
+  );
+}
 
-  useEffect(() => {
-    const stored = typeof window !== "undefined" ? window.localStorage.getItem(STORAGE_KEY) : null;
-    if (stored !== null) setCollapsed(stored === "true");
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (hydrated) window.localStorage.setItem(STORAGE_KEY, String(collapsed));
-  }, [collapsed, hydrated]);
-
-  // On mobile, force collapsed initially
-  useEffect(() => {
-    if (isMobile) setCollapsed(true);
-    // only run when device class flips
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMobile]);
-
-  return { collapsed, setCollapsed, isMobile };
+export function useSidebar(): SidebarCtx {
+  const ctx = useContext(SidebarContext);
+  if (ctx) return ctx;
+  // Fallback no-op (e.g. on auth pages where provider isn't mounted)
+  return { collapsed: true, setCollapsed: () => {}, isMobile: false };
 }
 
 export function AppSidebar({
@@ -207,7 +205,7 @@ function MenuGroup({
             <Link
               to={it.to}
               onClick={onNav}
-              className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+              className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
                 active
                   ? "bg-[#D8F3DC] text-[#2D6A4F] font-bold"
                   : "text-gray-700 hover:bg-[#F0FFF4]"

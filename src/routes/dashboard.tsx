@@ -60,10 +60,10 @@ function Dashboard() {
           <button
             onClick={() => setCollapsed(false)}
             aria-label="মেনু খুলুন"
-            className="mt-2 flex items-center gap-1.5 text-white/90 hover:text-white transition-colors"
+            className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 ring-1 ring-white/30 text-white transition-colors"
           >
-            <Menu className="h-5 w-5" />
-            <span className="text-sm font-medium">মেনু</span>
+            <Menu className="h-5 w-5" strokeWidth={2.75} />
+            <span className="text-sm font-bold">মেনু</span>
           </button>
         </div>
       </header>
