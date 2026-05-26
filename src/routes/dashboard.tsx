@@ -57,7 +57,10 @@ function Dashboard() {
         </div>
       </header>
 
+      <WeatherAlertBanner district={profile?.district} />
+
       <section className="px-5 -mt-10">
+        {/* If banner shows, the -mt-10 still overlaps gracefully because the banner has its own mt-4 */}
         <div className="grid grid-cols-2 gap-3">
           {cards.map(({ label, icon: Icon, bg, fg, to }) => (
             <Link
