@@ -58,10 +58,10 @@ function FeedPage() {
 
   const { posts, loading, loadingMore, hasMore, error, loadMore, prepend, updateById, refresh } = useFeed(filters, user?.district ?? null);
 
-  // Active users (stories) — distinct recent posters
-  const [activeUsers, setActiveUsers] = useState<{ name: string; district: string | null }[]>([]);
-  useEffect(() => {
-    (async () => {
+  // Active users (stories) — distinct recent posters. Cached, refetched at most every 2 min.
+  const { data: activeUsers = [] } = useQuery({
+    queryKey: ["feed", "active-users"],
+    queryFn: async () => {
       const { data } = await supabase
         .from("posts")
         .select("user_name, user_district, created_at")
@@ -76,24 +76,29 @@ function FeedPage() {
         }
         if (unique.length >= 12) break;
       }
-      setActiveUsers(unique);
-    })();
-  }, [posts.length]);
+      return unique;
+    },
+    staleTime: 2 * 60_000,
+  });
 
-  // Liked posts by current user
-  const [likedSet, setLikedSet] = useState<Set<string>>(new Set());
-  useEffect(() => {
-    if (!user || posts.length === 0) return;
-    const ids = posts.map((p) => p.id);
-    (async () => {
+  // Liked posts by current user — keyed by user + visible post ids
+  const postIdsKey = useMemo(() => posts.map((p) => p.id).join(","), [posts]);
+  const { data: likedArr = [] } = useQuery({
+    queryKey: ["feed", "liked", user?.id ?? null, postIdsKey],
+    queryFn: async () => {
+      if (!user || posts.length === 0) return [] as string[];
+      const ids = posts.map((p) => p.id);
       const { data } = await supabase
         .from("post_likes")
         .select("post_id")
         .eq("user_id", user.id)
         .in("post_id", ids);
-      setLikedSet(new Set(((data as { post_id: string }[]) ?? []).map((r) => r.post_id)));
-    })();
-  }, [posts, user]);
+      return ((data as { post_id: string }[]) ?? []).map((r) => r.post_id);
+    },
+    enabled: !!user && posts.length > 0,
+    staleTime: 60_000,
+  });
+  const likedSet = useMemo(() => new Set(likedArr), [likedArr]);
 
   // Realtime new-post banner
   const [newCount, setNewCount] = useState(0);
