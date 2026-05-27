@@ -238,7 +238,7 @@ function CommunityFeedSection({
         </div>
         <span className="flex-1 text-left text-sm text-gray-500">পোস্ট করুন...</span>
         <div className="h-9 w-9 rounded-full bg-[#F0FFF4] flex items-center justify-center text-[#2D6A4F]">
-          <Camera className="h-4.5 w-4.5" />
+          <Camera className="h-4 w-4" />
         </div>
       </button>
 
