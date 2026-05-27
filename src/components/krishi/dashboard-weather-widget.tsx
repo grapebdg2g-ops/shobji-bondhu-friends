@@ -128,7 +128,7 @@ export function DashboardWeatherWidget({
 
         {/* 5-day */}
         <div className="border-t border-border px-2 py-3">
-          <div className="flex gap-2 overflow-x-auto px-2">
+          <div className="flex gap-2 overflow-x-auto px-2 no-scrollbar">
             {f.daily.slice(0, 5).map((d, i) => {
               const date = new Date(d.date);
               const label = i === 0 ? "আজ" : i === 1 ? "কাল" : BN_DAYS[date.getDay()];
