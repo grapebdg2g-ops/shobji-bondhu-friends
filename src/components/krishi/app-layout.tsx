@@ -1,9 +1,8 @@
 import { useRouterState } from "@tanstack/react-router";
-import { Menu } from "lucide-react";
 import { AppSidebar, useSidebar } from "./app-sidebar";
+import { BottomNav } from "./bottom-nav";
 import { useUser } from "@/contexts/user-context";
 
-// Routes that should NOT render the sidebar (auth / onboarding / landing)
 const HIDDEN_ON = new Set<string>(["/", "/login", "/register", "/offline"]);
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -18,7 +17,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen w-full">
       <AppSidebar collapsed={collapsed} setCollapsed={setCollapsed} isMobile={isMobile} />
-      <div className="flex-1 min-w-0">{children}</div>
+      <div className="flex-1 min-w-0 pb-20 md:pb-0">{children}</div>
+      <BottomNav />
     </div>
   );
 }
