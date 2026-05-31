@@ -70,10 +70,23 @@ function WeatherPage() {
           <span className="text-sm font-medium">পেছনে</span>
         </button>
         <h1 className="text-2xl font-bold text-white">আবহাওয়া</h1>
-        <p className="text-sm text-white/80 mt-0.5">📍 {upazila ? `${upazila}, ${district}` : district}</p>
+        <p className="text-sm text-white/80 mt-0.5">
+          📍 {pos ? "আপনার লাইভ লোকেশন" : upazila ? `${upazila}, ${district}` : district}
+          {pos && <span className="ml-2 text-[10px] font-bold bg-white/20 px-1.5 py-0.5 rounded">GPS</span>}
+        </p>
+        {!pos && geoStatus !== "loading" && geoStatus !== "unavailable" && (
+          <button
+            onClick={requestGeo}
+            className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 ring-1 ring-white/30 text-white text-xs font-semibold"
+          >
+            <Navigation className="h-3.5 w-3.5" />
+            লাইভ লোকেশন ব্যবহার করুন
+          </button>
+        )}
       </header>
 
       <div className="px-5"><NotificationToggle /></div>
+
 
 
       {isLoading && (
