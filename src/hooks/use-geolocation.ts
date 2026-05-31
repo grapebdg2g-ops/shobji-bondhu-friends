@@ -56,13 +56,17 @@ export function useGeolocation(autoRequest = true) {
     if (perms?.query) {
       perms.query({ name: "geolocation" as PermissionName })
         .then((res: PermissionStatus) => {
-          if (res.state === "granted") request();
-          else if (res.state === "prompt") setStatus("prompt");
-          else setStatus("denied");
+          if (res.state === "denied") {
+            setStatus("denied");
+          } else {
+            // 'granted' or 'prompt' — call getCurrentPosition.
+            // Browser shows the prompt automatically when state is 'prompt'.
+            request();
+          }
         })
-        .catch(() => setStatus("prompt"));
+        .catch(() => request());
     } else {
-      setStatus("prompt");
+      request();
     }
   }, [autoRequest, request]);
 
