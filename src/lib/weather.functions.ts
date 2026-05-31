@@ -15,12 +15,17 @@ export const getWeatherForecast = createServerFn({ method: "POST" })
     z.object({
       district: z.string().min(1).max(100),
       upazila: z.string().min(1).max(100).nullable().optional(),
+      lat: z.number().min(-90).max(90).nullable().optional(),
+      lng: z.number().min(-180).max(180).nullable().optional(),
     }).parse(input),
   )
   .handler(async ({ data }): Promise<{ district: string; upazila: string | null; forecast: Forecast | null; error: string | null }> => {
-    const [lat, lng] = getDistrictUpazilaLatLng(data.district, data.upazila ?? null);
+    const [flat, flng] =
+      typeof data.lat === "number" && typeof data.lng === "number"
+        ? [data.lat, data.lng]
+        : getDistrictUpazilaLatLng(data.district, data.upazila ?? null);
     try {
-      const forecast = await fetchForecast(lat, lng);
+      const forecast = await fetchForecast(flat, flng);
       return { district: data.district, upazila: data.upazila ?? null, forecast, error: null };
     } catch (e) {
       const msg = e instanceof Error ? e.message : "weather unavailable";
