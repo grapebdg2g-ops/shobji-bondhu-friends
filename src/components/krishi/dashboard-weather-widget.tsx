@@ -99,10 +99,22 @@ export function DashboardWeatherWidget({
   const c = f.current;
   const today = f.daily[0];
   const advice = farmingAdvice(c, today);
-  const loc = upazila ? `${upazila}, ${district}` : district;
+  const usingGps = !!pos;
+  const loc = usingGps
+    ? "আপনার লোকেশন"
+    : upazila ? `${upazila}, ${district}` : district;
 
   return (
     <section className="px-5 mt-4 space-y-3">
+      {geoStatus === "prompt" && (
+        <button
+          onClick={requestGeo}
+          className="w-full flex items-center justify-center gap-2 rounded-xl bg-primary/10 border border-primary/30 text-primary text-sm font-semibold py-2.5 active:scale-[0.99] transition"
+        >
+          <Navigation className="h-4 w-4" />
+          লাইভ লোকেশন থেকে আবহাওয়া দেখুন
+        </button>
+      )}
       <Link
         to="/weather"
         className="block rounded-2xl bg-card border border-border shadow-[var(--shadow-card)] overflow-hidden active:scale-[0.99] transition"
@@ -112,15 +124,28 @@ export function DashboardWeatherWidget({
           <div className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
             <MapPin className="h-4 w-4 text-primary" />
             <span>{loc}</span>
+            {usingGps && <span className="text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">GPS</span>}
           </div>
-          <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); refetch(); }}
-            aria-label="আপডেট"
-            className="flex items-center gap-1 text-xs text-muted-foreground"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} />
-            আপডেট
-          </button>
+          <div className="flex items-center gap-2">
+            {!usingGps && geoStatus !== "loading" && (
+              <button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); requestGeo(); }}
+                aria-label="লাইভ লোকেশন"
+                className="flex items-center gap-1 text-xs text-primary font-semibold"
+              >
+                <Navigation className="h-3.5 w-3.5" />
+                GPS
+              </button>
+            )}
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); refetch(); }}
+              aria-label="আপডেট"
+              className="flex items-center gap-1 text-xs text-muted-foreground"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} />
+              আপডেট
+            </button>
+          </div>
         </div>
 
         {/* Current */}
