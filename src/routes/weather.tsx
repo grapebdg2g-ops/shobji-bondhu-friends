@@ -47,9 +47,13 @@ function WeatherPage() {
   const upazila = user?.upazila ?? null;
 
   const fetchForecast = useServerFn(getWeatherForecast);
+  const { pos, status: geoStatus, request: requestGeo } = useGeolocation(true);
   const { data, isLoading, error } = useQuery({
-    queryKey: ["weather-full", district, upazila],
-    queryFn: () => fetchForecast({ data: { district, upazila } }),
+    queryKey: ["weather-full", district, upazila, pos?.lat ?? null, pos?.lng ?? null],
+    queryFn: () =>
+      fetchForecast({
+        data: { district, upazila, lat: pos?.lat ?? null, lng: pos?.lng ?? null },
+      }),
     enabled: !!district,
     staleTime: 15 * 60_000,
   });
