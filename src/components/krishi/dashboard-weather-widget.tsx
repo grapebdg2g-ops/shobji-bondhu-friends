@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
-import { MapPin, RefreshCw } from "lucide-react";
+import { MapPin, RefreshCw, Navigation } from "lucide-react";
 import { getWeatherForecast } from "@/lib/weather.functions";
 import { weatherCodeBn } from "@/lib/weather-rules";
+import { useGeolocation } from "@/hooks/use-geolocation";
 import type { Forecast, DailyPoint, CurrentWeather } from "@/lib/weather-types";
 
 const BN_DAYS = ["রবি", "সোম", "মঙ্গল", "বুধ", "বৃহঃ", "শুক্র", "শনি"];
