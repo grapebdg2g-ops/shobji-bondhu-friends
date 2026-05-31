@@ -8,6 +8,8 @@ import { weatherCodeBn } from "@/lib/weather-rules";
 import { useUser } from "@/contexts/user-context";
 import type { Forecast, DailyPoint } from "@/lib/weather-types";
 import { NotificationToggle } from "@/components/krishi/notification-toggle";
+import { useGeolocation } from "@/hooks/use-geolocation";
+import { Navigation } from "lucide-react";
 
 export const Route = createFileRoute("/weather")({
   component: WeatherPage,
