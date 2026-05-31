@@ -56,9 +56,19 @@ export function DashboardWeatherWidget({
   upazila?: string | null;
 }) {
   const fetchForecast = useServerFn(getWeatherForecast);
+  const { pos, status: geoStatus, request: requestGeo } = useGeolocation(true);
+
   const { data, isLoading, isFetching, refetch, error } = useQuery({
-    queryKey: ["weather-dashboard", district, upazila ?? null],
-    queryFn: () => fetchForecast({ data: { district: district!, upazila: upazila ?? null } }),
+    queryKey: ["weather-dashboard", district, upazila ?? null, pos?.lat ?? null, pos?.lng ?? null],
+    queryFn: () =>
+      fetchForecast({
+        data: {
+          district: district!,
+          upazila: upazila ?? null,
+          lat: pos?.lat ?? null,
+          lng: pos?.lng ?? null,
+        },
+      }),
     enabled: !!district,
     staleTime: 30 * 60_000,
     refetchInterval: 30 * 60_000,
