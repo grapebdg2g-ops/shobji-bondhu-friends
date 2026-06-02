@@ -8,16 +8,16 @@ const BASE = "https://api.open-meteo.com/v1/forecast";
 // Key: "lat,lng" rounded. Value: { data, expiresAt } or in-flight promise.
 type CacheEntry = { promise: Promise<Forecast>; expiresAt: number };
 const cache = new Map<string, CacheEntry>();
-const CACHE_TTL_MS = 15 * 60_000; // 15 min
+const CACHE_TTL_MS = 30 * 60_000; // 30 min — reduce 429s from Open-Meteo
 
 export async function fetchForecast(lat: number, lng: number): Promise<Forecast> {
-  const key = `${lat.toFixed(2)},${lng.toFixed(2)}`;
+  // Round to 0.1° (~11km) so nearby GPS readings share cache
+  const key = `${lat.toFixed(1)},${lng.toFixed(1)}`;
   const now = Date.now();
   const hit = cache.get(key);
   if (hit && hit.expiresAt > now) return hit.promise;
 
   const promise = fetchForecastInner(lat, lng).catch((e) => {
-    // Don't cache failures
     if (cache.get(key)?.promise === promise) cache.delete(key);
     throw e;
   });
