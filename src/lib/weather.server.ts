@@ -54,14 +54,14 @@ async function fetchForecastInner(lat: number, lng: number): Promise<Forecast> {
     await new Promise((r) => setTimeout(r, delay));
   }
   if (!res || !res.ok) {
-    console.warn(`[weather] Open-Meteo unavailable (${res?.status ?? lastStatus}); using temporary local fallback`);
-    return buildFallbackForecast(lat, lng);
+    const status = res?.status ?? lastStatus;
+    console.warn(`[weather] Open-Meteo unavailable (${status})`);
+    throw new Error(status === 429 ? "rate-limited" : `upstream ${status}`);
   }
   const data = await res.json() as any;
 
   if (!data?.current || !data?.hourly?.time?.length || !data?.daily?.time?.length) {
-    console.warn("[weather] Open-Meteo returned incomplete data; using temporary local fallback");
-    return buildFallbackForecast(lat, lng);
+    throw new Error("incomplete data");
   }
 
   const c = data.current;
