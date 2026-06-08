@@ -7,6 +7,8 @@ const WEATHER_ENDPOINTS = [
   "https://api.open-meteo.com/v1/gfs",
 ];
 
+const MET_NO_ENDPOINT = "https://api.met.no/weatherapi/locationforecast/2.0/compact";
+
 // In-memory cache to dedupe concurrent requests and reduce 429s.
 // Key: "lat,lng" rounded. Value: { data, expiresAt } or in-flight promise.
 type CacheEntry = { promise: Promise<Forecast>; expiresAt: number };
@@ -38,6 +40,13 @@ async function fetchForecastInner(lat: number, lng: number): Promise<Forecast> {
       lastError = e instanceof Error ? e : new Error("weather unavailable");
       console.warn(`[weather] ${endpoint} failed: ${lastError.message}`);
     }
+  }
+
+  try {
+    return await fetchForecastFromMetNo(lat, lng);
+  } catch (e) {
+    lastError = e instanceof Error ? e : new Error("weather unavailable");
+    console.warn(`[weather] ${MET_NO_ENDPOINT} failed: ${lastError.message}`);
   }
 
   throw lastError ?? new Error("weather unavailable");
