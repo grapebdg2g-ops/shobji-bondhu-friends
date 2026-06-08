@@ -2,7 +2,10 @@
 import type { Forecast, CurrentWeather, HourlyPoint, DailyPoint } from "./weather-types";
 export type { Forecast, CurrentWeather, HourlyPoint, DailyPoint } from "./weather-types";
 
-const BASE = "https://api.open-meteo.com/v1/forecast";
+const WEATHER_ENDPOINTS = [
+  "https://api.open-meteo.com/v1/forecast",
+  "https://api.open-meteo.com/v1/gfs",
+];
 
 // In-memory cache to dedupe concurrent requests and reduce 429s.
 // Key: "lat,lng" rounded. Value: { data, expiresAt } or in-flight promise.
@@ -26,6 +29,21 @@ export async function fetchForecast(lat: number, lng: number): Promise<Forecast>
 }
 
 async function fetchForecastInner(lat: number, lng: number): Promise<Forecast> {
+  let lastError: Error | null = null;
+
+  for (const endpoint of WEATHER_ENDPOINTS) {
+    try {
+      return await fetchForecastFromEndpoint(endpoint, lat, lng);
+    } catch (e) {
+      lastError = e instanceof Error ? e : new Error("weather unavailable");
+      console.warn(`[weather] ${endpoint} failed: ${lastError.message}`);
+    }
+  }
+
+  throw lastError ?? new Error("weather unavailable");
+}
+
+async function fetchForecastFromEndpoint(endpoint: string, lat: number, lng: number): Promise<Forecast> {
   const params = new URLSearchParams({
     latitude: lat.toString(),
     longitude: lng.toString(),
@@ -36,26 +54,26 @@ async function fetchForecastInner(lat: number, lng: number): Promise<Forecast> {
     forecast_days: "7",
   });
 
-  const url = `${BASE}?${params}`;
+  const url = `${endpoint}?${params}`;
   let res: Response | null = null;
   let lastStatus = 0;
-  for (let attempt = 0; attempt < 4; attempt++) {
+  for (let attempt = 0; attempt < 2; attempt++) {
     try {
       res = await fetch(url, { headers: { "accept": "application/json" } });
       if (res.ok) break;
       lastStatus = res.status;
+      if (res.status === 429) break;
       // Retry on 429 / 5xx
-      if (res.status !== 429 && res.status < 500) break;
+      if (res.status < 500) break;
     } catch (e) {
       lastStatus = -1;
     }
-    // Exponential backoff with jitter: 400ms, 900ms, 1900ms
+    // Short backoff with jitter before trying again or falling back to another endpoint
     const delay = 400 * Math.pow(2, attempt) + Math.floor(Math.random() * 200);
     await new Promise((r) => setTimeout(r, delay));
   }
   if (!res || !res.ok) {
     const status = res?.status ?? lastStatus;
-    console.warn(`[weather] Open-Meteo unavailable (${status})`);
     throw new Error(status === 429 ? "rate-limited" : `upstream ${status}`);
   }
   const data = await res.json() as any;
