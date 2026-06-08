@@ -136,6 +136,100 @@ async function fetchForecastFromEndpoint(endpoint: string, lat: number, lng: num
   return { current, hourly, daily, past_rainfall };
 }
 
+async function fetchForecastFromMetNo(lat: number, lng: number): Promise<Forecast> {
+  const params = new URLSearchParams({ lat: lat.toString(), lon: lng.toString() });
+  const res = await fetch(`${MET_NO_ENDPOINT}?${params}`, {
+    headers: {
+      "accept": "application/json",
+      "user-agent": "ShobjiBondhu/1.0 https://shobji-bondhu-friends.lovable.app",
+    },
+  });
+  if (!res.ok) throw new Error(`upstream ${res.status}`);
+  const data = await res.json() as any;
+  const series: any[] = data?.properties?.timeseries ?? [];
+  if (!series.length) throw new Error("incomplete data");
+
+  const nowMs = Date.now();
+  const upcoming = series.filter((x) => new Date(x.time).getTime() >= nowMs - 60 * 60_000);
+  const first = upcoming[0] ?? series[0];
+  const firstInstant = first.data?.instant?.details ?? {};
+  const firstNext = first.data?.next_1_hours ?? first.data?.next_6_hours ?? first.data?.next_12_hours ?? {};
+  const current: CurrentWeather = {
+    temperature: firstInstant.air_temperature ?? 0,
+    weather_code: metSymbolToWmo(firstNext.summary?.symbol_code),
+    precipitation_prob: metPrecipProbability(first),
+    wind_speed: (firstInstant.wind_speed ?? 0) * 3.6,
+    humidity: firstInstant.relative_humidity ?? 0,
+    is_day: isDhakaDay(first.time),
+    time: first.time,
+  };
+
+  const hourly: HourlyPoint[] = upcoming.slice(0, 24).map((x) => {
+    const instant = x.data?.instant?.details ?? {};
+    const next = x.data?.next_1_hours ?? x.data?.next_6_hours ?? x.data?.next_12_hours ?? {};
+    return {
+      time: x.time,
+      temperature: instant.air_temperature ?? 0,
+      precipitation_probability: metPrecipProbability(x),
+      weather_code: metSymbolToWmo(next.summary?.symbol_code),
+    };
+  });
+
+  const byDate = new Map<string, any[]>();
+  for (const x of upcoming) {
+    const date = new Date(x.time).toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
+    if (!byDate.has(date)) byDate.set(date, []);
+    byDate.get(date)!.push(x);
+  }
+  const daily: DailyPoint[] = Array.from(byDate.entries()).slice(0, 7).map(([date, rows]) => {
+    const temps = rows.map((x) => x.data?.instant?.details?.air_temperature).filter((n) => typeof n === "number");
+    const probs = rows.map(metPrecipProbability);
+    const precip = rows.reduce((sum, x) => {
+      const next = x.data?.next_1_hours ?? x.data?.next_6_hours ?? x.data?.next_12_hours ?? {};
+      return sum + (next.details?.precipitation_amount ?? 0);
+    }, 0);
+    const symbol = rows.find((x) => x.data?.next_1_hours?.summary?.symbol_code)?.data?.next_1_hours?.summary?.symbol_code
+      ?? rows[0]?.data?.next_6_hours?.summary?.symbol_code;
+    return {
+      date,
+      temp_max: temps.length ? Math.max(...temps) : current.temperature,
+      temp_min: temps.length ? Math.min(...temps) : current.temperature,
+      precipitation_sum: Number(precip.toFixed(1)),
+      precipitation_probability_max: probs.length ? Math.max(...probs) : 0,
+      weather_code: metSymbolToWmo(symbol),
+    };
+  });
+
+  return { current, hourly, daily, past_rainfall: [] };
+}
+
+function metPrecipProbability(point: any): number {
+  const next = point.data?.next_1_hours ?? point.data?.next_6_hours ?? point.data?.next_12_hours ?? {};
+  const details = next.details ?? {};
+  if (typeof details.probability_of_precipitation === "number") return Math.round(details.probability_of_precipitation);
+  const amount = details.precipitation_amount ?? 0;
+  return amount > 0 ? Math.min(95, Math.round(25 + amount * 18)) : 0;
+}
+
+function metSymbolToWmo(symbol = ""): number {
+  const s = symbol.toLowerCase();
+  if (s.includes("thunder")) return 95;
+  if (s.includes("snow") || s.includes("sleet")) return 71;
+  if (s.includes("heavyrain")) return 65;
+  if (s.includes("rainshowers")) return 80;
+  if (s.includes("rain")) return 61;
+  if (s.includes("fog")) return 45;
+  if (s.includes("cloudy")) return s.includes("partly") ? 2 : 3;
+  if (s.includes("fair")) return 1;
+  if (s.includes("clearsky")) return 0;
+  return 2;
+}
+
+function isDhakaDay(isoTime: string): boolean {
+  const hour = Number(new Intl.DateTimeFormat("en-US", { hour: "numeric", hour12: false, timeZone: "Asia/Dhaka" }).format(new Date(isoTime)));
+  return hour >= 6 && hour < 18;
+}
+
 function buildFallbackForecast(lat: number, lng: number): Forecast {
   const hour = Number(new Intl.DateTimeFormat("en-US", { hour: "numeric", hour12: false, timeZone: "Asia/Dhaka" }).format(new Date()));
   const isDay = hour >= 6 && hour < 18;
