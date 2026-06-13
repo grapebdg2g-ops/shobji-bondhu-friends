@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WeatherRouteImport } from './routes/weather'
+import { Route as VegetableGuideRouteImport } from './routes/vegetable-guide'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PricesRouteImport } from './routes/prices'
 import { Route as OfflineRouteImport } from './routes/offline'
@@ -23,9 +24,15 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfileIndexRouteImport } from './routes/profile.index'
+import { Route as AiBondhuIndexRouteImport } from './routes/ai-bondhu.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as UUserIdRouteImport } from './routes/u.$userId'
 import { Route as ProfileDiseaseHistoryRouteImport } from './routes/profile.disease-history'
+import { Route as AiBondhuPesticideRouteImport } from './routes/ai-bondhu.pesticide'
+import { Route as AiBondhuDiseaseRouteImport } from './routes/ai-bondhu.disease'
+import { Route as AiBondhuChatRouteImport } from './routes/ai-bondhu.chat'
+import { Route as AiBondhuCalendarRouteImport } from './routes/ai-bondhu.calendar'
+import { Route as AiBondhuCalculatorRouteImport } from './routes/ai-bondhu.calculator'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminProRouteImport } from './routes/admin.pro'
@@ -42,6 +49,11 @@ import { Route as ApiPublicHooksSendScheduledBroadcastsRouteImport } from './rou
 const WeatherRoute = WeatherRouteImport.update({
   id: '/weather',
   path: '/weather',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VegetableGuideRoute = VegetableGuideRouteImport.update({
+  id: '/vegetable-guide',
+  path: '/vegetable-guide',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -109,6 +121,11 @@ const ProfileIndexRoute = ProfileIndexRouteImport.update({
   path: '/profile/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AiBondhuIndexRoute = AiBondhuIndexRouteImport.update({
+  id: '/ai-bondhu/',
+  path: '/ai-bondhu/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -122,6 +139,31 @@ const UUserIdRoute = UUserIdRouteImport.update({
 const ProfileDiseaseHistoryRoute = ProfileDiseaseHistoryRouteImport.update({
   id: '/profile/disease-history',
   path: '/profile/disease-history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiBondhuPesticideRoute = AiBondhuPesticideRouteImport.update({
+  id: '/ai-bondhu/pesticide',
+  path: '/ai-bondhu/pesticide',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiBondhuDiseaseRoute = AiBondhuDiseaseRouteImport.update({
+  id: '/ai-bondhu/disease',
+  path: '/ai-bondhu/disease',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiBondhuChatRoute = AiBondhuChatRouteImport.update({
+  id: '/ai-bondhu/chat',
+  path: '/ai-bondhu/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiBondhuCalendarRoute = AiBondhuCalendarRouteImport.update({
+  id: '/ai-bondhu/calendar',
+  path: '/ai-bondhu/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiBondhuCalculatorRoute = AiBondhuCalculatorRouteImport.update({
+  id: '/ai-bondhu/calculator',
+  path: '/ai-bondhu/calculator',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
@@ -200,6 +242,7 @@ export interface FileRoutesByFullPath {
   '/offline': typeof OfflineRoute
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
+  '/vegetable-guide': typeof VegetableGuideRoute
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
@@ -211,9 +254,15 @@ export interface FileRoutesByFullPath {
   '/admin/pro': typeof AdminProRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/ai-bondhu/calculator': typeof AiBondhuCalculatorRoute
+  '/ai-bondhu/calendar': typeof AiBondhuCalendarRoute
+  '/ai-bondhu/chat': typeof AiBondhuChatRoute
+  '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
+  '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
   '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/ai-bondhu/': typeof AiBondhuIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -230,6 +279,7 @@ export interface FileRoutesByTo {
   '/offline': typeof OfflineRoute
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
+  '/vegetable-guide': typeof VegetableGuideRoute
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
@@ -241,9 +291,15 @@ export interface FileRoutesByTo {
   '/admin/pro': typeof AdminProRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/ai-bondhu/calculator': typeof AiBondhuCalculatorRoute
+  '/ai-bondhu/calendar': typeof AiBondhuCalendarRoute
+  '/ai-bondhu/chat': typeof AiBondhuChatRoute
+  '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
+  '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
   '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
   '/admin': typeof AdminIndexRoute
+  '/ai-bondhu': typeof AiBondhuIndexRoute
   '/profile': typeof ProfileIndexRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -262,6 +318,7 @@ export interface FileRoutesById {
   '/offline': typeof OfflineRoute
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
+  '/vegetable-guide': typeof VegetableGuideRoute
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
@@ -273,9 +330,15 @@ export interface FileRoutesById {
   '/admin/pro': typeof AdminProRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/ai-bondhu/calculator': typeof AiBondhuCalculatorRoute
+  '/ai-bondhu/calendar': typeof AiBondhuCalendarRoute
+  '/ai-bondhu/chat': typeof AiBondhuChatRoute
+  '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
+  '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
   '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/ai-bondhu/': typeof AiBondhuIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -295,6 +358,7 @@ export interface FileRouteTypes {
     | '/offline'
     | '/prices'
     | '/register'
+    | '/vegetable-guide'
     | '/weather'
     | '/admin/analytics'
     | '/admin/audit'
@@ -306,9 +370,15 @@ export interface FileRouteTypes {
     | '/admin/pro'
     | '/admin/reports'
     | '/admin/users'
+    | '/ai-bondhu/calculator'
+    | '/ai-bondhu/calendar'
+    | '/ai-bondhu/chat'
+    | '/ai-bondhu/disease'
+    | '/ai-bondhu/pesticide'
     | '/profile/disease-history'
     | '/u/$userId'
     | '/admin/'
+    | '/ai-bondhu/'
     | '/profile/'
     | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
@@ -325,6 +395,7 @@ export interface FileRouteTypes {
     | '/offline'
     | '/prices'
     | '/register'
+    | '/vegetable-guide'
     | '/weather'
     | '/admin/analytics'
     | '/admin/audit'
@@ -336,9 +407,15 @@ export interface FileRouteTypes {
     | '/admin/pro'
     | '/admin/reports'
     | '/admin/users'
+    | '/ai-bondhu/calculator'
+    | '/ai-bondhu/calendar'
+    | '/ai-bondhu/chat'
+    | '/ai-bondhu/disease'
+    | '/ai-bondhu/pesticide'
     | '/profile/disease-history'
     | '/u/$userId'
     | '/admin'
+    | '/ai-bondhu'
     | '/profile'
     | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
@@ -356,6 +433,7 @@ export interface FileRouteTypes {
     | '/offline'
     | '/prices'
     | '/register'
+    | '/vegetable-guide'
     | '/weather'
     | '/admin/analytics'
     | '/admin/audit'
@@ -367,9 +445,15 @@ export interface FileRouteTypes {
     | '/admin/pro'
     | '/admin/reports'
     | '/admin/users'
+    | '/ai-bondhu/calculator'
+    | '/ai-bondhu/calendar'
+    | '/ai-bondhu/chat'
+    | '/ai-bondhu/disease'
+    | '/ai-bondhu/pesticide'
     | '/profile/disease-history'
     | '/u/$userId'
     | '/admin/'
+    | '/ai-bondhu/'
     | '/profile/'
     | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
@@ -388,9 +472,16 @@ export interface RootRouteChildren {
   OfflineRoute: typeof OfflineRoute
   PricesRoute: typeof PricesRoute
   RegisterRoute: typeof RegisterRoute
+  VegetableGuideRoute: typeof VegetableGuideRoute
   WeatherRoute: typeof WeatherRoute
+  AiBondhuCalculatorRoute: typeof AiBondhuCalculatorRoute
+  AiBondhuCalendarRoute: typeof AiBondhuCalendarRoute
+  AiBondhuChatRoute: typeof AiBondhuChatRoute
+  AiBondhuDiseaseRoute: typeof AiBondhuDiseaseRoute
+  AiBondhuPesticideRoute: typeof AiBondhuPesticideRoute
   ProfileDiseaseHistoryRoute: typeof ProfileDiseaseHistoryRoute
   UUserIdRoute: typeof UUserIdRoute
+  AiBondhuIndexRoute: typeof AiBondhuIndexRoute
   ProfileIndexRoute: typeof ProfileIndexRoute
   ApiPublicHooksSendScheduledBroadcastsRoute: typeof ApiPublicHooksSendScheduledBroadcastsRoute
   ApiPublicHooksWeatherAlertsRoute: typeof ApiPublicHooksWeatherAlertsRoute
@@ -403,6 +494,13 @@ declare module '@tanstack/react-router' {
       path: '/weather'
       fullPath: '/weather'
       preLoaderRoute: typeof WeatherRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vegetable-guide': {
+      id: '/vegetable-guide'
+      path: '/vegetable-guide'
+      fullPath: '/vegetable-guide'
+      preLoaderRoute: typeof VegetableGuideRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -496,6 +594,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ai-bondhu/': {
+      id: '/ai-bondhu/'
+      path: '/ai-bondhu'
+      fullPath: '/ai-bondhu/'
+      preLoaderRoute: typeof AiBondhuIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/': {
       id: '/admin/'
       path: '/'
@@ -515,6 +620,41 @@ declare module '@tanstack/react-router' {
       path: '/profile/disease-history'
       fullPath: '/profile/disease-history'
       preLoaderRoute: typeof ProfileDiseaseHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-bondhu/pesticide': {
+      id: '/ai-bondhu/pesticide'
+      path: '/ai-bondhu/pesticide'
+      fullPath: '/ai-bondhu/pesticide'
+      preLoaderRoute: typeof AiBondhuPesticideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-bondhu/disease': {
+      id: '/ai-bondhu/disease'
+      path: '/ai-bondhu/disease'
+      fullPath: '/ai-bondhu/disease'
+      preLoaderRoute: typeof AiBondhuDiseaseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-bondhu/chat': {
+      id: '/ai-bondhu/chat'
+      path: '/ai-bondhu/chat'
+      fullPath: '/ai-bondhu/chat'
+      preLoaderRoute: typeof AiBondhuChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-bondhu/calendar': {
+      id: '/ai-bondhu/calendar'
+      path: '/ai-bondhu/calendar'
+      fullPath: '/ai-bondhu/calendar'
+      preLoaderRoute: typeof AiBondhuCalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-bondhu/calculator': {
+      id: '/ai-bondhu/calculator'
+      path: '/ai-bondhu/calculator'
+      fullPath: '/ai-bondhu/calculator'
+      preLoaderRoute: typeof AiBondhuCalculatorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/users': {
@@ -647,9 +787,16 @@ const rootRouteChildren: RootRouteChildren = {
   OfflineRoute: OfflineRoute,
   PricesRoute: PricesRoute,
   RegisterRoute: RegisterRoute,
+  VegetableGuideRoute: VegetableGuideRoute,
   WeatherRoute: WeatherRoute,
+  AiBondhuCalculatorRoute: AiBondhuCalculatorRoute,
+  AiBondhuCalendarRoute: AiBondhuCalendarRoute,
+  AiBondhuChatRoute: AiBondhuChatRoute,
+  AiBondhuDiseaseRoute: AiBondhuDiseaseRoute,
+  AiBondhuPesticideRoute: AiBondhuPesticideRoute,
   ProfileDiseaseHistoryRoute: ProfileDiseaseHistoryRoute,
   UUserIdRoute: UUserIdRoute,
+  AiBondhuIndexRoute: AiBondhuIndexRoute,
   ProfileIndexRoute: ProfileIndexRoute,
   ApiPublicHooksSendScheduledBroadcastsRoute:
     ApiPublicHooksSendScheduledBroadcastsRoute,
@@ -658,13 +805,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
