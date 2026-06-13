@@ -102,7 +102,7 @@ function Dashboard() {
 
 const AI_CARDS = [
   {
-    href: "/ai-bondhu/disease-detection",
+    href: "/ai-bondhu/disease",
     Icon: Stethoscope,
     title: "গাছের ডাক্তার",
     desc: "ফসলের ছবি তুলে রোগ শনাক্ত করুন",
