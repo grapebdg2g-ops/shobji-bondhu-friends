@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WeatherRouteImport } from './routes/weather'
 import { Route as RegisterRouteImport } from './routes/register'
-import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PricesRouteImport } from './routes/prices'
 import { Route as OfflineRouteImport } from './routes/offline'
 import { Route as NotificationsRouteImport } from './routes/notifications'
@@ -23,8 +22,10 @@ import { Route as DiseaseDetectionRouteImport } from './routes/disease-detection
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProfileIndexRouteImport } from './routes/profile.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as UUserIdRouteImport } from './routes/u.$userId'
+import { Route as ProfileDiseaseHistoryRouteImport } from './routes/profile.disease-history'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminProRouteImport } from './routes/admin.pro'
@@ -46,11 +47,6 @@ const WeatherRoute = WeatherRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricesRoute = PricesRouteImport.update({
@@ -108,6 +104,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileIndexRoute = ProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -116,6 +117,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const UUserIdRoute = UUserIdRouteImport.update({
   id: '/u/$userId',
   path: '/u/$userId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileDiseaseHistoryRoute = ProfileDiseaseHistoryRouteImport.update({
+  id: '/profile/disease-history',
+  path: '/profile/disease-history',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
@@ -193,7 +199,6 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
   '/prices': typeof PricesRoute
-  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
@@ -206,8 +211,10 @@ export interface FileRoutesByFullPath {
   '/admin/pro': typeof AdminProRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/profile/': typeof ProfileIndexRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
 }
@@ -222,7 +229,6 @@ export interface FileRoutesByTo {
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
   '/prices': typeof PricesRoute
-  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
@@ -235,8 +241,10 @@ export interface FileRoutesByTo {
   '/admin/pro': typeof AdminProRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
   '/admin': typeof AdminIndexRoute
+  '/profile': typeof ProfileIndexRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
 }
@@ -253,7 +261,6 @@ export interface FileRoutesById {
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
   '/prices': typeof PricesRoute
-  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
@@ -266,8 +273,10 @@ export interface FileRoutesById {
   '/admin/pro': typeof AdminProRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/profile/': typeof ProfileIndexRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
 }
@@ -285,7 +294,6 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/offline'
     | '/prices'
-    | '/profile'
     | '/register'
     | '/weather'
     | '/admin/analytics'
@@ -298,8 +306,10 @@ export interface FileRouteTypes {
     | '/admin/pro'
     | '/admin/reports'
     | '/admin/users'
+    | '/profile/disease-history'
     | '/u/$userId'
     | '/admin/'
+    | '/profile/'
     | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
   fileRoutesByTo: FileRoutesByTo
@@ -314,7 +324,6 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/offline'
     | '/prices'
-    | '/profile'
     | '/register'
     | '/weather'
     | '/admin/analytics'
@@ -327,8 +336,10 @@ export interface FileRouteTypes {
     | '/admin/pro'
     | '/admin/reports'
     | '/admin/users'
+    | '/profile/disease-history'
     | '/u/$userId'
     | '/admin'
+    | '/profile'
     | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
   id:
@@ -344,7 +355,6 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/offline'
     | '/prices'
-    | '/profile'
     | '/register'
     | '/weather'
     | '/admin/analytics'
@@ -357,8 +367,10 @@ export interface FileRouteTypes {
     | '/admin/pro'
     | '/admin/reports'
     | '/admin/users'
+    | '/profile/disease-history'
     | '/u/$userId'
     | '/admin/'
+    | '/profile/'
     | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
   fileRoutesById: FileRoutesById
@@ -375,10 +387,11 @@ export interface RootRouteChildren {
   NotificationsRoute: typeof NotificationsRoute
   OfflineRoute: typeof OfflineRoute
   PricesRoute: typeof PricesRoute
-  ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
   WeatherRoute: typeof WeatherRoute
+  ProfileDiseaseHistoryRoute: typeof ProfileDiseaseHistoryRoute
   UUserIdRoute: typeof UUserIdRoute
+  ProfileIndexRoute: typeof ProfileIndexRoute
   ApiPublicHooksSendScheduledBroadcastsRoute: typeof ApiPublicHooksSendScheduledBroadcastsRoute
   ApiPublicHooksWeatherAlertsRoute: typeof ApiPublicHooksWeatherAlertsRoute
 }
@@ -397,13 +410,6 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/prices': {
@@ -483,6 +489,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile/': {
+      id: '/profile/'
+      path: '/profile'
+      fullPath: '/profile/'
+      preLoaderRoute: typeof ProfileIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/': {
       id: '/admin/'
       path: '/'
@@ -495,6 +508,13 @@ declare module '@tanstack/react-router' {
       path: '/u/$userId'
       fullPath: '/u/$userId'
       preLoaderRoute: typeof UUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile/disease-history': {
+      id: '/profile/disease-history'
+      path: '/profile/disease-history'
+      fullPath: '/profile/disease-history'
+      preLoaderRoute: typeof ProfileDiseaseHistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/users': {
@@ -626,10 +646,11 @@ const rootRouteChildren: RootRouteChildren = {
   NotificationsRoute: NotificationsRoute,
   OfflineRoute: OfflineRoute,
   PricesRoute: PricesRoute,
-  ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
   WeatherRoute: WeatherRoute,
+  ProfileDiseaseHistoryRoute: ProfileDiseaseHistoryRoute,
   UUserIdRoute: UUserIdRoute,
+  ProfileIndexRoute: ProfileIndexRoute,
   ApiPublicHooksSendScheduledBroadcastsRoute:
     ApiPublicHooksSendScheduledBroadcastsRoute,
   ApiPublicHooksWeatherAlertsRoute: ApiPublicHooksWeatherAlertsRoute,
