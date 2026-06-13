@@ -21,7 +21,7 @@ import { Switch } from "@/components/ui/switch";
 import { DISTRICTS, getUpazilas } from "@/lib/bd-data";
 import { sanitize, sanitizeOptional } from "@/lib/sanitize";
 
-export const Route = createFileRoute("/profile")({
+export const Route = createFileRoute("/profile/")({
   component: ProfilePage,
   head: () => ({
     meta: [

@@ -25,6 +25,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as UUserIdRouteImport } from './routes/u.$userId'
+import { Route as ProfileDiseaseHistoryRouteImport } from './routes/profile.disease-history'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminProRouteImport } from './routes/admin.pro'
@@ -118,6 +119,11 @@ const UUserIdRoute = UUserIdRouteImport.update({
   path: '/u/$userId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileDiseaseHistoryRoute = ProfileDiseaseHistoryRouteImport.update({
+  id: '/disease-history',
+  path: '/disease-history',
+  getParentRoute: () => ProfileRoute,
+} as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -193,7 +199,7 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
   '/prices': typeof PricesRoute
-  '/profile': typeof ProfileRoute
+  '/profile': typeof ProfileRouteWithChildren
   '/register': typeof RegisterRoute
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
@@ -206,6 +212,7 @@ export interface FileRoutesByFullPath {
   '/admin/pro': typeof AdminProRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
@@ -222,7 +229,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
   '/prices': typeof PricesRoute
-  '/profile': typeof ProfileRoute
+  '/profile': typeof ProfileRouteWithChildren
   '/register': typeof RegisterRoute
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
@@ -235,6 +242,7 @@ export interface FileRoutesByTo {
   '/admin/pro': typeof AdminProRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
   '/admin': typeof AdminIndexRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
@@ -253,7 +261,7 @@ export interface FileRoutesById {
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
   '/prices': typeof PricesRoute
-  '/profile': typeof ProfileRoute
+  '/profile': typeof ProfileRouteWithChildren
   '/register': typeof RegisterRoute
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
@@ -266,6 +274,7 @@ export interface FileRoutesById {
   '/admin/pro': typeof AdminProRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
@@ -298,6 +307,7 @@ export interface FileRouteTypes {
     | '/admin/pro'
     | '/admin/reports'
     | '/admin/users'
+    | '/profile/disease-history'
     | '/u/$userId'
     | '/admin/'
     | '/api/public/hooks/send-scheduled-broadcasts'
@@ -327,6 +337,7 @@ export interface FileRouteTypes {
     | '/admin/pro'
     | '/admin/reports'
     | '/admin/users'
+    | '/profile/disease-history'
     | '/u/$userId'
     | '/admin'
     | '/api/public/hooks/send-scheduled-broadcasts'
@@ -357,6 +368,7 @@ export interface FileRouteTypes {
     | '/admin/pro'
     | '/admin/reports'
     | '/admin/users'
+    | '/profile/disease-history'
     | '/u/$userId'
     | '/admin/'
     | '/api/public/hooks/send-scheduled-broadcasts'
@@ -375,7 +387,7 @@ export interface RootRouteChildren {
   NotificationsRoute: typeof NotificationsRoute
   OfflineRoute: typeof OfflineRoute
   PricesRoute: typeof PricesRoute
-  ProfileRoute: typeof ProfileRoute
+  ProfileRoute: typeof ProfileRouteWithChildren
   RegisterRoute: typeof RegisterRoute
   WeatherRoute: typeof WeatherRoute
   UUserIdRoute: typeof UUserIdRoute
@@ -497,6 +509,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UUserIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile/disease-history': {
+      id: '/profile/disease-history'
+      path: '/disease-history'
+      fullPath: '/profile/disease-history'
+      preLoaderRoute: typeof ProfileDiseaseHistoryRouteImport
+      parentRoute: typeof ProfileRoute
+    }
     '/admin/users': {
       id: '/admin/users'
       path: '/users'
@@ -614,6 +633,17 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface ProfileRouteChildren {
+  ProfileDiseaseHistoryRoute: typeof ProfileDiseaseHistoryRoute
+}
+
+const ProfileRouteChildren: ProfileRouteChildren = {
+  ProfileDiseaseHistoryRoute: ProfileDiseaseHistoryRoute,
+}
+
+const ProfileRouteWithChildren =
+  ProfileRoute._addFileChildren(ProfileRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
@@ -626,7 +656,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotificationsRoute: NotificationsRoute,
   OfflineRoute: OfflineRoute,
   PricesRoute: PricesRoute,
-  ProfileRoute: ProfileRoute,
+  ProfileRoute: ProfileRouteWithChildren,
   RegisterRoute: RegisterRoute,
   WeatherRoute: WeatherRoute,
   UUserIdRoute: UUserIdRoute,
@@ -637,13 +667,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
