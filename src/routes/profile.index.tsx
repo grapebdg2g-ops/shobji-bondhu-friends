@@ -7,6 +7,7 @@ import {
   Bell, Globe, Info, Star, HelpCircle, ChevronRight, MapPin, Plus, BellOff,
 } from "lucide-react";
 import { MutedUsersSheet } from "@/components/krishi/muted-users-sheet";
+import { DiseaseHistoryView } from "@/components/krishi/disease-history-view";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/user-context";
 import { BottomSheet } from "@/components/krishi/bottom-sheet";
@@ -65,7 +66,7 @@ function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
-  const [tab, setTab] = useState<"posts" | "exchanges" | "prices">("posts");
+  const [tab, setTab] = useState<"posts" | "exchanges" | "prices" | "diseases">("posts");
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -233,16 +234,17 @@ function ProfilePage() {
       </section>
 
       <section className="px-4 mt-6">
-        <div className="flex gap-1 bg-muted rounded-xl p-1">
+        <div className="flex gap-1 bg-muted rounded-xl p-1 overflow-x-auto">
           {([
             ["posts", "আমার পোস্ট"],
-            ["exchanges", "আমার বিনিময়"],
-            ["prices", "দাম আপডেট"],
+            ["exchanges", "বিনিময়"],
+            ["prices", "দাম"],
+            ["diseases", "রোগ ইতিহাস"],
           ] as const).map(([k, label]) => (
             <button
               key={k}
               onClick={() => setTab(k)}
-              className={`flex-1 h-9 rounded-lg text-xs font-bold transition ${tab === k ? "bg-card text-primary shadow-sm" : "text-muted-foreground"}`}
+              className={`flex-1 min-w-fit px-2 h-9 rounded-lg text-xs font-bold transition whitespace-nowrap ${tab === k ? "bg-card text-primary shadow-sm" : "text-muted-foreground"}`}
             >
               {label}
             </button>
@@ -268,6 +270,7 @@ function ProfilePage() {
               onChange={(delta) => setFull((p) => (p ? { ...p, prices_count: Math.max(0, p.prices_count + delta) } : p))}
             />
           )}
+          {tab === "diseases" && <DiseaseHistoryView userId={full.id} />}
         </div>
       </section>
 
