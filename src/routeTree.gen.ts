@@ -26,6 +26,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfileIndexRouteImport } from './routes/profile.index'
 import { Route as AiBondhuIndexRouteImport } from './routes/ai-bondhu.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as VegetableGuideSlugRouteImport } from './routes/vegetable-guide.$slug'
 import { Route as UUserIdRouteImport } from './routes/u.$userId'
 import { Route as ProfileDiseaseHistoryRouteImport } from './routes/profile.disease-history'
 import { Route as AiBondhuPesticideRouteImport } from './routes/ai-bondhu.pesticide'
@@ -130,6 +131,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const VegetableGuideSlugRoute = VegetableGuideSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => VegetableGuideRoute,
 } as any)
 const UUserIdRoute = UUserIdRouteImport.update({
   id: '/u/$userId',
@@ -242,7 +248,7 @@ export interface FileRoutesByFullPath {
   '/offline': typeof OfflineRoute
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
-  '/vegetable-guide': typeof VegetableGuideRoute
+  '/vegetable-guide': typeof VegetableGuideRouteWithChildren
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
@@ -261,6 +267,7 @@ export interface FileRoutesByFullPath {
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
   '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
+  '/vegetable-guide/$slug': typeof VegetableGuideSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/ai-bondhu/': typeof AiBondhuIndexRoute
   '/profile/': typeof ProfileIndexRoute
@@ -279,7 +286,7 @@ export interface FileRoutesByTo {
   '/offline': typeof OfflineRoute
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
-  '/vegetable-guide': typeof VegetableGuideRoute
+  '/vegetable-guide': typeof VegetableGuideRouteWithChildren
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
@@ -298,6 +305,7 @@ export interface FileRoutesByTo {
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
   '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
+  '/vegetable-guide/$slug': typeof VegetableGuideSlugRoute
   '/admin': typeof AdminIndexRoute
   '/ai-bondhu': typeof AiBondhuIndexRoute
   '/profile': typeof ProfileIndexRoute
@@ -318,7 +326,7 @@ export interface FileRoutesById {
   '/offline': typeof OfflineRoute
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
-  '/vegetable-guide': typeof VegetableGuideRoute
+  '/vegetable-guide': typeof VegetableGuideRouteWithChildren
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
@@ -337,6 +345,7 @@ export interface FileRoutesById {
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
   '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
+  '/vegetable-guide/$slug': typeof VegetableGuideSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/ai-bondhu/': typeof AiBondhuIndexRoute
   '/profile/': typeof ProfileIndexRoute
@@ -377,6 +386,7 @@ export interface FileRouteTypes {
     | '/ai-bondhu/pesticide'
     | '/profile/disease-history'
     | '/u/$userId'
+    | '/vegetable-guide/$slug'
     | '/admin/'
     | '/ai-bondhu/'
     | '/profile/'
@@ -414,6 +424,7 @@ export interface FileRouteTypes {
     | '/ai-bondhu/pesticide'
     | '/profile/disease-history'
     | '/u/$userId'
+    | '/vegetable-guide/$slug'
     | '/admin'
     | '/ai-bondhu'
     | '/profile'
@@ -452,6 +463,7 @@ export interface FileRouteTypes {
     | '/ai-bondhu/pesticide'
     | '/profile/disease-history'
     | '/u/$userId'
+    | '/vegetable-guide/$slug'
     | '/admin/'
     | '/ai-bondhu/'
     | '/profile/'
@@ -472,7 +484,7 @@ export interface RootRouteChildren {
   OfflineRoute: typeof OfflineRoute
   PricesRoute: typeof PricesRoute
   RegisterRoute: typeof RegisterRoute
-  VegetableGuideRoute: typeof VegetableGuideRoute
+  VegetableGuideRoute: typeof VegetableGuideRouteWithChildren
   WeatherRoute: typeof WeatherRoute
   AiBondhuCalculatorRoute: typeof AiBondhuCalculatorRoute
   AiBondhuCalendarRoute: typeof AiBondhuCalendarRoute
@@ -607,6 +619,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/vegetable-guide/$slug': {
+      id: '/vegetable-guide/$slug'
+      path: '/$slug'
+      fullPath: '/vegetable-guide/$slug'
+      preLoaderRoute: typeof VegetableGuideSlugRouteImport
+      parentRoute: typeof VegetableGuideRoute
     }
     '/u/$userId': {
       id: '/u/$userId'
@@ -774,6 +793,18 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface VegetableGuideRouteChildren {
+  VegetableGuideSlugRoute: typeof VegetableGuideSlugRoute
+}
+
+const VegetableGuideRouteChildren: VegetableGuideRouteChildren = {
+  VegetableGuideSlugRoute: VegetableGuideSlugRoute,
+}
+
+const VegetableGuideRouteWithChildren = VegetableGuideRoute._addFileChildren(
+  VegetableGuideRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
@@ -787,7 +818,7 @@ const rootRouteChildren: RootRouteChildren = {
   OfflineRoute: OfflineRoute,
   PricesRoute: PricesRoute,
   RegisterRoute: RegisterRoute,
-  VegetableGuideRoute: VegetableGuideRoute,
+  VegetableGuideRoute: VegetableGuideRouteWithChildren,
   WeatherRoute: WeatherRoute,
   AiBondhuCalculatorRoute: AiBondhuCalculatorRoute,
   AiBondhuCalendarRoute: AiBondhuCalendarRoute,
