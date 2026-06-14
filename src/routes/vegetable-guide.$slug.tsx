@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, notFound } from "@tanstack/react-router";
 import { ArrowLeft, Leaf, Droplets, Bug, Sprout, Package, TrendingUp, Calculator, Stethoscope, BarChart3 } from "lucide-react";
-import { getVegetableBySlug } from "@/data/vegetable-guide";
+import { getVegetableBySlug, type Vegetable } from "@/data/vegetable-guide";
 
 export const Route = createFileRoute("/vegetable-guide/$slug")({
   component: VegetableDetailPage,
@@ -34,7 +34,7 @@ export const Route = createFileRoute("/vegetable-guide/$slug")({
 });
 
 function VegetableDetailPage() {
-  const { veg } = Route.useLoaderData();
+  const { veg } = Route.useLoaderData() as { veg: Vegetable };
   const navigate = useNavigate();
 
   return (
