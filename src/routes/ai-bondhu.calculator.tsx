@@ -213,7 +213,7 @@ function StepResult({
         area_unit: unit,
         area_shotok: shotok,
         soil_type: soilLabel,
-        result_json: result as unknown as Record<string, unknown>,
+        result_json: JSON.parse(JSON.stringify(result)),
       });
       if (error) throw error;
       toast.success("হিসাব সংরক্ষণ হয়েছে");
