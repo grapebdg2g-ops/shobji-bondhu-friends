@@ -617,6 +617,42 @@ export type Database = {
           },
         ]
       }
+      saved_calculations: {
+        Row: {
+          area_shotok: number
+          area_unit: string
+          area_value: number
+          created_at: string
+          crop_type: string
+          id: string
+          result_json: Json
+          soil_type: string
+          user_id: string
+        }
+        Insert: {
+          area_shotok: number
+          area_unit: string
+          area_value: number
+          created_at?: string
+          crop_type: string
+          id?: string
+          result_json: Json
+          soil_type: string
+          user_id: string
+        }
+        Update: {
+          area_shotok?: number
+          area_unit?: string
+          area_value?: number
+          created_at?: string
+          crop_type?: string
+          id?: string
+          result_json?: Json
+          soil_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_reports: {
         Row: {
           content_id: string | null
