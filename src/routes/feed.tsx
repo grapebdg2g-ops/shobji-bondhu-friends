@@ -1,8 +1,10 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, SlidersHorizontal, ThumbsUp, MessageCircle, Share2, Plus, HelpCircle, Star, CloudRain, ChevronDown, ArrowUp } from "lucide-react";
+import { ArrowLeft, SlidersHorizontal, ThumbsUp, MessageCircle, Share2, Plus, HelpCircle, Star, CloudRain, ChevronDown, ArrowUp, CheckCircle2, Reply, Trophy } from "lucide-react";
 import { toast } from "sonner";
+import { z } from "zod";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/user-context";
 import { useFeed, type FeedFilters, type Post, type PostType } from "@/hooks/use-feed";
@@ -17,7 +19,12 @@ import { EmptyState } from "@/components/krishi/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LazyImage } from "@/components/krishi/lazy-image";
 
+const feedSearchSchema = z.object({
+  filter: fallback(z.enum(["all", "help", "success"]), "all").default("all"),
+});
+
 export const Route = createFileRoute("/feed")({
+  validateSearch: zodValidator(feedSearchSchema),
   component: FeedPage,
   head: () => ({
     meta: [
@@ -35,6 +42,12 @@ const TYPE_META: Record<PostType, { label: string; badge: string; border: string
   weather: { label: "সতর্কতা", badge: "🌧️ সতর্কতা", border: "border-sky-300 bg-sky-50", icon: CloudRain, iconColor: "text-sky-600" },
 };
 
+const FILTER_HEADER: Record<"all" | "help" | "success", { title: string; subtitle: string | null }> = {
+  all: { title: "সংবাদ ফিড", subtitle: null },
+  help: { title: "কৃষকদের প্রশ্নোত্তর", subtitle: "প্রশ্ন করুন, উত্তর পান" },
+  success: { title: "সফল কৃষকের গল্প", subtitle: "অনুপ্রেরণার উৎস" },
+};
+
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
   const m = Math.floor(diff / 60000);
@@ -49,19 +62,73 @@ function FeedPage() {
   const navigate = useNavigate();
   const { user } = useUser();
   const qc = useQueryClient();
-
+  const { filter } = Route.useSearch() as { filter: "all" | "help" | "success" };
+  const headerMeta = FILTER_HEADER[filter];
 
   const [filters, setFilters] = useState<FeedFilters>({
     districtMode: user?.upazila ? "myUpazila" : "myDistrict",
     district: null,
     crop: null,
-    types: [],
+    types: filter === "help" ? ["help"] : filter === "success" ? ["success"] : [],
   });
   const [filterOpen, setFilterOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
 
+  // Sync URL filter → types lock
+  useEffect(() => {
+    setFilters((f) => {
+      const want: PostType[] = filter === "help" ? ["help"] : filter === "success" ? ["success"] : [];
+      const same = f.types.length === want.length && want.every((t) => f.types.includes(t));
+      if (same) return f;
+      return { ...f, types: want };
+    });
+  }, [filter]);
+
   const { data: mutedIds = [] } = useMutedIds();
   const { posts, loading, loadingMore, hasMore, error, loadMore, prepend, removeById, updateById, refresh } = useFeed(filters, user?.district ?? null, user?.upazila ?? null, mutedIds);
+
+  // Sort posts based on active filter mode
+  const displayPosts = useMemo(() => {
+    if (filter === "success") {
+      return [...posts].sort((a, b) => b.likes_count - a.likes_count);
+    }
+    if (filter === "help") {
+      return [...posts].sort((a, b) => {
+        const aAns = a.comments_count > 0 ? 1 : 0;
+        const bAns = b.comments_count > 0 ? 1 : 0;
+        if (aAns !== bAns) return aAns - bAns; // unanswered (0) first
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+    }
+    return posts;
+  }, [posts, filter]);
+
+  // Monthly top farmers (success mode only)
+  const { data: leaderboard = [] } = useQuery({
+    queryKey: ["feed", "leaderboard", "success-month"],
+    enabled: filter === "success",
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+      const { data } = await supabase
+        .from("posts")
+        .select("user_id, user_name, likes_count")
+        .eq("type", "success")
+        .gte("created_at", startOfMonth.toISOString())
+        .limit(200);
+      const map = new Map<string, { user_id: string; name: string; posts: number; likes: number }>();
+      for (const r of (data as { user_id: string; user_name: string; likes_count: number }[]) ?? []) {
+        const ex = map.get(r.user_id) ?? { user_id: r.user_id, name: r.user_name, posts: 0, likes: 0 };
+        ex.posts += 1;
+        ex.likes += r.likes_count ?? 0;
+        map.set(r.user_id, ex);
+      }
+      return Array.from(map.values()).sort((a, b) => b.likes - a.likes || b.posts - a.posts).slice(0, 3);
+    },
+  });
+
 
   // Active users (stories) — distinct recent posters. Cached, refetched at most every 2 min.
   const { data: activeUsers = [] } = useQuery({
@@ -206,7 +273,12 @@ function FeedPage() {
             >
               <ArrowLeft className="h-5 w-5 text-white" />
             </button>
-            <h1 className="text-xl font-bold text-white">সংবাদ ফিড</h1>
+            <div>
+              <h1 className="text-xl font-bold text-white leading-tight">{headerMeta.title}</h1>
+              {headerMeta.subtitle && (
+                <p className="text-[11px] text-white/80 mt-0.5">{headerMeta.subtitle}</p>
+              )}
+            </div>
           </div>
           <button
             onClick={() => setFilterOpen(true)}
@@ -264,6 +336,38 @@ function FeedPage() {
         </div>
       )}
 
+      {/* Monthly leaderboard for success mode */}
+      {filter === "success" && leaderboard.length > 0 && (
+        <section className="px-4 mb-3">
+          <div className="bg-gradient-to-br from-amber-50 to-yellow-100 border-2 border-amber-300 rounded-2xl p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Trophy className="h-5 w-5 text-amber-600" />
+              <h2 className="text-sm font-bold text-amber-900">এই মাসের সেরা চাষী</h2>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {leaderboard.map((u, i) => {
+                const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉";
+                return (
+                  <Link
+                    key={u.user_id}
+                    to="/u/$userId"
+                    params={{ userId: u.user_id }}
+                    className="flex flex-col items-center text-center bg-white/70 rounded-xl p-2 active:scale-95"
+                  >
+                    <div className="text-2xl">{medal}</div>
+                    <div className="h-9 w-9 rounded-full bg-primary/15 text-primary flex items-center justify-center text-sm font-bold mt-1">
+                      {u.name.charAt(0) || "ক"}
+                    </div>
+                    <p className="mt-1 text-[11px] font-bold text-foreground truncate w-full">{u.name}</p>
+                    <p className="text-[10px] text-muted-foreground">{u.posts} পোস্ট</p>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Posts */}
       <section className="px-4 space-y-4 mt-2">
         {loading ? (
@@ -272,15 +376,19 @@ function FeedPage() {
           </div>
         ) : error ? (
           <p className="text-center text-sm text-destructive py-6">{error}</p>
-        ) : posts.length === 0 ? (
-          <EmptyState title="কোনো পোস্ট নেই" description="ফিল্টার বদলান বা প্রথম পোস্টটি আপনিই করুন" />
+        ) : displayPosts.length === 0 ? (
+          <EmptyState
+            title={filter === "help" ? "কোনো প্রশ্ন নেই" : filter === "success" ? "কোনো সাফল্যের গল্প নেই" : "কোনো পোস্ট নেই"}
+            description={filter === "help" ? "প্রথম প্রশ্নটি আপনিই করুন" : "ফিল্টার বদলান বা প্রথম পোস্টটি আপনিই করুন"}
+          />
         ) : (
-          posts.map((p) => (
+          displayPosts.map((p) => (
             <PostCard
               key={p.id}
               post={p}
               liked={likedSet.has(p.id)}
               currentUserId={user?.id ?? null}
+              mode={filter}
               onLike={() => toggleLike(p)}
               onShare={() => share(p)}
               onCommentAdded={() => updateById(p.id, { comments_count: p.comments_count + 1 })}
@@ -295,7 +403,7 @@ function FeedPage() {
             {Array.from({ length: 3 }).map((_, i) => <PostSkeleton key={`m-${i}`} />)}
           </div>
         )}
-        {!hasMore && posts.length > 0 && (
+        {!hasMore && displayPosts.length > 0 && (
           <p className="text-center text-xs text-muted-foreground py-4">আর কোনো পোস্ট নেই</p>
         )}
       </section>
@@ -305,6 +413,7 @@ function FeedPage() {
     </main>
   );
 }
+
 
 function PostSkeleton() {
   return (
@@ -327,6 +436,7 @@ function PostCard({
   post,
   liked,
   currentUserId,
+  mode = "all",
   onLike,
   onShare,
   onCommentAdded,
@@ -335,6 +445,7 @@ function PostCard({
   post: Post;
   liked: boolean;
   currentUserId: string | null;
+  mode?: "all" | "help" | "success";
   onLike: () => void;
   onShare: () => void;
   onCommentAdded: () => void;
@@ -345,6 +456,8 @@ function PostCard({
   const [showComments, setShowComments] = useState(false);
   const long = post.content.length > 180;
   const text = expanded || !long ? post.content : post.content.slice(0, 180) + "...";
+  const isAnswered = post.type === "help" && post.comments_count > 0;
+  const isSuccessHighlight = mode === "success" && post.type === "success";
 
   const handleDelete = async () => {
     const { error } = await supabase.from("posts").delete().eq("id", post.id);
@@ -357,7 +470,12 @@ function PostCard({
   };
 
   return (
-    <article className={`rounded-2xl border-2 ${meta.border} shadow-sm overflow-hidden`}>
+    <article className={`relative rounded-2xl border-2 ${isSuccessHighlight ? "border-amber-400 bg-gradient-to-br from-amber-50 to-white" : meta.border} shadow-sm overflow-hidden`}>
+      {isSuccessHighlight && (
+        <div className="absolute top-2 right-2 flex items-center gap-1 bg-amber-400 text-white px-2 py-0.5 rounded-full text-[10px] font-bold shadow z-10">
+          <Star className="h-3 w-3 fill-current" /> সাফল্যের গল্প
+        </div>
+      )}
       <div className="p-4">
         <div className="flex items-start gap-3">
           <div className="h-11 w-11 rounded-full bg-primary/15 text-primary flex items-center justify-center font-bold shrink-0">
@@ -392,6 +510,11 @@ function PostCard({
                   {meta.badge}
                 </span>
               )}
+              {isAnswered && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-700 bg-emerald-100 border border-emerald-300">
+                  <CheckCircle2 className="h-3 w-3" /> উত্তর পেয়েছি
+                </span>
+              )}
               {post.crop_tag && (
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary">
                   🌾 {post.crop_tag}
@@ -422,9 +545,9 @@ function PostCard({
           <ThumbsUp className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />
           <span>উপকারী{post.likes_count > 0 ? ` (${post.likes_count})` : ""}</span>
         </button>
-        <button onClick={() => setShowComments((s) => !s)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-muted-foreground active:scale-95">
-          <MessageCircle className="h-4 w-4" />
-          <span>মন্তব্য{post.comments_count > 0 ? ` (${post.comments_count})` : ""}</span>
+        <button onClick={() => setShowComments((s) => !s)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold active:scale-95 ${post.type === "help" ? "text-emerald-700" : "text-muted-foreground"}`}>
+          {post.type === "help" ? <Reply className="h-4 w-4" /> : <MessageCircle className="h-4 w-4" />}
+          <span>{post.type === "help" ? "উত্তর দিন" : "মন্তব্য"}{post.comments_count > 0 ? ` (${post.comments_count})` : ""}</span>
         </button>
         <button onClick={onShare} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-muted-foreground active:scale-95">
           <Share2 className="h-4 w-4" />

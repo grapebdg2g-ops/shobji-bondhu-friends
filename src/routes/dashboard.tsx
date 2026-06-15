@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Bell, MapPin, Menu, ChevronRight, Stethoscope, MessageSquareText,
   CalendarDays, Leaf, FlaskConical, ShoppingBasket, Award, Repeat2,
-  CloudSun, Bug, Sprout, Plus, Camera, ThumbsUp, MessageCircle,
+  CloudSun, Bug, Sprout, Plus, Camera, ThumbsUp, MessageCircle, HelpCircle,
 } from "lucide-react";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useUser } from "@/contexts/user-context";
@@ -168,6 +168,7 @@ const QUICK_ACTIONS = [
   { href: "/ai-bondhu/calculator",     Icon: FlaskConical,   label: "জৈব সার",     bg: "bg-blue-100",    color: "text-blue-700" },
   { href: "/prices",                   Icon: ShoppingBasket, label: "সবজি বাজার",  bg: "bg-orange-100",  color: "text-orange-700" },
   { href: "/feed?filter=success",      Icon: Award,          label: "সেরা চাষী",   bg: "bg-purple-100",  color: "text-purple-700" },
+  { href: "/feed?filter=help",         Icon: HelpCircle,     label: "জিজ্ঞাসা",     bg: "bg-amber-100",   color: "text-amber-700" },
   { href: "/exchange",                 Icon: Repeat2,        label: "বিনিময়",      bg: "bg-teal-100",    color: "text-teal-700" },
   { href: "/weather",                  Icon: CloudSun,       label: "আবহাওয়া",     bg: "bg-sky-100",     color: "text-sky-700" },
   { href: "/ai-bondhu/disease",        Icon: Bug,            label: "রোগবালাই",     bg: "bg-amber-100",   color: "text-amber-700" },
