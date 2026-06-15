@@ -336,6 +336,38 @@ function FeedPage() {
         </div>
       )}
 
+      {/* Monthly leaderboard for success mode */}
+      {filter === "success" && leaderboard.length > 0 && (
+        <section className="px-4 mb-3">
+          <div className="bg-gradient-to-br from-amber-50 to-yellow-100 border-2 border-amber-300 rounded-2xl p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Trophy className="h-5 w-5 text-amber-600" />
+              <h2 className="text-sm font-bold text-amber-900">এই মাসের সেরা চাষী</h2>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {leaderboard.map((u, i) => {
+                const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉";
+                return (
+                  <Link
+                    key={u.user_id}
+                    to="/u/$userId"
+                    params={{ userId: u.user_id }}
+                    className="flex flex-col items-center text-center bg-white/70 rounded-xl p-2 active:scale-95"
+                  >
+                    <div className="text-2xl">{medal}</div>
+                    <div className="h-9 w-9 rounded-full bg-primary/15 text-primary flex items-center justify-center text-sm font-bold mt-1">
+                      {u.name.charAt(0) || "ক"}
+                    </div>
+                    <p className="mt-1 text-[11px] font-bold text-foreground truncate w-full">{u.name}</p>
+                    <p className="text-[10px] text-muted-foreground">{u.posts} পোস্ট</p>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Posts */}
       <section className="px-4 space-y-4 mt-2">
         {loading ? (
@@ -344,15 +376,19 @@ function FeedPage() {
           </div>
         ) : error ? (
           <p className="text-center text-sm text-destructive py-6">{error}</p>
-        ) : posts.length === 0 ? (
-          <EmptyState title="কোনো পোস্ট নেই" description="ফিল্টার বদলান বা প্রথম পোস্টটি আপনিই করুন" />
+        ) : displayPosts.length === 0 ? (
+          <EmptyState
+            title={filter === "help" ? "কোনো প্রশ্ন নেই" : filter === "success" ? "কোনো সাফল্যের গল্প নেই" : "কোনো পোস্ট নেই"}
+            description={filter === "help" ? "প্রথম প্রশ্নটি আপনিই করুন" : "ফিল্টার বদলান বা প্রথম পোস্টটি আপনিই করুন"}
+          />
         ) : (
-          posts.map((p) => (
+          displayPosts.map((p) => (
             <PostCard
               key={p.id}
               post={p}
               liked={likedSet.has(p.id)}
               currentUserId={user?.id ?? null}
+              mode={filter}
               onLike={() => toggleLike(p)}
               onShare={() => share(p)}
               onCommentAdded={() => updateById(p.id, { comments_count: p.comments_count + 1 })}
@@ -367,7 +403,7 @@ function FeedPage() {
             {Array.from({ length: 3 }).map((_, i) => <PostSkeleton key={`m-${i}`} />)}
           </div>
         )}
-        {!hasMore && posts.length > 0 && (
+        {!hasMore && displayPosts.length > 0 && (
           <p className="text-center text-xs text-muted-foreground py-4">আর কোনো পোস্ট নেই</p>
         )}
       </section>
@@ -377,6 +413,7 @@ function FeedPage() {
     </main>
   );
 }
+
 
 function PostSkeleton() {
   return (
