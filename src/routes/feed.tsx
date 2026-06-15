@@ -510,6 +510,11 @@ function PostCard({
                   {meta.badge}
                 </span>
               )}
+              {isAnswered && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-700 bg-emerald-100 border border-emerald-300">
+                  <CheckCircle2 className="h-3 w-3" /> উত্তর পেয়েছি
+                </span>
+              )}
               {post.crop_tag && (
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary">
                   🌾 {post.crop_tag}
