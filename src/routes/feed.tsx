@@ -273,7 +273,12 @@ function FeedPage() {
             >
               <ArrowLeft className="h-5 w-5 text-white" />
             </button>
-            <h1 className="text-xl font-bold text-white">সংবাদ ফিড</h1>
+            <div>
+              <h1 className="text-xl font-bold text-white leading-tight">{headerMeta.title}</h1>
+              {headerMeta.subtitle && (
+                <p className="text-[11px] text-white/80 mt-0.5">{headerMeta.subtitle}</p>
+              )}
+            </div>
           </div>
           <button
             onClick={() => setFilterOpen(true)}
