@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Bell, MapPin, Menu, ChevronRight, Stethoscope, MessageSquareText,
   CalendarDays, Leaf, FlaskConical, ShoppingBasket, Award, Repeat2,
-  CloudSun, Bug, Sprout, Plus, Camera, ThumbsUp, MessageCircle,
+  CloudSun, Bug, Sprout, Plus, Camera, ThumbsUp, MessageCircle, HelpCircle,
 } from "lucide-react";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useUser } from "@/contexts/user-context";
