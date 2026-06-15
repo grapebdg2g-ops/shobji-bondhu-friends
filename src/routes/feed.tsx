@@ -62,19 +62,73 @@ function FeedPage() {
   const navigate = useNavigate();
   const { user } = useUser();
   const qc = useQueryClient();
-
+  const { filter } = Route.useSearch();
+  const headerMeta = FILTER_HEADER[filter];
 
   const [filters, setFilters] = useState<FeedFilters>({
     districtMode: user?.upazila ? "myUpazila" : "myDistrict",
     district: null,
     crop: null,
-    types: [],
+    types: filter === "help" ? ["help"] : filter === "success" ? ["success"] : [],
   });
   const [filterOpen, setFilterOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
 
+  // Sync URL filter → types lock
+  useEffect(() => {
+    setFilters((f) => {
+      const want: PostType[] = filter === "help" ? ["help"] : filter === "success" ? ["success"] : [];
+      const same = f.types.length === want.length && want.every((t) => f.types.includes(t));
+      if (same) return f;
+      return { ...f, types: want };
+    });
+  }, [filter]);
+
   const { data: mutedIds = [] } = useMutedIds();
   const { posts, loading, loadingMore, hasMore, error, loadMore, prepend, removeById, updateById, refresh } = useFeed(filters, user?.district ?? null, user?.upazila ?? null, mutedIds);
+
+  // Sort posts based on active filter mode
+  const displayPosts = useMemo(() => {
+    if (filter === "success") {
+      return [...posts].sort((a, b) => b.likes_count - a.likes_count);
+    }
+    if (filter === "help") {
+      return [...posts].sort((a, b) => {
+        const aAns = a.comments_count > 0 ? 1 : 0;
+        const bAns = b.comments_count > 0 ? 1 : 0;
+        if (aAns !== bAns) return aAns - bAns; // unanswered (0) first
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+    }
+    return posts;
+  }, [posts, filter]);
+
+  // Monthly top farmers (success mode only)
+  const { data: leaderboard = [] } = useQuery({
+    queryKey: ["feed", "leaderboard", "success-month"],
+    enabled: filter === "success",
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+      const { data } = await supabase
+        .from("posts")
+        .select("user_id, user_name, likes_count")
+        .eq("type", "success")
+        .gte("created_at", startOfMonth.toISOString())
+        .limit(200);
+      const map = new Map<string, { user_id: string; name: string; posts: number; likes: number }>();
+      for (const r of (data as { user_id: string; user_name: string; likes_count: number }[]) ?? []) {
+        const ex = map.get(r.user_id) ?? { user_id: r.user_id, name: r.user_name, posts: 0, likes: 0 };
+        ex.posts += 1;
+        ex.likes += r.likes_count ?? 0;
+        map.set(r.user_id, ex);
+      }
+      return Array.from(map.values()).sort((a, b) => b.likes - a.likes || b.posts - a.posts).slice(0, 3);
+    },
+  });
+
 
   // Active users (stories) — distinct recent posters. Cached, refetched at most every 2 min.
   const { data: activeUsers = [] } = useQuery({
