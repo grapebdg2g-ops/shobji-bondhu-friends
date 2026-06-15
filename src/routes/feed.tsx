@@ -1,8 +1,10 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, SlidersHorizontal, ThumbsUp, MessageCircle, Share2, Plus, HelpCircle, Star, CloudRain, ChevronDown, ArrowUp } from "lucide-react";
+import { ArrowLeft, SlidersHorizontal, ThumbsUp, MessageCircle, Share2, Plus, HelpCircle, Star, CloudRain, ChevronDown, ArrowUp, CheckCircle2, Reply, Trophy } from "lucide-react";
 import { toast } from "sonner";
+import { z } from "zod";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/user-context";
 import { useFeed, type FeedFilters, type Post, type PostType } from "@/hooks/use-feed";
@@ -17,7 +19,12 @@ import { EmptyState } from "@/components/krishi/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LazyImage } from "@/components/krishi/lazy-image";
 
+const feedSearchSchema = z.object({
+  filter: fallback(z.enum(["all", "help", "success"]), "all").default("all"),
+});
+
 export const Route = createFileRoute("/feed")({
+  validateSearch: zodValidator(feedSearchSchema),
   component: FeedPage,
   head: () => ({
     meta: [
@@ -33,6 +40,12 @@ const TYPE_META: Record<PostType, { label: string; badge: string; border: string
   help: { label: "সাহায্য চাই", badge: "❓ সাহায্য চাই", border: "border-amber-300 bg-amber-50", icon: HelpCircle, iconColor: "text-amber-600" },
   success: { label: "সাফল্য", badge: "🌟 সাফল্য", border: "border-emerald-300 bg-emerald-50", icon: Star, iconColor: "text-emerald-600" },
   weather: { label: "সতর্কতা", badge: "🌧️ সতর্কতা", border: "border-sky-300 bg-sky-50", icon: CloudRain, iconColor: "text-sky-600" },
+};
+
+const FILTER_HEADER: Record<"all" | "help" | "success", { title: string; subtitle: string | null }> = {
+  all: { title: "সংবাদ ফিড", subtitle: null },
+  help: { title: "কৃষকদের প্রশ্নোত্তর", subtitle: "প্রশ্ন করুন, উত্তর পান" },
+  success: { title: "সফল কৃষকের গল্প", subtitle: "অনুপ্রেরণার উৎস" },
 };
 
 function timeAgo(iso: string) {
