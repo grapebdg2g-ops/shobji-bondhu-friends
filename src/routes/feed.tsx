@@ -545,9 +545,9 @@ function PostCard({
           <ThumbsUp className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />
           <span>উপকারী{post.likes_count > 0 ? ` (${post.likes_count})` : ""}</span>
         </button>
-        <button onClick={() => setShowComments((s) => !s)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-muted-foreground active:scale-95">
-          <MessageCircle className="h-4 w-4" />
-          <span>মন্তব্য{post.comments_count > 0 ? ` (${post.comments_count})` : ""}</span>
+        <button onClick={() => setShowComments((s) => !s)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold active:scale-95 ${post.type === "help" ? "text-emerald-700" : "text-muted-foreground"}`}>
+          {post.type === "help" ? <Reply className="h-4 w-4" /> : <MessageCircle className="h-4 w-4" />}
+          <span>{post.type === "help" ? "উত্তর দিন" : "মন্তব্য"}{post.comments_count > 0 ? ` (${post.comments_count})` : ""}</span>
         </button>
         <button onClick={onShare} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-muted-foreground active:scale-95">
           <Share2 className="h-4 w-4" />
