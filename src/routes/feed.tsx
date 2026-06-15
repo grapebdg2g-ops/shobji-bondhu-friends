@@ -62,7 +62,7 @@ function FeedPage() {
   const navigate = useNavigate();
   const { user } = useUser();
   const qc = useQueryClient();
-  const { filter } = Route.useSearch();
+  const { filter } = Route.useSearch() as { filter: "all" | "help" | "success" };
   const headerMeta = FILTER_HEADER[filter];
 
   const [filters, setFilters] = useState<FeedFilters>({
