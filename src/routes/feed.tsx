@@ -436,6 +436,7 @@ function PostCard({
   post,
   liked,
   currentUserId,
+  mode = "all",
   onLike,
   onShare,
   onCommentAdded,
@@ -444,6 +445,7 @@ function PostCard({
   post: Post;
   liked: boolean;
   currentUserId: string | null;
+  mode?: "all" | "help" | "success";
   onLike: () => void;
   onShare: () => void;
   onCommentAdded: () => void;
@@ -454,6 +456,8 @@ function PostCard({
   const [showComments, setShowComments] = useState(false);
   const long = post.content.length > 180;
   const text = expanded || !long ? post.content : post.content.slice(0, 180) + "...";
+  const isAnswered = post.type === "help" && post.comments_count > 0;
+  const isSuccessHighlight = mode === "success" && post.type === "success";
 
   const handleDelete = async () => {
     const { error } = await supabase.from("posts").delete().eq("id", post.id);
@@ -466,7 +470,12 @@ function PostCard({
   };
 
   return (
-    <article className={`rounded-2xl border-2 ${meta.border} shadow-sm overflow-hidden`}>
+    <article className={`relative rounded-2xl border-2 ${isSuccessHighlight ? "border-amber-400 bg-gradient-to-br from-amber-50 to-white" : meta.border} shadow-sm overflow-hidden`}>
+      {isSuccessHighlight && (
+        <div className="absolute top-2 right-2 flex items-center gap-1 bg-amber-400 text-white px-2 py-0.5 rounded-full text-[10px] font-bold shadow z-10">
+          <Star className="h-3 w-3 fill-current" /> সাফল্যের গল্প
+        </div>
+      )}
       <div className="p-4">
         <div className="flex items-start gap-3">
           <div className="h-11 w-11 rounded-full bg-primary/15 text-primary flex items-center justify-center font-bold shrink-0">
