@@ -165,7 +165,7 @@ function AiSolutionsSection() {
 
 const QUICK_ACTIONS = [
   { href: "/vegetable-guide",          Icon: Leaf,           label: "সবজি গাইড",  bg: "bg-emerald-100", color: "text-emerald-700" },
-  { href: "/ai-bondhu/calculator",     Icon: FlaskConical,   label: "জৈব সার",     bg: "bg-blue-100",    color: "text-blue-700" },
+  { href: "/organic-fertilizer",       Icon: FlaskConical,   label: "জৈব সার",     bg: "bg-blue-100",    color: "text-blue-700" },
   { href: "/prices",                   Icon: ShoppingBasket, label: "সবজি বাজার",  bg: "bg-orange-100",  color: "text-orange-700" },
   { href: "/feed?filter=success",      Icon: Award,          label: "সেরা চাষী",   bg: "bg-purple-100",  color: "text-purple-700" },
   { href: "/feed?filter=help",         Icon: HelpCircle,     label: "জিজ্ঞাসা",     bg: "bg-amber-100",   color: "text-amber-700" },
