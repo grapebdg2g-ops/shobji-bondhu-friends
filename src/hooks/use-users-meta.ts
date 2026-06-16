@@ -25,7 +25,7 @@ export function useUsersMeta(userIds: string[]) {
     queryFn: async (): Promise<Record<string, UserMeta>> => {
       const ids = Array.from(new Set(userIds));
       const [rolesRes, profRes] = await Promise.all([
-        supabase.from("user_roles").select("user_id, role").in("user_id", ids),
+        supabase.rpc("get_public_user_roles" as never, { _ids: ids } as never),
         supabase
           .from("profiles")
           .select("id, is_verified, expert_specialty, expert_institution")
