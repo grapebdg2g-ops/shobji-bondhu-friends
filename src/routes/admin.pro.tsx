@@ -67,9 +67,9 @@ function ProPage() {
 
   const add = useMutation({
     mutationFn: async () => {
-      const { data: prof, error: pe } = await supabase.from("profiles")
-        .select("id").eq("phone", phone.trim()).maybeSingle();
+      const { data: foundId, error: pe } = await supabase.rpc("admin_find_user_by_phone" as never, { _phone: phone.trim() } as never);
       if (pe) throw pe;
+      const prof = foundId ? { id: foundId as unknown as string } : null;
       if (!prof) throw new Error("ব্যবহারকারী পাওয়া যায়নি");
       const amt = Number(amount) || 0;
       const expires = Number(days) > 0
