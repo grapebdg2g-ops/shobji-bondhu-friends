@@ -163,6 +163,7 @@ const AI_CARDS = [
 ];
 
 function AiSolutionsSection() {
+  const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeCard, setActiveCard] = useState(0);
 
