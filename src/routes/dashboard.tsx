@@ -140,42 +140,98 @@ const AI_CARDS = [
     href: "/ai-bondhu/calendar",
     Icon: CalendarDays,
     title: "ফসল চাষের ক্যালেন্ডার",
-    desc: "আপনার এলাকার চাষ করার সময়সূচি দেখুন",
+    desc: "আপনার এলাকার চাষের সময়সূচি দেখুন",
     iconBg: "bg-orange-100",
     iconColor: "text-orange-700",
+  },
+  {
+    href: "/ai-bondhu/calculator",
+    Icon: FlaskConical,
+    title: "সার ক্যালকুলেটর",
+    desc: "জমির জন্য প্রয়োজনীয় সার হিসাব করুন",
+    iconBg: "bg-teal-100",
+    iconColor: "text-teal-700",
+  },
+  {
+    href: "/ai-bondhu/pesticide",
+    Icon: Leaf,
+    title: "কীটনাশক গাইড",
+    desc: "পোকা ও রোগ দমনের নিরাপদ পদ্ধতি",
+    iconBg: "bg-red-100",
+    iconColor: "text-red-700",
   },
 ];
 
 function AiSolutionsSection() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeCard, setActiveCard] = useState(0);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveCard(Number(entry.target.getAttribute("data-card-index")));
+          }
+        });
+      },
+      { root: el, threshold: 0.6 }
+    );
+    el.querySelectorAll("[data-card-index]").forEach((card) => observer.observe(card));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section className="mt-5">
       <div
-        className="px-5 py-4 rounded-3xl mx-3"
-        style={{ background: "linear-gradient(135deg, #F4A261 0%, #E89B3D 100%)" }}
+        className="px-4 py-4 rounded-[20px] mx-4"
+        style={{ background: "#F59E0B" }}
       >
-        <a href="/ai-bondhu" className="flex items-center justify-between mb-3 text-white">
+        <button
+          onClick={() => navigate({ to: "/ai-bondhu" })}
+          className="w-full flex items-center justify-between mb-3 text-white"
+        >
           <h2 className="text-lg font-bold">AI কৃষি সমাধান</h2>
-          <ChevronRight className="h-5 w-5" strokeWidth={2.6} />
-        </a>
-        <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1 snap-x snap-mandatory">
-          {AI_CARDS.map((c) => (
-            <a
+          <span className="text-sm font-semibold flex items-center gap-0.5">
+            সব দেখুন <ChevronRight className="h-4 w-4" strokeWidth={2.6} />
+          </span>
+        </button>
+        <div
+          ref={scrollRef}
+          className="flex gap-3 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1"
+          style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}
+        >
+          {AI_CARDS.map((c, i) => (
+            <button
               key={c.href}
-              href={c.href}
-              className="snap-start shrink-0 w-[42%] bg-white rounded-2xl p-4 shadow-sm active:scale-[0.97] transition-transform"
+              data-card-index={i}
+              onClick={() => navigate({ to: c.href })}
+              className="snap-start shrink-0 w-[140px] min-w-[140px] bg-white rounded-2xl p-3.5 shadow-sm active:scale-95 transition-transform text-left"
+              style={{ scrollSnapAlign: "start" }}
             >
-              <div className={`h-12 w-12 rounded-2xl ${c.iconBg} flex items-center justify-center mb-3`}>
-                <c.Icon className={`h-7 w-7 ${c.iconColor}`} strokeWidth={2.2} />
+              <div className={`h-10 w-10 rounded-xl ${c.iconBg} flex items-center justify-center mb-2.5`}>
+                <c.Icon className={`h-5 w-5 ${c.iconColor}`} strokeWidth={2.2} />
               </div>
               <h3 className="font-bold text-sm text-gray-900 leading-tight">{c.title}</h3>
               <p className="text-[11px] text-gray-500 mt-1 leading-snug">{c.desc}</p>
-            </a>
+            </button>
+          ))}
+        </div>
+        <div className="flex justify-center gap-1.5 mt-3">
+          {AI_CARDS.map((_, i) => (
+            <span
+              key={i}
+              className={`h-1.5 rounded-full transition-all ${i === activeCard ? "w-4 bg-white" : "w-1.5 bg-white/50"}`}
+            />
           ))}
         </div>
       </div>
     </section>
   );
 }
+
 
 /* ──────────────────────────── SECTION 4 ──────────────────────────── */
 
