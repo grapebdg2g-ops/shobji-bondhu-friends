@@ -13,6 +13,7 @@ import { Route as WeatherRouteImport } from './routes/weather'
 import { Route as VegetableGuideRouteImport } from './routes/vegetable-guide'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PricesRouteImport } from './routes/prices'
+import { Route as OrganicFertilizerRouteImport } from './routes/organic-fertilizer'
 import { Route as OfflineRouteImport } from './routes/offline'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as ModerationRouteImport } from './routes/moderation'
@@ -65,6 +66,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const PricesRoute = PricesRouteImport.update({
   id: '/prices',
   path: '/prices',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrganicFertilizerRoute = OrganicFertilizerRouteImport.update({
+  id: '/organic-fertilizer',
+  path: '/organic-fertilizer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OfflineRoute = OfflineRouteImport.update({
@@ -246,6 +252,7 @@ export interface FileRoutesByFullPath {
   '/moderation': typeof ModerationRoute
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
+  '/organic-fertilizer': typeof OrganicFertilizerRoute
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
   '/vegetable-guide': typeof VegetableGuideRouteWithChildren
@@ -284,6 +291,7 @@ export interface FileRoutesByTo {
   '/moderation': typeof ModerationRoute
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
+  '/organic-fertilizer': typeof OrganicFertilizerRoute
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
   '/vegetable-guide': typeof VegetableGuideRouteWithChildren
@@ -324,6 +332,7 @@ export interface FileRoutesById {
   '/moderation': typeof ModerationRoute
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
+  '/organic-fertilizer': typeof OrganicFertilizerRoute
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
   '/vegetable-guide': typeof VegetableGuideRouteWithChildren
@@ -365,6 +374,7 @@ export interface FileRouteTypes {
     | '/moderation'
     | '/notifications'
     | '/offline'
+    | '/organic-fertilizer'
     | '/prices'
     | '/register'
     | '/vegetable-guide'
@@ -403,6 +413,7 @@ export interface FileRouteTypes {
     | '/moderation'
     | '/notifications'
     | '/offline'
+    | '/organic-fertilizer'
     | '/prices'
     | '/register'
     | '/vegetable-guide'
@@ -442,6 +453,7 @@ export interface FileRouteTypes {
     | '/moderation'
     | '/notifications'
     | '/offline'
+    | '/organic-fertilizer'
     | '/prices'
     | '/register'
     | '/vegetable-guide'
@@ -482,6 +494,7 @@ export interface RootRouteChildren {
   ModerationRoute: typeof ModerationRoute
   NotificationsRoute: typeof NotificationsRoute
   OfflineRoute: typeof OfflineRoute
+  OrganicFertilizerRoute: typeof OrganicFertilizerRoute
   PricesRoute: typeof PricesRoute
   RegisterRoute: typeof RegisterRoute
   VegetableGuideRoute: typeof VegetableGuideRouteWithChildren
@@ -527,6 +540,13 @@ declare module '@tanstack/react-router' {
       path: '/prices'
       fullPath: '/prices'
       preLoaderRoute: typeof PricesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/organic-fertilizer': {
+      id: '/organic-fertilizer'
+      path: '/organic-fertilizer'
+      fullPath: '/organic-fertilizer'
+      preLoaderRoute: typeof OrganicFertilizerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/offline': {
@@ -816,6 +836,7 @@ const rootRouteChildren: RootRouteChildren = {
   ModerationRoute: ModerationRoute,
   NotificationsRoute: NotificationsRoute,
   OfflineRoute: OfflineRoute,
+  OrganicFertilizerRoute: OrganicFertilizerRoute,
   PricesRoute: PricesRoute,
   RegisterRoute: RegisterRoute,
   VegetableGuideRoute: VegetableGuideRouteWithChildren,

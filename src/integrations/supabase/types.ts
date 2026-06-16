@@ -152,6 +152,27 @@ export type Database = {
         }
         Relationships: []
       }
+      feature_waitlist: {
+        Row: {
+          created_at: string
+          feature: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feature?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feature?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       muted_users: {
         Row: {
           created_at: string
