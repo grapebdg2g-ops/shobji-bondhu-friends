@@ -464,7 +464,7 @@ function UserDetailDialog({ userId, onClose }: { userId: string | null; onClose:
         supabase.rpc("admin_get_phones" as never, { _ids: [userId!] } as never),
       ]);
       const phone = ((phoneRpc.data as { id: string; phone: string | null }[] | null) ?? [])[0]?.phone ?? null;
-      const profile = prof.data ? { ...(prof.data as object), phone } : null;
+      const profile = prof.data ? ({ ...(prof.data as Record<string, unknown>), phone } as typeof prof.data & { phone: string | null }) : null;
       return { profile, posts: posts.data ?? [], exchanges: exch.data ?? [], disease: dx.data ?? [], reports: reports.data ?? [] };
     },
   });
