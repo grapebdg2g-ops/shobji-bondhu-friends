@@ -772,7 +772,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_find_user_by_phone: { Args: { _phone: string }; Returns: string }
+      admin_get_phones: {
+        Args: { _ids: string[] }
+        Returns: {
+          id: string
+          phone: string
+        }[]
+      }
       decrement_likes: { Args: { post_id: string }; Returns: undefined }
+      get_my_phone: { Args: never; Returns: string }
+      get_public_user_roles: {
+        Args: { _ids: string[] }
+        Returns: {
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

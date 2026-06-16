@@ -77,10 +77,11 @@ function ProfilePage() {
       if (!uid) { navigate({ to: "/login" }); return; }
       const { data: p } = await supabase
         .from("profiles")
-        .select("id, name, phone, district, upazila, crops, role, avatar_url, bio, posts_count, exchanges_count, prices_count")
+        .select("id, name, district, upazila, crops, role, avatar_url, bio, posts_count, exchanges_count, prices_count")
         .eq("id", uid)
         .maybeSingle();
-      setFull((p as ProfileFull | null) ?? null);
+      const { data: phone } = await supabase.rpc("get_my_phone" as never);
+      setFull(p ? ({ ...(p as object), phone: (phone as string | null) ?? null } as ProfileFull) : null);
       setLoading(false);
     })();
   }, [navigate]);

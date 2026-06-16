@@ -27,11 +27,14 @@ const profileKey = (uid: string | null) => ["profile", uid] as const;
 async function fetchProfile(uid: string): Promise<UserProfile | null> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, name, phone, district, upazila, crops, role")
+    .select("id, name, district, upazila, crops, role")
     .eq("id", uid)
     .maybeSingle();
   if (error) throw error;
-  return (data as UserProfile | null) ?? null;
+  if (!data) return null;
+  // Phone is column-restricted via RLS; fetch via SECURITY DEFINER RPC (owner only).
+  const { data: phone } = await supabase.rpc("get_my_phone" as never);
+  return { ...(data as Omit<UserProfile, "phone">), phone: (phone as string | null) ?? null };
 }
 
 export function UserProvider({ children }: { children: ReactNode }) {
