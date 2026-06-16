@@ -180,7 +180,7 @@ function AiSolutionsSection() {
 /* ──────────────────────────── SECTION 4 ──────────────────────────── */
 
 const QUICK_ACTIONS = [
-  { href: "/vegetable-guide", Icon: Leaf, label: "চাষের গাইড লাইন", bg: "bg-emerald-100", color: "text-emerald-700" },
+  { href: "/vegetable-guide", Icon: Leaf, label: "চাষাবাদের গাইড", bg: "bg-emerald-100", color: "text-emerald-700" },
   { href: "/organic-fertilizer", Icon: FlaskConical, label: "জৈব সার", bg: "bg-blue-100", color: "text-blue-700" },
   { href: "/prices", Icon: ShoppingBasket, label: "সবজি বাজার", bg: "bg-orange-100", color: "text-orange-700" },
   { href: "/feed?filter=success", Icon: Award, label: "সেরা চাষী", bg: "bg-purple-100", color: "text-purple-700" },
