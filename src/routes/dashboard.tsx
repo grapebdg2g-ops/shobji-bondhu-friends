@@ -101,59 +101,71 @@ function Dashboard() {
 /* ──────────────────────────── SECTION 3 ──────────────────────────── */
 
 const AI_CARDS = [
-  {
-    href: "/ai-bondhu/disease",
-    Icon: Stethoscope,
-    title: "গাছের ডাক্তার",
-    desc: "ফসলের ছবি তুলে রোগ শনাক্ত করুন",
-    iconBg: "bg-emerald-100",
-    iconColor: "text-emerald-700",
-  },
-  {
-    href: "/ai-bondhu/chat",
-    Icon: MessageSquareText,
-    title: "বলো বন্ধু",
-    desc: "ভয়েস বা টেক্সটে পরামর্শ নিন",
-    iconBg: "bg-purple-100",
-    iconColor: "text-purple-700",
-  },
-  {
-    href: "/ai-bondhu/calendar",
-    Icon: CalendarDays,
-    title: "চাষের ক্যালেন্ডার",
-    desc: "আপনার এলাকার সময়সূচি দেখুন",
-    iconBg: "bg-orange-100",
-    iconColor: "text-orange-700",
-  },
+  { route: "/ai-bondhu/disease",    icon: "🩺", title: "গাছের ডাক্তার",   subtitle: "ফসলের ছবি তুলে রোগ শনাক্ত করুন" },
+  { route: "/ai-bondhu/chat",       icon: "🎤", title: "বালা বন্ধু",       subtitle: "ভয়েস বা টেক্সটে পরামর্শ নিন" },
+  { route: "/ai-bondhu/calendar",   icon: "📅", title: "চাষের ক্যালেন্ডার", subtitle: "আপনার এলাকার সময়সূচি দেখুন" },
+  { route: "/ai-bondhu/calculator", icon: "🧪", title: "সার ক্যালকুলেটর",   subtitle: "জমি অনুযায়ী সঠিক সার হিসাব করুন" },
+  { route: "/ai-bondhu/pesticide",  icon: "🌿", title: "কীটনাশক গাইড",     subtitle: "পোকা ও রোগ দমনের সঠিক পদ্ধতি" },
 ];
 
 function AiSolutionsSection() {
+  const navigate = useNavigate();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeCard, setActiveCard] = useState(0);
+
+  useEffect(() => {
+    const root = scrollRef.current;
+    if (!root) return;
+    const items = root.querySelectorAll<HTMLElement>("[data-card-index]");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveCard(Number((entry.target as HTMLElement).dataset.cardIndex));
+          }
+        });
+      },
+      { root, threshold: 0.6 }
+    );
+    items.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section className="mt-5">
-      <div
-        className="px-5 py-4 rounded-3xl mx-3"
-        style={{ background: "linear-gradient(135deg, #F4A261 0%, #E89B3D 100%)" }}
-      >
-        <a
-          href="/ai-bondhu"
-          className="flex items-center justify-between mb-3 text-white"
+      <div className="mx-4 rounded-[20px] p-4" style={{ background: "#F59E0B" }}>
+        <div className="flex justify-between items-center mb-3">
+          <span className="text-white font-bold text-base">কৃষি সমাধান</span>
+          <Link to="/ai-bondhu" className="text-white text-sm opacity-90">সব দেখুন ›</Link>
+        </div>
+
+        <div
+          ref={scrollRef}
+          className="flex overflow-x-auto gap-3 pb-1 scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}
         >
-          <h2 className="text-lg font-bold">AI কৃষি সমাধান</h2>
-          <ChevronRight className="h-5 w-5" strokeWidth={2.6} />
-        </a>
-        <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1 snap-x snap-mandatory">
-          {AI_CARDS.map((c) => (
-            <a
-              key={c.href}
-              href={c.href}
-              className="snap-start shrink-0 w-[42%] bg-white rounded-2xl p-4 shadow-sm active:scale-[0.97] transition-transform"
+          {AI_CARDS.map((c, i) => (
+            <button
+              key={c.route}
+              data-card-index={i}
+              onClick={() => navigate({ to: c.route })}
+              style={{ scrollSnapAlign: "start" }}
+              className="min-w-[140px] w-[140px] bg-white rounded-2xl p-3.5 flex flex-col items-center shadow-[0_2px_8px_rgba(0,0,0,0.08)] active:scale-95 transition-transform duration-150"
             >
-              <div className={`h-12 w-12 rounded-2xl ${c.iconBg} flex items-center justify-center mb-3`}>
-                <c.Icon className={`h-7 w-7 ${c.iconColor}`} strokeWidth={2.2} />
-              </div>
-              <h3 className="font-bold text-sm text-gray-900 leading-tight">{c.title}</h3>
-              <p className="text-[11px] text-gray-500 mt-1 leading-snug">{c.desc}</p>
-            </a>
+              <span className="text-5xl mb-2 leading-none">{c.icon}</span>
+              <span className="text-[13px] font-bold text-gray-800 text-center leading-tight mb-1">{c.title}</span>
+              <span className="text-[10px] text-gray-500 text-center leading-tight">{c.subtitle}</span>
+            </button>
+          ))}
+          <div className="min-w-[20px]" />
+        </div>
+
+        <div className="flex justify-center gap-1.5 mt-3">
+          {AI_CARDS.map((_, i) => (
+            <div
+              key={i}
+              className={`h-1.5 rounded-full transition-all duration-300 ${activeCard === i ? "bg-white w-3" : "bg-white/40 w-1.5"}`}
+            />
           ))}
         </div>
       </div>
