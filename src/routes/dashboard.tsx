@@ -180,7 +180,7 @@ function AiSolutionsSection() {
       },
       { root: el, threshold: 0.6 }
     );
-    el.querySelectorAll("[data-card-index]").forEach((card) => observer.observe(card));
+    el.querySelectorAll("[data-card-index]").forEach((card: Element) => observer.observe(card));
     return () => observer.disconnect();
   }, []);
 
