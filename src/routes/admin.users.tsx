@@ -76,11 +76,20 @@ function UsersPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, name, phone, district, upazila, is_verified, is_suspended, suspension_until, expert_specialty, expert_institution, posts_count, last_active, created_at")
+        .select("id, name, district, upazila, is_verified, is_suspended, suspension_until, expert_specialty, expert_institution, posts_count, last_active, created_at")
         .order("created_at", { ascending: false })
         .limit(500);
       if (error) throw error;
-      return (data as AdminProfile[]) ?? [];
+      const rows = (data as Omit<AdminProfile, "phone">[]) ?? [];
+      const ids = rows.map((r) => r.id);
+      const phoneMap = new Map<string, string | null>();
+      if (ids.length) {
+        const { data: phones } = await supabase.rpc("admin_get_phones" as never, { _ids: ids } as never);
+        for (const r of ((phones as { id: string; phone: string | null }[] | null) ?? [])) {
+          phoneMap.set(r.id, r.phone);
+        }
+      }
+      return rows.map((r) => ({ ...r, phone: phoneMap.get(r.id) ?? null })) as AdminProfile[];
     },
   });
 
