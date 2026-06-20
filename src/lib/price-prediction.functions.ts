@@ -4,11 +4,12 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getDistrictLatLng } from "@/lib/bd-data";
 
 type HistoryRow = {
-  day: string;
+  price_date: string;
   avg_price: number;
   min_price: number;
   max_price: number;
-  sample_count: number;
+  data_points: number;
+  source: string;
 };
 
 export type Prediction = {
