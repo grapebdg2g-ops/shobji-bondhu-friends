@@ -162,6 +162,20 @@ function AnalyticsPage() {
           {diseases.length === 0 && <li className="py-4 text-center text-gray-400 text-sm">তথ্য নেই</li>}
         </ul>
       </Card>
+
+      <Card title="🤖 AI পূর্বাভাস পারফরম্যান্স">
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          <MiniStat label="মোট পূর্বাভাস" value={toBn(predictionPerf?.total ?? 0)} />
+          <MiniStat label="যাচাই হয়েছে" value={toBn(predictionPerf?.checked ?? 0)} />
+          <MiniStat label="নির্ভুলতা" value={`${toBn(predictionPerf?.accuracy ?? 0)}%`} />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <PredList title="সবচেয়ে অনুরোধকৃত" rows={predictionPerf?.requested ?? []} field="total" />
+          <PredList title="✅ সবচেয়ে সঠিক" rows={predictionPerf?.best ?? []} field="accuracy" suffix="%" />
+          <PredList title="❌ সবচেয়ে ভুল" rows={predictionPerf?.worst ?? []} field="accuracy" suffix="%" />
+        </div>
+      </Card>
+
     </div>
   );
 }
