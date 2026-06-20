@@ -47,6 +47,7 @@ import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as ApiPublicHooksWeatherAlertsRouteImport } from './routes/api/public/hooks/weather-alerts'
 import { Route as ApiPublicHooksSendScheduledBroadcastsRouteImport } from './routes/api/public/hooks/send-scheduled-broadcasts'
+import { Route as ApiPublicHooksFetchGovtPricesRouteImport } from './routes/api/public/hooks/fetch-govt-prices'
 
 const WeatherRoute = WeatherRouteImport.update({
   id: '/weather',
@@ -240,6 +241,12 @@ const ApiPublicHooksSendScheduledBroadcastsRoute =
     path: '/api/public/hooks/send-scheduled-broadcasts',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksFetchGovtPricesRoute =
+  ApiPublicHooksFetchGovtPricesRouteImport.update({
+    id: '/api/public/hooks/fetch-govt-prices',
+    path: '/api/public/hooks/fetch-govt-prices',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -278,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/ai-bondhu/': typeof AiBondhuIndexRoute
   '/profile/': typeof ProfileIndexRoute
+  '/api/public/hooks/fetch-govt-prices': typeof ApiPublicHooksFetchGovtPricesRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
 }
@@ -317,6 +325,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/ai-bondhu': typeof AiBondhuIndexRoute
   '/profile': typeof ProfileIndexRoute
+  '/api/public/hooks/fetch-govt-prices': typeof ApiPublicHooksFetchGovtPricesRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
 }
@@ -358,6 +367,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/ai-bondhu/': typeof AiBondhuIndexRoute
   '/profile/': typeof ProfileIndexRoute
+  '/api/public/hooks/fetch-govt-prices': typeof ApiPublicHooksFetchGovtPricesRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
 }
@@ -400,6 +410,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/ai-bondhu/'
     | '/profile/'
+    | '/api/public/hooks/fetch-govt-prices'
     | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
   fileRoutesByTo: FileRoutesByTo
@@ -439,6 +450,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/ai-bondhu'
     | '/profile'
+    | '/api/public/hooks/fetch-govt-prices'
     | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
   id:
@@ -479,6 +491,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/ai-bondhu/'
     | '/profile/'
+    | '/api/public/hooks/fetch-govt-prices'
     | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
   fileRoutesById: FileRoutesById
@@ -508,6 +521,7 @@ export interface RootRouteChildren {
   UUserIdRoute: typeof UUserIdRoute
   AiBondhuIndexRoute: typeof AiBondhuIndexRoute
   ProfileIndexRoute: typeof ProfileIndexRoute
+  ApiPublicHooksFetchGovtPricesRoute: typeof ApiPublicHooksFetchGovtPricesRoute
   ApiPublicHooksSendScheduledBroadcastsRoute: typeof ApiPublicHooksSendScheduledBroadcastsRoute
   ApiPublicHooksWeatherAlertsRoute: typeof ApiPublicHooksWeatherAlertsRoute
 }
@@ -780,6 +794,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksSendScheduledBroadcastsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/fetch-govt-prices': {
+      id: '/api/public/hooks/fetch-govt-prices'
+      path: '/api/public/hooks/fetch-govt-prices'
+      fullPath: '/api/public/hooks/fetch-govt-prices'
+      preLoaderRoute: typeof ApiPublicHooksFetchGovtPricesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -850,6 +871,7 @@ const rootRouteChildren: RootRouteChildren = {
   UUserIdRoute: UUserIdRoute,
   AiBondhuIndexRoute: AiBondhuIndexRoute,
   ProfileIndexRoute: ProfileIndexRoute,
+  ApiPublicHooksFetchGovtPricesRoute: ApiPublicHooksFetchGovtPricesRoute,
   ApiPublicHooksSendScheduledBroadcastsRoute:
     ApiPublicHooksSendScheduledBroadcastsRoute,
   ApiPublicHooksWeatherAlertsRoute: ApiPublicHooksWeatherAlertsRoute,
