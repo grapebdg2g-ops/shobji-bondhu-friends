@@ -1,286 +1,339 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowLeft, ExternalLink, ChevronRight } from "lucide-react";
-import { ORGANIC_FERTILIZER_GUIDE, type OrganicFertilizerKey } from "@/data/organic-fertilizer-guide";
+import { ArrowLeft, ExternalLink, ChevronDown } from "lucide-react";
+import {
+  ORGANIC_FERTILIZER_GUIDE,
+  ORGANIC_APPLICATION_RATES,
+  CHEMICAL_REDUCTION,
+  type OrganicFertilizerKey,
+} from "@/data/organic-fertilizer-guide";
 
 export const Route = createFileRoute("/organic-fertilizer")({
   component: OrganicFertilizerPage,
   head: () => ({
     meta: [
-      { title: "জৈব সার প্রস্তুত প্রণালী — সবজি বন্ধু" },
-      { name: "description", content: "গোবর, কম্পোস্ট, ভার্মি কম্পোস্ট, সবুজ সার ও জৈব বালাইনাশক তৈরির সম্পূর্ণ গাইড।" },
+      { title: "জৈব সার গাইড — সবজি বন্ধু" },
+      {
+        name: "description",
+        content:
+          "গোবর, কম্পোস্ট, ভার্মি কম্পোস্ট, সবুজ সার ও জৈব বালাইনাশক তৈরির সম্পূর্ণ বাংলা গাইড।",
+      },
     ],
   }),
 });
 
-type Item = (typeof ORGANIC_FERTILIZER_GUIDE)[OrganicFertilizerKey];
+const TABS: { key: OrganicFertilizerKey; label: string; icon: string }[] = [
+  { key: "goborSar", label: "গোবর সার", icon: "🐄" },
+  { key: "compost", label: "কম্পোস্ট", icon: "♻️" },
+  { key: "vermicompost", label: "ভার্মি কম্পোস্ট", icon: "🪱" },
+  { key: "greenManure", label: "সবুজ সার", icon: "🌿" },
+  { key: "biopesticide", label: "জৈব বালাইনাশক", icon: "🌶️" },
+];
 
-const KEYS: OrganicFertilizerKey[] = ["goborSar", "compost", "vermicompost", "greenManure", "biopesticide"];
+const CALC_KEYS: Record<OrganicFertilizerKey, keyof typeof ORGANIC_APPLICATION_RATES | null> = {
+  goborSar: "gobor",
+  compost: "compost",
+  vermicompost: "vermicompost",
+  greenManure: null,
+  biopesticide: null,
+};
+
+const REDUCTION_KEYS: Record<OrganicFertilizerKey, keyof typeof CHEMICAL_REDUCTION | null> = {
+  goborSar: "gobor",
+  compost: "compost",
+  vermicompost: "vermicompost",
+  greenManure: "greenManure",
+  biopesticide: null,
+};
+
+// Rough fertilizer prices (BDT/kg) for savings estimate
+const PRICES = { urea: 27, tsp: 27, mop: 20 };
 
 function OrganicFertilizerPage() {
   const navigate = useNavigate();
-  const [selectedKey, setSelectedKey] = useState<OrganicFertilizerKey | null>(null);
-
-  const selected = selectedKey ? ORGANIC_FERTILIZER_GUIDE[selectedKey] : null;
+  const [active, setActive] = useState<OrganicFertilizerKey>("goborSar");
+  const item = ORGANIC_FERTILIZER_GUIDE[active] as any;
 
   return (
-    <main className="min-h-screen bg-[#F0FFF4] md:max-w-[560px] md:mx-auto pb-16">
-      <header className="px-5 pt-8 pb-8 rounded-b-3xl" style={{ background: "var(--gradient-brand)" }}>
+    <main className="min-h-screen bg-[#F0FFF4] md:max-w-[560px] md:mx-auto pb-20">
+      {/* Header */}
+      <header
+        className="px-5 pt-8 pb-8 rounded-b-3xl"
+        style={{ background: "var(--gradient-brand)" }}
+      >
         <button
-          onClick={() => (selected ? setSelectedKey(null) : navigate({ to: "/dashboard" }))}
+          onClick={() => navigate({ to: "/dashboard" })}
           className="h-9 w-9 rounded-full bg-white/15 flex items-center justify-center text-white"
           aria-label="Back"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="mt-4 text-2xl font-bold text-white">
-          {selected ? selected.name : "জৈব সার গাইড"}
-        </h1>
-        <p className="text-sm text-white/85 mt-1">
-          {selected ? selected.shortDesc : "ঘরে বসেই তৈরি করুন প্রাকৃতিক সার ও বালাইনাশক"}
-        </p>
+        <h1 className="mt-4 text-2xl font-bold text-white">🌿 জৈব সার</h1>
+        <p className="text-sm text-white/85 mt-1">প্রকৃতির সেরা উপহার</p>
       </header>
 
-      {!selected ? (
-        <ListView onPick={setSelectedKey} />
-      ) : (
-        <DetailView item={selected} />
-      )}
+      {/* Tabs */}
+      <nav className="-mt-4 mb-4 sticky top-0 z-10 bg-[#F0FFF4]/95 backdrop-blur">
+        <div className="overflow-x-auto no-scrollbar">
+          <ul className="flex gap-1 px-3 py-2 min-w-max">
+            {TABS.map((t) => {
+              const on = t.key === active;
+              return (
+                <li key={t.key}>
+                  <button
+                    onClick={() => setActive(t.key)}
+                    className={`px-3 py-2 text-sm rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-colors ${
+                      on
+                        ? "bg-white text-emerald-800 font-bold border-b-2 border-emerald-700"
+                        : "text-gray-600"
+                    }`}
+                  >
+                    <span>{t.icon}</span>
+                    <span>{t.label}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </nav>
+
+      <section className="px-4 space-y-4">
+        {/* SECTION 2 — Info card */}
+        <InfoCard item={item} />
+
+        {/* SECTION 3 — Steps OR Recipes */}
+        {item.recipes ? (
+          <Recipes recipes={item.recipes} color={item.color} />
+        ) : (
+          <StepsCard steps={item.preparationSteps} color={item.color} />
+        )}
+
+        {/* Green manure extras */}
+        {item.nitrogenProvided && (
+          <Card title="🌱 নাইট্রোজেন সরবরাহ">
+            <div className="grid gap-2">
+              <Stat
+                label="প্রতি বিঘায়"
+                value={item.nitrogenProvided.perBigha}
+                tone="emerald"
+              />
+              <Stat
+                label="ইউরিয়া সাশ্রয়"
+                value={item.nitrogenProvided.equivalentUrea}
+                tone="amber"
+              />
+            </div>
+          </Card>
+        )}
+
+        {item.suitableCrops && (
+          <Card title="🌾 উপযুক্ত ফসল">
+            <ul className="space-y-1.5">
+              {item.suitableCrops.map((c: string) => (
+                <li key={c} className="text-sm text-gray-800">
+                  • {c}
+                </li>
+              ))}
+            </ul>
+          </Card>
+        )}
+
+        {/* SECTION 4 — Calculator */}
+        {CALC_KEYS[active] && (
+          <Calculator activeKey={active} />
+        )}
+
+        {/* Business potential — vermicompost only */}
+        {item.businessPotential && (
+          <div className="bg-gradient-to-br from-amber-100 to-yellow-50 rounded-2xl border border-amber-200 p-4">
+            <h3 className="font-bold text-amber-900 mb-3">💰 আয়ের সুযোগ!</h3>
+            <div className="space-y-2 text-sm">
+              <Row k="মাসিক উৎপাদন" v={item.businessPotential.productionPerMonth} />
+              <Row k="বিক্রয় মূল্য" v={item.businessPotential.sellingPrice} />
+              <Row k="মাসিক আয়" v={item.businessPotential.monthlyIncome} />
+            </div>
+            <p className="mt-3 text-xs italic text-amber-900 bg-white/60 rounded-lg px-3 py-2">
+              "{item.businessPotential.note}"
+            </p>
+          </div>
+        )}
+
+        {/* SECTION 5 — Videos */}
+        {item.videoLinks && (
+          <Card title="ভিডিও গাইড 📹">
+            <ul className="space-y-2">
+              {item.videoLinks.map((v: any) => (
+                <li key={v.url}>
+                  <button
+                    onClick={() => window.open(v.url, "_blank", "noopener,noreferrer")}
+                    className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-left"
+                  >
+                    <span className="text-2xl">📹</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold text-gray-900 truncate">
+                        {v.title}
+                      </div>
+                      <div className="text-[11px] text-gray-500">
+                        {v.source}
+                        {v.duration ? ` • ${v.duration}` : ""}
+                      </div>
+                    </div>
+                    <span className="text-xs font-semibold text-emerald-700 flex items-center gap-0.5 shrink-0">
+                      দেখুন <ExternalLink className="h-3 w-3" />
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        )}
+
+        {/* Biopesticide general tips */}
+        {item.generalTips && (
+          <Card title="💡 সাধারণ নিয়ম">
+            <ul className="space-y-2">
+              {item.generalTips.map((t: string) => (
+                <li key={t} className="text-sm text-gray-800 leading-relaxed">
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </Card>
+        )}
+
+        {/* Per-item tips */}
+        {item.tips && (
+          <Card title="💡 পরামর্শ">
+            <ul className="space-y-2">
+              {item.tips.map((t: string) => (
+                <li key={t} className="text-sm text-gray-800 leading-relaxed">
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </Card>
+        )}
+
+        {/* GENERAL TIPS — bottom, all tabs */}
+        <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4">
+          <h3 className="font-bold text-yellow-900 mb-3">মনে রাখবেন</h3>
+          <ul className="space-y-2.5">
+            {[
+              "জৈব সার রাসায়নিক সারের সাথে মিলিয়ে ব্যবহার করলে সেরা ফল পাওয়া যায়",
+              "জৈব সার ব্যবহারে রাসায়নিক সারের খরচ ২৫-৫০% কমানো সম্ভব",
+              "মাটির স্বাস্থ্য ভালো রাখতে প্রতি বছর জৈব সার দিন",
+            ].map((t) => (
+              <li key={t} className="flex gap-2 text-sm text-yellow-900">
+                <span>💡</span>
+                <span className="leading-relaxed">{t}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
     </main>
   );
 }
 
-function ListView({ onPick }: { onPick: (k: OrganicFertilizerKey) => void }) {
-  return (
-    <section className="px-4 -mt-4 space-y-3">
-      {KEYS.map((k) => {
-        const it = ORGANIC_FERTILIZER_GUIDE[k];
-        return (
-          <button
-            key={k}
-            onClick={() => onPick(k)}
-            className="w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center gap-3 text-left active:scale-[0.99] transition-transform"
-          >
-            <div
-              className="h-14 w-14 rounded-2xl flex items-center justify-center text-3xl shrink-0"
-              style={{ background: it.bgColor }}
-            >
-              {it.icon}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="font-bold text-gray-900">{it.name}</div>
-              <div className="text-xs text-gray-600 mt-0.5 line-clamp-2">{it.shortDesc}</div>
-              {"totalTime" in it && (
-                <div className="flex gap-2 mt-1.5">
-                  <Chip>{(it as any).totalTime}</Chip>
-                  <Chip>{(it as any).difficulty}</Chip>
-                </div>
-              )}
-            </div>
-            <ChevronRight className="h-5 w-5 text-gray-400 shrink-0" />
-          </button>
-        );
-      })}
-    </section>
-  );
-}
+/* ─── components ─── */
 
-function DetailView({ item }: { item: Item }) {
-  const anyItem = item as any;
+function InfoCard({ item }: { item: any }) {
   return (
-    <section className="px-4 -mt-4 space-y-4">
-      {/* Quick facts */}
-      {(anyItem.totalTime || anyItem.difficulty || anyItem.cost) && (
-        <div className="grid grid-cols-3 gap-2">
-          {anyItem.totalTime && <Fact label="সময়" value={anyItem.totalTime} />}
-          {anyItem.difficulty && <Fact label="কঠিনতা" value={anyItem.difficulty} />}
-          {anyItem.cost && <Fact label="খরচ" value={anyItem.cost} />}
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="p-4 flex gap-3">
+        <div
+          className="h-16 w-16 rounded-2xl flex items-center justify-center text-4xl shrink-0"
+          style={{ background: item.bgColor }}
+        >
+          {item.icon}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="font-bold text-gray-900">{item.name}</div>
+          <p className="text-xs text-gray-600 mt-0.5">{item.shortDesc}</p>
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {item.difficulty && <Chip>কঠিনতা: {item.difficulty}</Chip>}
+            {item.totalTime && <Chip>সময়: {item.totalTime}</Chip>}
+            {item.cost && <Chip>খরচ: {item.cost}</Chip>}
+          </div>
+        </div>
+      </div>
+
+      {item.nutrientContent && (
+        <div className="px-4 pb-4">
+          <div className="text-xs font-semibold text-gray-500 mb-2">পুষ্টিগুণ</div>
+          <div className="grid grid-cols-3 gap-2">
+            {Object.entries(item.nutrientContent).map(([k, v]) => (
+              <div key={k} className="bg-gray-50 rounded-lg p-2 text-center">
+                <div className="text-[10px] text-gray-500 uppercase">{k.slice(0, 1)}</div>
+                <div className="text-xs font-bold text-gray-900">{String(v)}</div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Benefits */}
-      {anyItem.benefits && (
-        <Card title="✨ উপকারিতা">
-          <ul className="space-y-2">
-            {anyItem.benefits.map((b: string) => (
+      {item.benefits && (
+        <div className="px-4 pb-4 border-t border-gray-100 pt-3">
+          <div className="text-xs font-semibold text-gray-500 mb-2">উপকারিতা</div>
+          <ul className="space-y-1.5">
+            {item.benefits.map((b: string) => (
               <li key={b} className="flex gap-2 text-sm text-gray-800">
                 <span className="text-emerald-600">✅</span>
                 <span>{b}</span>
               </li>
             ))}
           </ul>
-        </Card>
+        </div>
       )}
 
-      {/* Nutrient content */}
-      {anyItem.nutrientContent && (
-        <Card title="🧪 পুষ্টি উপাদান">
-          <div className="grid grid-cols-2 gap-2">
-            {Object.entries(anyItem.nutrientContent).map(([k, v]) => (
-              <div key={k} className="bg-gray-50 rounded-xl p-2.5">
-                <div className="text-[11px] text-gray-500 uppercase">{k}</div>
-                <div className="font-bold text-gray-900">{String(v)}</div>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
-
-      {/* Materials */}
-      {anyItem.materials && (
-        <Card title="📋 উপকরণ">
+      {item.materials && (
+        <div className="px-4 pb-4 border-t border-gray-100 pt-3">
+          <div className="text-xs font-semibold text-gray-500 mb-2">উপকরণ</div>
           <ul className="divide-y divide-gray-100">
-            {anyItem.materials.map((m: { name: string; amount: string }) => (
-              <li key={m.name} className="py-2 flex justify-between text-sm">
+            {item.materials.map((m: { name: string; amount: string }) => (
+              <li key={m.name} className="py-1.5 flex justify-between text-sm">
                 <span className="text-gray-800">{m.name}</span>
                 <span className="font-semibold text-gray-900">{m.amount}</span>
               </li>
             ))}
           </ul>
-        </Card>
+        </div>
       )}
+    </div>
+  );
+}
 
-      {/* Preparation steps */}
-      {anyItem.preparationSteps && (
-        <Card title="📝 প্রস্তুত প্রণালী">
-          <ol className="space-y-3">
-            {anyItem.preparationSteps.map((s: any) => (
-              <li key={s.step} className="flex gap-3">
-                <div
-                  className="h-9 w-9 rounded-full flex items-center justify-center font-bold text-white shrink-0"
-                  style={{ background: item.color }}
-                >
-                  {s.step}
+function StepsCard({ steps, color }: { steps: any[]; color: string }) {
+  return (
+    <Card title="তৈরির পদ্ধতি">
+      <ol className="space-y-4">
+        {steps.map((s, i) => (
+          <li key={s.step} className="flex gap-3">
+            <div className="flex flex-col items-center">
+              <div
+                className="h-9 w-9 rounded-full flex items-center justify-center font-bold text-white shrink-0"
+                style={{ background: color }}
+              >
+                {s.step}
+              </div>
+              {i < steps.length - 1 && (
+                <div className="w-px flex-1 bg-gray-200 my-1" />
+              )}
+            </div>
+            <div className="flex-1 pb-1">
+              <div className="flex items-start justify-between gap-2">
+                <div className="font-semibold text-gray-900">{s.title}</div>
+                <div className="text-xs text-gray-500 whitespace-nowrap flex items-center gap-1">
+                  {s.duration} <span>{s.icon}</span>
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{s.icon}</span>
-                    <div className="font-semibold text-gray-900">{s.title}</div>
-                  </div>
-                  <p className="text-sm text-gray-700 mt-1 leading-relaxed">{s.desc}</p>
-                  {s.duration && (
-                    <div className="text-[11px] text-gray-500 mt-1">⏱ {s.duration}</div>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ol>
-        </Card>
-      )}
-
-      {/* Application rates */}
-      {anyItem.applicationRates && (
-        <Card title="📏 প্রয়োগ মাত্রা">
-          <ul className="divide-y divide-gray-100">
-            {Object.entries(anyItem.applicationRates).map(([crop, info]: any) => (
-              <li key={crop} className="py-2 flex justify-between text-sm">
-                <span className="text-gray-800">{crop}</span>
-                <span className="font-semibold text-gray-900">
-                  {info.amount} {info.unit}
-                </span>
-              </li>
-            ))}
-          </ul>
-          {anyItem.applicationTime && (
-            <div className="mt-3 text-xs text-gray-600 bg-amber-50 rounded-lg px-3 py-2">
-              ⏰ <strong>সময়:</strong> {anyItem.applicationTime}
+              </div>
+              <p className="text-sm text-gray-700 mt-1 leading-relaxed">{s.desc}</p>
             </div>
-          )}
-        </Card>
-      )}
-
-      {/* Recipes (biopesticide) */}
-      {anyItem.recipes && (
-        <Recipes recipes={anyItem.recipes} color={item.color} />
-      )}
-
-      {/* Tips */}
-      {anyItem.tips && (
-        <Card title="💡 পরামর্শ">
-          <ul className="space-y-2">
-            {anyItem.tips.map((t: string) => (
-              <li key={t} className="text-sm text-gray-800 leading-relaxed">{t}</li>
-            ))}
-          </ul>
-        </Card>
-      )}
-
-      {anyItem.generalTips && (
-        <Card title="💡 সাধারণ নিয়ম">
-          <ul className="space-y-2">
-            {anyItem.generalTips.map((t: string) => (
-              <li key={t} className="text-sm text-gray-800 leading-relaxed">{t}</li>
-            ))}
-          </ul>
-        </Card>
-      )}
-
-      {/* Nitrogen provided (green manure) */}
-      {anyItem.nitrogenProvided && (
-        <Card title="🌱 নাইট্রোজেন সরবরাহ">
-          <div className="grid grid-cols-1 gap-2">
-            <div className="bg-emerald-50 rounded-xl p-3">
-              <div className="text-xs text-emerald-700">প্রতি বিঘায়</div>
-              <div className="font-bold text-emerald-900">{anyItem.nitrogenProvided.perBigha}</div>
-            </div>
-            <div className="bg-amber-50 rounded-xl p-3">
-              <div className="text-xs text-amber-700">ইউরিয়া সাশ্রয়</div>
-              <div className="font-bold text-amber-900">{anyItem.nitrogenProvided.equivalentUrea}</div>
-            </div>
-          </div>
-        </Card>
-      )}
-
-      {anyItem.suitableCrops && (
-        <Card title="🌾 উপযুক্ত ফসল">
-          <ul className="space-y-1.5">
-            {anyItem.suitableCrops.map((c: string) => (
-              <li key={c} className="text-sm text-gray-800">• {c}</li>
-            ))}
-          </ul>
-        </Card>
-      )}
-
-      {/* Business potential */}
-      {anyItem.businessPotential && (
-        <Card title="💰 ব্যবসায়িক সম্ভাবনা">
-          <div className="space-y-2 text-sm">
-            <Row k="মাসিক উৎপাদন" v={anyItem.businessPotential.productionPerMonth} />
-            <Row k="বিক্রয় মূল্য" v={anyItem.businessPotential.sellingPrice} />
-            <Row k="মাসিক আয়" v={anyItem.businessPotential.monthlyIncome} />
-          </div>
-          <p className="mt-3 text-xs text-emerald-800 bg-emerald-50 rounded-lg px-3 py-2">
-            {anyItem.businessPotential.note}
-          </p>
-        </Card>
-      )}
-
-      {/* Video links */}
-      {anyItem.videoLinks && (
-        <Card title="🎥 ভিডিও ও রেফারেন্স">
-          <ul className="space-y-2">
-            {anyItem.videoLinks.map((v: any) => (
-              <li key={v.url}>
-                <a
-                  href={v.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-start gap-2 p-2 rounded-lg hover:bg-gray-50"
-                >
-                  <ExternalLink className="h-4 w-4 mt-0.5 text-blue-600 shrink-0" />
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-gray-900">{v.title}</div>
-                    <div className="text-[11px] text-gray-500">
-                      {v.source}{v.duration ? ` • ${v.duration}` : ""}
-                    </div>
-                  </div>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      )}
-    </section>
+          </li>
+        ))}
+      </ol>
+    </Card>
   );
 }
 
@@ -291,56 +344,69 @@ function Recipes({ recipes, color }: { recipes: any[]; color: string }) {
       {recipes.map((r) => {
         const isOpen = open === r.name;
         return (
-          <div key={r.name} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div
+            key={r.name}
+            className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+          >
+            <div className="p-4">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{r.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-gray-900">{r.name}</div>
+                  <div className="text-xs text-gray-500">কার্যকর: {r.effectiveness}</div>
+                </div>
+              </div>
+
+              <div className="mt-3">
+                <div className="text-xs font-semibold text-gray-500 mb-1.5">উপকরণ</div>
+                <ul className="space-y-1">
+                  {r.ingredients.map((i: string) => (
+                    <li key={i} className="text-sm text-gray-800">• {i}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
             <button
               onClick={() => setOpen(isOpen ? null : r.name)}
-              className="w-full p-4 flex items-center gap-3 text-left"
+              className="w-full px-4 py-2.5 text-sm font-semibold text-emerald-700 bg-emerald-50 flex items-center justify-center gap-1 border-t border-emerald-100"
             >
-              <span className="text-2xl">{r.icon}</span>
-              <div className="flex-1">
-                <div className="font-bold text-gray-900">{r.name}</div>
-                <div className="text-xs text-gray-500">{r.effectiveness}</div>
-              </div>
-              <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform ${isOpen ? "rotate-90" : ""}`} />
+              <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+              প্রস্তুত প্রণালী {isOpen ? "লুকান" : "দেখুন"}
             </button>
+
             {isOpen && (
-              <div className="px-4 pb-4 space-y-3 border-t border-gray-100 pt-3">
+              <div className="p-4 space-y-3 border-t border-gray-100">
+                <ol className="space-y-1.5">
+                  {r.steps.map((s: string, i: number) => (
+                    <li key={s} className="flex gap-2 text-sm text-gray-800">
+                      <span
+                        className="h-5 w-5 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0"
+                        style={{ background: color }}
+                      >
+                        {i + 1}
+                      </span>
+                      <span>{s}</span>
+                    </li>
+                  ))}
+                </ol>
+
                 <div>
-                  <div className="text-xs font-semibold text-gray-500 mb-1">উপকরণ</div>
-                  <ul className="space-y-1">
-                    {r.ingredients.map((i: string) => (
-                      <li key={i} className="text-sm text-gray-800">• {i}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <div className="text-xs font-semibold text-gray-500 mb-1">পদ্ধতি</div>
-                  <ol className="space-y-1.5">
-                    {r.steps.map((s: string, i: number) => (
-                      <li key={s} className="flex gap-2 text-sm text-gray-800">
-                        <span
-                          className="h-5 w-5 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0"
-                          style={{ background: color }}
-                        >
-                          {i + 1}
-                        </span>
-                        <span>{s}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-                <div>
-                  <div className="text-xs font-semibold text-gray-500 mb-1">টার্গেট পোকা</div>
+                  <div className="text-xs font-semibold text-gray-500 mb-1.5">টার্গেট পোকা</div>
                   <div className="flex flex-wrap gap-1.5">
                     {r.targetPests.map((p: string) => (
-                      <span key={p} className="text-xs bg-red-50 text-red-700 px-2 py-0.5 rounded-full">
+                      <span
+                        key={p}
+                        className="text-xs bg-red-50 text-red-700 px-2 py-0.5 rounded-full"
+                      >
                         {p}
                       </span>
                     ))}
                   </div>
                 </div>
+
                 {r.caution && (
-                  <div className="text-xs text-amber-900 bg-amber-50 rounded-lg px-3 py-2">
+                  <div className="text-xs text-red-800 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                     ⚠️ {r.caution}
                   </div>
                 )}
@@ -353,6 +419,148 @@ function Recipes({ recipes, color }: { recipes: any[]; color: string }) {
   );
 }
 
+function Calculator({ activeKey }: { activeKey: OrganicFertilizerKey }) {
+  const calcKey = CALC_KEYS[activeKey]!;
+  const redKey = REDUCTION_KEYS[activeKey];
+  const rates = ORGANIC_APPLICATION_RATES[calcKey];
+  const item = ORGANIC_FERTILIZER_GUIDE[activeKey] as any;
+  const crops = Object.keys(rates);
+
+  const [crop, setCrop] = useState<string>(crops[0]);
+  const [areaInput, setAreaInput] = useState<string>("1");
+  const [unit, setUnit] = useState<"শতক" | "বিঘা" | "একর">("বিঘা");
+  const [showResult, setShowResult] = useState(false);
+
+  // Conversions to bigha (1 bigha = 33 শতক = ~0.33 একর; 1 একর = 3 বিঘা)
+  const toBigha = (n: number) =>
+    unit === "বিঘা" ? n : unit === "শতক" ? n / 33 : n * 3;
+
+  const area = Number(areaInput) || 0;
+  const bigha = toBigha(area);
+  const ratePerBigha = (rates as any)[crop] as number;
+  const totalKg = useMemo(() => Math.round(ratePerBigha * bigha), [ratePerBigha, bigha]);
+
+  const reduction = redKey ? CHEMICAL_REDUCTION[redKey] : null;
+
+  // Rough baseline chemical doses (kg/bigha) — DAE general guide
+  const BASELINE = { urea: 20, tsp: 7, mop: 5 };
+  const savings = reduction
+    ? {
+        urea: +(BASELINE.urea * reduction.urea * bigha).toFixed(2),
+        tsp: +(BASELINE.tsp * reduction.tsp * bigha).toFixed(2),
+        mop: +(BASELINE.mop * reduction.mop * bigha).toFixed(2),
+      }
+    : null;
+  const moneySaved = savings
+    ? Math.round(
+        savings.urea * PRICES.urea + savings.tsp * PRICES.tsp + savings.mop * PRICES.mop
+      )
+    : 0;
+
+  return (
+    <Card title="কতটুকু দেবেন?">
+      <div className="space-y-3">
+        <div>
+          <label className="text-xs font-semibold text-gray-600">ফসল বাছাই করুন</label>
+          <select
+            value={crop}
+            onChange={(e) => {
+              setCrop(e.target.value);
+              setShowResult(false);
+            }}
+            className="mt-1 w-full h-11 rounded-xl border border-gray-200 px-3 bg-white text-sm"
+          >
+            {crops.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="text-xs font-semibold text-gray-600">জমির পরিমাণ</label>
+          <div className="mt-1 flex gap-2">
+            <input
+              type="number"
+              min={0}
+              step="0.1"
+              value={areaInput}
+              onChange={(e) => {
+                setAreaInput(e.target.value);
+                setShowResult(false);
+              }}
+              className="flex-1 h-11 rounded-xl border border-gray-200 px-3 text-sm"
+            />
+            <div className="flex rounded-xl bg-gray-100 p-0.5">
+              {(["শতক", "বিঘা", "একর"] as const).map((u) => (
+                <button
+                  key={u}
+                  onClick={() => { setUnit(u); setShowResult(false); }}
+                  className={`px-3 text-xs font-semibold rounded-lg transition ${
+                    unit === u ? "bg-white text-emerald-700 shadow-sm" : "text-gray-600"
+                  }`}
+                >
+                  {u}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setShowResult(true)}
+          disabled={!area}
+          className="w-full h-11 rounded-xl bg-[#2D6A4F] text-white font-bold text-sm disabled:opacity-50 active:scale-[0.98]"
+        >
+          হিসাব করুন
+        </button>
+
+        {showResult && area > 0 && (
+          <div className="mt-2 bg-emerald-50 border border-emerald-200 rounded-2xl p-4 space-y-3">
+            <div className="font-bold text-emerald-900">
+              {crop} — {area} {unit}-এর জন্য
+            </div>
+
+            <div className="flex items-center justify-between bg-white rounded-xl p-3">
+              <span className="flex items-center gap-2 text-sm font-semibold text-gray-800">
+                <span className="text-xl">{item.icon}</span>
+                {item.name}:
+              </span>
+              <span className="font-bold text-emerald-800">{totalKg} কেজি</span>
+            </div>
+
+            {savings && (
+              <>
+                <div className="text-xs font-semibold text-gray-700">
+                  এই সার দিলে রাসায়নিক সার কমবে:
+                </div>
+                <ul className="space-y-1 text-sm">
+                  <SaveRow label="ইউরিয়া" pct={reduction!.urea} kg={savings.urea} />
+                  <SaveRow label="TSP" pct={reduction!.tsp} kg={savings.tsp} />
+                  <SaveRow label="MOP" pct={reduction!.mop} kg={savings.mop} />
+                </ul>
+                <div className="bg-amber-100 rounded-xl px-3 py-2.5 text-sm font-bold text-amber-900">
+                  💰 আনুমানিক সাশ্রয়: ৳{moneySaved.toLocaleString("bn-BD")}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function SaveRow({ label, pct, kg }: { label: string; pct: number; kg: number }) {
+  return (
+    <li className="flex justify-between text-gray-800">
+      <span>{label}: {Math.round(pct * 100)}% কম</span>
+      <span className="font-semibold">= {kg} কেজি সাশ্রয়</span>
+    </li>
+  );
+}
+
+/* ─── small atoms ─── */
+
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
@@ -362,18 +570,9 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
   );
 }
 
-function Fact({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="bg-white rounded-xl border border-gray-100 p-2.5 text-center">
-      <div className="text-[11px] text-gray-500">{label}</div>
-      <div className="text-xs font-bold text-gray-900 mt-0.5 leading-tight">{value}</div>
-    </div>
-  );
-}
-
 function Chip({ children }: { children: React.ReactNode }) {
   return (
-    <span className="text-[10px] bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">
+    <span className="text-[11px] bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">
       {children}
     </span>
   );
@@ -382,11 +581,21 @@ function Chip({ children }: { children: React.ReactNode }) {
 function Row({ k, v }: { k: string; v: string }) {
   return (
     <div className="flex justify-between">
-      <span className="text-gray-600">{k}</span>
+      <span className="text-gray-700">{k}</span>
       <span className="font-semibold text-gray-900">{v}</span>
     </div>
   );
 }
 
-// Keep useMemo import used (avoid unused) — referenced for potential future memoization
-void useMemo;
+function Stat({ label, value, tone }: { label: string; value: string; tone: "emerald" | "amber" }) {
+  const cls =
+    tone === "emerald"
+      ? "bg-emerald-50 text-emerald-900 border-emerald-200"
+      : "bg-amber-50 text-amber-900 border-amber-200";
+  return (
+    <div className={`rounded-xl border p-3 ${cls}`}>
+      <div className="text-xs opacity-80">{label}</div>
+      <div className="font-bold">{value}</div>
+    </div>
+  );
+}
