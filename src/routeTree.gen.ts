@@ -31,6 +31,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as VegetableGuideSlugRouteImport } from './routes/vegetable-guide.$slug'
 import { Route as UUserIdRouteImport } from './routes/u.$userId'
 import { Route as ProfileDiseaseHistoryRouteImport } from './routes/profile.disease-history'
+import { Route as PricePredictionHistoryRouteImport } from './routes/price-prediction.history'
 import { Route as AiBondhuPesticideRouteImport } from './routes/ai-bondhu.pesticide'
 import { Route as AiBondhuDiseaseRouteImport } from './routes/ai-bondhu.disease'
 import { Route as AiBondhuChatRouteImport } from './routes/ai-bondhu.chat'
@@ -49,6 +50,7 @@ import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as ApiPublicHooksWeatherAlertsRouteImport } from './routes/api/public/hooks/weather-alerts'
 import { Route as ApiPublicHooksSendScheduledBroadcastsRouteImport } from './routes/api/public/hooks/send-scheduled-broadcasts'
 import { Route as ApiPublicHooksFetchGovtPricesRouteImport } from './routes/api/public/hooks/fetch-govt-prices'
+import { Route as ApiPublicHooksCheckPredictionAccuracyRouteImport } from './routes/api/public/hooks/check-prediction-accuracy'
 
 const WeatherRoute = WeatherRouteImport.update({
   id: '/weather',
@@ -160,6 +162,11 @@ const ProfileDiseaseHistoryRoute = ProfileDiseaseHistoryRouteImport.update({
   path: '/profile/disease-history',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PricePredictionHistoryRoute = PricePredictionHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => PricePredictionRoute,
+} as any)
 const AiBondhuPesticideRoute = AiBondhuPesticideRouteImport.update({
   id: '/ai-bondhu/pesticide',
   path: '/ai-bondhu/pesticide',
@@ -253,6 +260,12 @@ const ApiPublicHooksFetchGovtPricesRoute =
     path: '/api/public/hooks/fetch-govt-prices',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksCheckPredictionAccuracyRoute =
+  ApiPublicHooksCheckPredictionAccuracyRouteImport.update({
+    id: '/api/public/hooks/check-prediction-accuracy',
+    path: '/api/public/hooks/check-prediction-accuracy',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -266,7 +279,7 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
   '/organic-fertilizer': typeof OrganicFertilizerRoute
-  '/price-prediction': typeof PricePredictionRoute
+  '/price-prediction': typeof PricePredictionRouteWithChildren
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
   '/vegetable-guide': typeof VegetableGuideRouteWithChildren
@@ -286,12 +299,14 @@ export interface FileRoutesByFullPath {
   '/ai-bondhu/chat': typeof AiBondhuChatRoute
   '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
+  '/price-prediction/history': typeof PricePredictionHistoryRoute
   '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
   '/vegetable-guide/$slug': typeof VegetableGuideSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/ai-bondhu/': typeof AiBondhuIndexRoute
   '/profile/': typeof ProfileIndexRoute
+  '/api/public/hooks/check-prediction-accuracy': typeof ApiPublicHooksCheckPredictionAccuracyRoute
   '/api/public/hooks/fetch-govt-prices': typeof ApiPublicHooksFetchGovtPricesRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -307,7 +322,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
   '/organic-fertilizer': typeof OrganicFertilizerRoute
-  '/price-prediction': typeof PricePredictionRoute
+  '/price-prediction': typeof PricePredictionRouteWithChildren
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
   '/vegetable-guide': typeof VegetableGuideRouteWithChildren
@@ -327,12 +342,14 @@ export interface FileRoutesByTo {
   '/ai-bondhu/chat': typeof AiBondhuChatRoute
   '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
+  '/price-prediction/history': typeof PricePredictionHistoryRoute
   '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
   '/vegetable-guide/$slug': typeof VegetableGuideSlugRoute
   '/admin': typeof AdminIndexRoute
   '/ai-bondhu': typeof AiBondhuIndexRoute
   '/profile': typeof ProfileIndexRoute
+  '/api/public/hooks/check-prediction-accuracy': typeof ApiPublicHooksCheckPredictionAccuracyRoute
   '/api/public/hooks/fetch-govt-prices': typeof ApiPublicHooksFetchGovtPricesRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -350,7 +367,7 @@ export interface FileRoutesById {
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
   '/organic-fertilizer': typeof OrganicFertilizerRoute
-  '/price-prediction': typeof PricePredictionRoute
+  '/price-prediction': typeof PricePredictionRouteWithChildren
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
   '/vegetable-guide': typeof VegetableGuideRouteWithChildren
@@ -370,12 +387,14 @@ export interface FileRoutesById {
   '/ai-bondhu/chat': typeof AiBondhuChatRoute
   '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
+  '/price-prediction/history': typeof PricePredictionHistoryRoute
   '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
   '/vegetable-guide/$slug': typeof VegetableGuideSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/ai-bondhu/': typeof AiBondhuIndexRoute
   '/profile/': typeof ProfileIndexRoute
+  '/api/public/hooks/check-prediction-accuracy': typeof ApiPublicHooksCheckPredictionAccuracyRoute
   '/api/public/hooks/fetch-govt-prices': typeof ApiPublicHooksFetchGovtPricesRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -414,12 +433,14 @@ export interface FileRouteTypes {
     | '/ai-bondhu/chat'
     | '/ai-bondhu/disease'
     | '/ai-bondhu/pesticide'
+    | '/price-prediction/history'
     | '/profile/disease-history'
     | '/u/$userId'
     | '/vegetable-guide/$slug'
     | '/admin/'
     | '/ai-bondhu/'
     | '/profile/'
+    | '/api/public/hooks/check-prediction-accuracy'
     | '/api/public/hooks/fetch-govt-prices'
     | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
@@ -455,12 +476,14 @@ export interface FileRouteTypes {
     | '/ai-bondhu/chat'
     | '/ai-bondhu/disease'
     | '/ai-bondhu/pesticide'
+    | '/price-prediction/history'
     | '/profile/disease-history'
     | '/u/$userId'
     | '/vegetable-guide/$slug'
     | '/admin'
     | '/ai-bondhu'
     | '/profile'
+    | '/api/public/hooks/check-prediction-accuracy'
     | '/api/public/hooks/fetch-govt-prices'
     | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
@@ -497,12 +520,14 @@ export interface FileRouteTypes {
     | '/ai-bondhu/chat'
     | '/ai-bondhu/disease'
     | '/ai-bondhu/pesticide'
+    | '/price-prediction/history'
     | '/profile/disease-history'
     | '/u/$userId'
     | '/vegetable-guide/$slug'
     | '/admin/'
     | '/ai-bondhu/'
     | '/profile/'
+    | '/api/public/hooks/check-prediction-accuracy'
     | '/api/public/hooks/fetch-govt-prices'
     | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
@@ -520,7 +545,7 @@ export interface RootRouteChildren {
   NotificationsRoute: typeof NotificationsRoute
   OfflineRoute: typeof OfflineRoute
   OrganicFertilizerRoute: typeof OrganicFertilizerRoute
-  PricePredictionRoute: typeof PricePredictionRoute
+  PricePredictionRoute: typeof PricePredictionRouteWithChildren
   PricesRoute: typeof PricesRoute
   RegisterRoute: typeof RegisterRoute
   VegetableGuideRoute: typeof VegetableGuideRouteWithChildren
@@ -534,6 +559,7 @@ export interface RootRouteChildren {
   UUserIdRoute: typeof UUserIdRoute
   AiBondhuIndexRoute: typeof AiBondhuIndexRoute
   ProfileIndexRoute: typeof ProfileIndexRoute
+  ApiPublicHooksCheckPredictionAccuracyRoute: typeof ApiPublicHooksCheckPredictionAccuracyRoute
   ApiPublicHooksFetchGovtPricesRoute: typeof ApiPublicHooksFetchGovtPricesRoute
   ApiPublicHooksSendScheduledBroadcastsRoute: typeof ApiPublicHooksSendScheduledBroadcastsRoute
   ApiPublicHooksWeatherAlertsRoute: typeof ApiPublicHooksWeatherAlertsRoute
@@ -695,6 +721,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileDiseaseHistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/price-prediction/history': {
+      id: '/price-prediction/history'
+      path: '/history'
+      fullPath: '/price-prediction/history'
+      preLoaderRoute: typeof PricePredictionHistoryRouteImport
+      parentRoute: typeof PricePredictionRoute
+    }
     '/ai-bondhu/pesticide': {
       id: '/ai-bondhu/pesticide'
       path: '/ai-bondhu/pesticide'
@@ -821,6 +854,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksFetchGovtPricesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/check-prediction-accuracy': {
+      id: '/api/public/hooks/check-prediction-accuracy'
+      path: '/api/public/hooks/check-prediction-accuracy'
+      fullPath: '/api/public/hooks/check-prediction-accuracy'
+      preLoaderRoute: typeof ApiPublicHooksCheckPredictionAccuracyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -854,6 +894,18 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface PricePredictionRouteChildren {
+  PricePredictionHistoryRoute: typeof PricePredictionHistoryRoute
+}
+
+const PricePredictionRouteChildren: PricePredictionRouteChildren = {
+  PricePredictionHistoryRoute: PricePredictionHistoryRoute,
+}
+
+const PricePredictionRouteWithChildren = PricePredictionRoute._addFileChildren(
+  PricePredictionRouteChildren,
+)
+
 interface VegetableGuideRouteChildren {
   VegetableGuideSlugRoute: typeof VegetableGuideSlugRoute
 }
@@ -878,7 +930,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotificationsRoute: NotificationsRoute,
   OfflineRoute: OfflineRoute,
   OrganicFertilizerRoute: OrganicFertilizerRoute,
-  PricePredictionRoute: PricePredictionRoute,
+  PricePredictionRoute: PricePredictionRouteWithChildren,
   PricesRoute: PricesRoute,
   RegisterRoute: RegisterRoute,
   VegetableGuideRoute: VegetableGuideRouteWithChildren,
@@ -892,6 +944,8 @@ const rootRouteChildren: RootRouteChildren = {
   UUserIdRoute: UUserIdRoute,
   AiBondhuIndexRoute: AiBondhuIndexRoute,
   ProfileIndexRoute: ProfileIndexRoute,
+  ApiPublicHooksCheckPredictionAccuracyRoute:
+    ApiPublicHooksCheckPredictionAccuracyRoute,
   ApiPublicHooksFetchGovtPricesRoute: ApiPublicHooksFetchGovtPricesRoute,
   ApiPublicHooksSendScheduledBroadcastsRoute:
     ApiPublicHooksSendScheduledBroadcastsRoute,

@@ -200,10 +200,12 @@ ${JSON.stringify(history.slice(-10))}
         prediction_json: prediction,
         data_points: history.length,
         trend,
+        user_id: context.userId,
       });
     } catch (e) {
       console.warn("[prediction] cache save failed:", e);
     }
+
 
     return {
       prediction,

@@ -59,6 +59,44 @@ function AnalyticsPage() {
       return { week1: Math.round((returned / ids.length) * 100), total: ids.length };
     },
   });
+  const { data: predictionPerf } = useQuery({
+    queryKey: ["admin", "analytics", "predictions", range],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("price_predictions")
+        .select("product_name, was_correct, checked_at")
+        .gte("created_at", since)
+        .limit(5000);
+      const rows = data ?? [];
+      const total = rows.length;
+      const checked = rows.filter((r) => r.was_correct !== null);
+      const correct = checked.filter((r) => r.was_correct === true).length;
+      const accuracy = checked.length > 0 ? Math.round((correct / checked.length) * 100) : 0;
+
+      const byProduct: Record<string, { total: number; correct: number; checked: number }> = {};
+      for (const r of rows) {
+        const p = r.product_name;
+        if (!byProduct[p]) byProduct[p] = { total: 0, correct: 0, checked: 0 };
+        byProduct[p].total += 1;
+        if (r.was_correct !== null) {
+          byProduct[p].checked += 1;
+          if (r.was_correct) byProduct[p].correct += 1;
+        }
+      }
+      const productStats = Object.entries(byProduct).map(([product, s]) => ({
+        product,
+        total: s.total,
+        accuracy: s.checked > 0 ? Math.round((s.correct / s.checked) * 100) : null,
+        checked: s.checked,
+      }));
+      const requested = [...productStats].sort((a, b) => b.total - a.total).slice(0, 5);
+      const checkedOnly = productStats.filter((p) => p.accuracy !== null && p.checked >= 2);
+      const best = [...checkedOnly].sort((a, b) => (b.accuracy ?? 0) - (a.accuracy ?? 0)).slice(0, 5);
+      const worst = [...checkedOnly].sort((a, b) => (a.accuracy ?? 0) - (b.accuracy ?? 0)).slice(0, 5);
+      return { total, checked: checked.length, accuracy, requested, best, worst };
+    },
+  });
+
 
   const exportCsv = (rows: Array<Record<string, unknown>>, name: string) => {
     if (!rows.length) return;
@@ -124,6 +162,20 @@ function AnalyticsPage() {
           {diseases.length === 0 && <li className="py-4 text-center text-gray-400 text-sm">তথ্য নেই</li>}
         </ul>
       </Card>
+
+      <Card title="🤖 AI পূর্বাভাস পারফরম্যান্স">
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          <MiniStat label="মোট পূর্বাভাস" value={toBn(predictionPerf?.total ?? 0)} />
+          <MiniStat label="যাচাই হয়েছে" value={toBn(predictionPerf?.checked ?? 0)} />
+          <MiniStat label="নির্ভুলতা" value={`${toBn(predictionPerf?.accuracy ?? 0)}%`} />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <PredList title="সবচেয়ে অনুরোধকৃত" rows={predictionPerf?.requested ?? []} field="total" />
+          <PredList title="✅ সবচেয়ে সঠিক" rows={predictionPerf?.best ?? []} field="accuracy" suffix="%" />
+          <PredList title="❌ সবচেয়ে ভুল" rows={predictionPerf?.worst ?? []} field="accuracy" suffix="%" />
+        </div>
+      </Card>
+
     </div>
   );
 }
@@ -153,3 +205,37 @@ function Card({ title, children, onExport }: { title: string; children: React.Re
     </div>
   );
 }
+
+function MiniStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-gray-50 rounded-lg p-2 text-center">
+      <p className="text-[10px] font-semibold text-gray-500">{label}</p>
+      <p className="text-lg font-extrabold leading-none mt-0.5">{value}</p>
+    </div>
+  );
+}
+
+type PredRow = { product: string; total: number; accuracy: number | null; checked: number };
+function PredList({ title, rows, field, suffix }: { title: string; rows: PredRow[]; field: "total" | "accuracy"; suffix?: string }) {
+  return (
+    <div className="border border-gray-100 rounded-lg p-2">
+      <p className="text-xs font-bold text-gray-600 mb-1">{title}</p>
+      {rows.length === 0 ? (
+        <p className="text-[11px] text-gray-400 py-2 text-center">তথ্য নেই</p>
+      ) : (
+        <ul className="space-y-1">
+          {rows.map((r) => {
+            const v = field === "total" ? r.total : r.accuracy;
+            return (
+              <li key={r.product} className="flex justify-between text-xs">
+                <span className="truncate">{r.product}</span>
+                <span className="font-bold ml-2">{toBn(v ?? 0)}{suffix ?? ""}</span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
