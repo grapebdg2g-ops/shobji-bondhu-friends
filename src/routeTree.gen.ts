@@ -31,6 +31,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as VegetableGuideSlugRouteImport } from './routes/vegetable-guide.$slug'
 import { Route as UUserIdRouteImport } from './routes/u.$userId'
 import { Route as ProfileDiseaseHistoryRouteImport } from './routes/profile.disease-history'
+import { Route as PricePredictionHistoryRouteImport } from './routes/price-prediction.history'
 import { Route as AiBondhuPesticideRouteImport } from './routes/ai-bondhu.pesticide'
 import { Route as AiBondhuDiseaseRouteImport } from './routes/ai-bondhu.disease'
 import { Route as AiBondhuChatRouteImport } from './routes/ai-bondhu.chat'
@@ -161,6 +162,11 @@ const ProfileDiseaseHistoryRoute = ProfileDiseaseHistoryRouteImport.update({
   path: '/profile/disease-history',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PricePredictionHistoryRoute = PricePredictionHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => PricePredictionRoute,
+} as any)
 const AiBondhuPesticideRoute = AiBondhuPesticideRouteImport.update({
   id: '/ai-bondhu/pesticide',
   path: '/ai-bondhu/pesticide',
@@ -273,7 +279,7 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
   '/organic-fertilizer': typeof OrganicFertilizerRoute
-  '/price-prediction': typeof PricePredictionRoute
+  '/price-prediction': typeof PricePredictionRouteWithChildren
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
   '/vegetable-guide': typeof VegetableGuideRouteWithChildren
@@ -293,6 +299,7 @@ export interface FileRoutesByFullPath {
   '/ai-bondhu/chat': typeof AiBondhuChatRoute
   '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
+  '/price-prediction/history': typeof PricePredictionHistoryRoute
   '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
   '/vegetable-guide/$slug': typeof VegetableGuideSlugRoute
@@ -315,7 +322,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
   '/organic-fertilizer': typeof OrganicFertilizerRoute
-  '/price-prediction': typeof PricePredictionRoute
+  '/price-prediction': typeof PricePredictionRouteWithChildren
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
   '/vegetable-guide': typeof VegetableGuideRouteWithChildren
@@ -335,6 +342,7 @@ export interface FileRoutesByTo {
   '/ai-bondhu/chat': typeof AiBondhuChatRoute
   '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
+  '/price-prediction/history': typeof PricePredictionHistoryRoute
   '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
   '/vegetable-guide/$slug': typeof VegetableGuideSlugRoute
@@ -359,7 +367,7 @@ export interface FileRoutesById {
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
   '/organic-fertilizer': typeof OrganicFertilizerRoute
-  '/price-prediction': typeof PricePredictionRoute
+  '/price-prediction': typeof PricePredictionRouteWithChildren
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
   '/vegetable-guide': typeof VegetableGuideRouteWithChildren
@@ -379,6 +387,7 @@ export interface FileRoutesById {
   '/ai-bondhu/chat': typeof AiBondhuChatRoute
   '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
+  '/price-prediction/history': typeof PricePredictionHistoryRoute
   '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
   '/vegetable-guide/$slug': typeof VegetableGuideSlugRoute
@@ -424,6 +433,7 @@ export interface FileRouteTypes {
     | '/ai-bondhu/chat'
     | '/ai-bondhu/disease'
     | '/ai-bondhu/pesticide'
+    | '/price-prediction/history'
     | '/profile/disease-history'
     | '/u/$userId'
     | '/vegetable-guide/$slug'
@@ -466,6 +476,7 @@ export interface FileRouteTypes {
     | '/ai-bondhu/chat'
     | '/ai-bondhu/disease'
     | '/ai-bondhu/pesticide'
+    | '/price-prediction/history'
     | '/profile/disease-history'
     | '/u/$userId'
     | '/vegetable-guide/$slug'
@@ -509,6 +520,7 @@ export interface FileRouteTypes {
     | '/ai-bondhu/chat'
     | '/ai-bondhu/disease'
     | '/ai-bondhu/pesticide'
+    | '/price-prediction/history'
     | '/profile/disease-history'
     | '/u/$userId'
     | '/vegetable-guide/$slug'
@@ -533,7 +545,7 @@ export interface RootRouteChildren {
   NotificationsRoute: typeof NotificationsRoute
   OfflineRoute: typeof OfflineRoute
   OrganicFertilizerRoute: typeof OrganicFertilizerRoute
-  PricePredictionRoute: typeof PricePredictionRoute
+  PricePredictionRoute: typeof PricePredictionRouteWithChildren
   PricesRoute: typeof PricesRoute
   RegisterRoute: typeof RegisterRoute
   VegetableGuideRoute: typeof VegetableGuideRouteWithChildren
@@ -709,6 +721,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileDiseaseHistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/price-prediction/history': {
+      id: '/price-prediction/history'
+      path: '/history'
+      fullPath: '/price-prediction/history'
+      preLoaderRoute: typeof PricePredictionHistoryRouteImport
+      parentRoute: typeof PricePredictionRoute
+    }
     '/ai-bondhu/pesticide': {
       id: '/ai-bondhu/pesticide'
       path: '/ai-bondhu/pesticide'
@@ -875,6 +894,18 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface PricePredictionRouteChildren {
+  PricePredictionHistoryRoute: typeof PricePredictionHistoryRoute
+}
+
+const PricePredictionRouteChildren: PricePredictionRouteChildren = {
+  PricePredictionHistoryRoute: PricePredictionHistoryRoute,
+}
+
+const PricePredictionRouteWithChildren = PricePredictionRoute._addFileChildren(
+  PricePredictionRouteChildren,
+)
+
 interface VegetableGuideRouteChildren {
   VegetableGuideSlugRoute: typeof VegetableGuideSlugRoute
 }
@@ -899,7 +930,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotificationsRoute: NotificationsRoute,
   OfflineRoute: OfflineRoute,
   OrganicFertilizerRoute: OrganicFertilizerRoute,
-  PricePredictionRoute: PricePredictionRoute,
+  PricePredictionRoute: PricePredictionRouteWithChildren,
   PricesRoute: PricesRoute,
   RegisterRoute: RegisterRoute,
   VegetableGuideRoute: VegetableGuideRouteWithChildren,
