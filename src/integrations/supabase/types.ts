@@ -173,6 +173,45 @@ export type Database = {
         }
         Relationships: []
       }
+      govt_prices: {
+        Row: {
+          created_at: string
+          district: string
+          id: string
+          market_name: string | null
+          price_avg: number
+          price_date: string
+          price_max: number | null
+          price_min: number | null
+          product_name: string
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          district: string
+          id?: string
+          market_name?: string | null
+          price_avg: number
+          price_date: string
+          price_max?: number | null
+          price_min?: number | null
+          product_name: string
+          source?: string
+        }
+        Update: {
+          created_at?: string
+          district?: string
+          id?: string
+          market_name?: string | null
+          price_avg?: number
+          price_date?: string
+          price_max?: number | null
+          price_min?: number | null
+          product_name?: string
+          source?: string
+        }
+        Relationships: []
+      }
       muted_users: {
         Row: {
           created_at: string
@@ -816,10 +855,11 @@ export type Database = {
         Args: { p_days?: number; p_district: string; p_product: string }
         Returns: {
           avg_price: number
-          day: string
+          data_points: number
           max_price: number
           min_price: number
-          sample_count: number
+          price_date: string
+          source: string
         }[]
       }
       get_public_user_roles: {
