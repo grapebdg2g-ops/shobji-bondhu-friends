@@ -205,3 +205,37 @@ function Card({ title, children, onExport }: { title: string; children: React.Re
     </div>
   );
 }
+
+function MiniStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-gray-50 rounded-lg p-2 text-center">
+      <p className="text-[10px] font-semibold text-gray-500">{label}</p>
+      <p className="text-lg font-extrabold leading-none mt-0.5">{value}</p>
+    </div>
+  );
+}
+
+type PredRow = { product: string; total: number; accuracy: number | null; checked: number };
+function PredList({ title, rows, field, suffix }: { title: string; rows: PredRow[]; field: "total" | "accuracy"; suffix?: string }) {
+  return (
+    <div className="border border-gray-100 rounded-lg p-2">
+      <p className="text-xs font-bold text-gray-600 mb-1">{title}</p>
+      {rows.length === 0 ? (
+        <p className="text-[11px] text-gray-400 py-2 text-center">তথ্য নেই</p>
+      ) : (
+        <ul className="space-y-1">
+          {rows.map((r) => {
+            const v = field === "total" ? r.total : r.accuracy;
+            return (
+              <li key={r.product} className="flex justify-between text-xs">
+                <span className="truncate">{r.product}</span>
+                <span className="font-bold ml-2">{toBn(v ?? 0)}{suffix ?? ""}</span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
