@@ -467,6 +467,8 @@ export type Database = {
       }
       price_predictions: {
         Row: {
+          actual_price: number | null
+          checked_at: string | null
           created_at: string
           data_points: number
           district: string
@@ -474,8 +476,12 @@ export type Database = {
           prediction_json: Json
           product_name: string
           trend: string | null
+          user_id: string | null
+          was_correct: boolean | null
         }
         Insert: {
+          actual_price?: number | null
+          checked_at?: string | null
           created_at?: string
           data_points?: number
           district: string
@@ -483,8 +489,12 @@ export type Database = {
           prediction_json: Json
           product_name: string
           trend?: string | null
+          user_id?: string | null
+          was_correct?: boolean | null
         }
         Update: {
+          actual_price?: number | null
+          checked_at?: string | null
           created_at?: string
           data_points?: number
           district?: string
@@ -492,6 +502,8 @@ export type Database = {
           prediction_json?: Json
           product_name?: string
           trend?: string | null
+          user_id?: string | null
+          was_correct?: boolean | null
         }
         Relationships: []
       }
