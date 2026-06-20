@@ -157,6 +157,12 @@ function PricePredictionPage() {
             <h1 className="text-lg font-bold leading-tight">📊 দামের পূর্বাভাস</h1>
             <p className="text-xs text-emerald-100">AI + বাজার ডেটা বিশ্লেষণ</p>
           </div>
+          <button
+            onClick={() => navigate({ to: "/price-prediction/history" })}
+            className="text-xs font-semibold bg-white/20 hover:bg-white/30 rounded-full px-3 py-1.5"
+          >
+            📜 ইতিহাস
+          </button>
         </div>
       </header>
 
