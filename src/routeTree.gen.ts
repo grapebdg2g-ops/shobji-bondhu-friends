@@ -49,6 +49,7 @@ import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as ApiPublicHooksWeatherAlertsRouteImport } from './routes/api/public/hooks/weather-alerts'
 import { Route as ApiPublicHooksSendScheduledBroadcastsRouteImport } from './routes/api/public/hooks/send-scheduled-broadcasts'
 import { Route as ApiPublicHooksFetchGovtPricesRouteImport } from './routes/api/public/hooks/fetch-govt-prices'
+import { Route as ApiPublicHooksCheckPredictionAccuracyRouteImport } from './routes/api/public/hooks/check-prediction-accuracy'
 
 const WeatherRoute = WeatherRouteImport.update({
   id: '/weather',
@@ -253,6 +254,12 @@ const ApiPublicHooksFetchGovtPricesRoute =
     path: '/api/public/hooks/fetch-govt-prices',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksCheckPredictionAccuracyRoute =
+  ApiPublicHooksCheckPredictionAccuracyRouteImport.update({
+    id: '/api/public/hooks/check-prediction-accuracy',
+    path: '/api/public/hooks/check-prediction-accuracy',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -292,6 +299,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/ai-bondhu/': typeof AiBondhuIndexRoute
   '/profile/': typeof ProfileIndexRoute
+  '/api/public/hooks/check-prediction-accuracy': typeof ApiPublicHooksCheckPredictionAccuracyRoute
   '/api/public/hooks/fetch-govt-prices': typeof ApiPublicHooksFetchGovtPricesRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -333,6 +341,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/ai-bondhu': typeof AiBondhuIndexRoute
   '/profile': typeof ProfileIndexRoute
+  '/api/public/hooks/check-prediction-accuracy': typeof ApiPublicHooksCheckPredictionAccuracyRoute
   '/api/public/hooks/fetch-govt-prices': typeof ApiPublicHooksFetchGovtPricesRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -376,6 +385,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/ai-bondhu/': typeof AiBondhuIndexRoute
   '/profile/': typeof ProfileIndexRoute
+  '/api/public/hooks/check-prediction-accuracy': typeof ApiPublicHooksCheckPredictionAccuracyRoute
   '/api/public/hooks/fetch-govt-prices': typeof ApiPublicHooksFetchGovtPricesRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -420,6 +430,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/ai-bondhu/'
     | '/profile/'
+    | '/api/public/hooks/check-prediction-accuracy'
     | '/api/public/hooks/fetch-govt-prices'
     | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
@@ -461,6 +472,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/ai-bondhu'
     | '/profile'
+    | '/api/public/hooks/check-prediction-accuracy'
     | '/api/public/hooks/fetch-govt-prices'
     | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
@@ -503,6 +515,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/ai-bondhu/'
     | '/profile/'
+    | '/api/public/hooks/check-prediction-accuracy'
     | '/api/public/hooks/fetch-govt-prices'
     | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
@@ -534,6 +547,7 @@ export interface RootRouteChildren {
   UUserIdRoute: typeof UUserIdRoute
   AiBondhuIndexRoute: typeof AiBondhuIndexRoute
   ProfileIndexRoute: typeof ProfileIndexRoute
+  ApiPublicHooksCheckPredictionAccuracyRoute: typeof ApiPublicHooksCheckPredictionAccuracyRoute
   ApiPublicHooksFetchGovtPricesRoute: typeof ApiPublicHooksFetchGovtPricesRoute
   ApiPublicHooksSendScheduledBroadcastsRoute: typeof ApiPublicHooksSendScheduledBroadcastsRoute
   ApiPublicHooksWeatherAlertsRoute: typeof ApiPublicHooksWeatherAlertsRoute
@@ -821,6 +835,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksFetchGovtPricesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/check-prediction-accuracy': {
+      id: '/api/public/hooks/check-prediction-accuracy'
+      path: '/api/public/hooks/check-prediction-accuracy'
+      fullPath: '/api/public/hooks/check-prediction-accuracy'
+      preLoaderRoute: typeof ApiPublicHooksCheckPredictionAccuracyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -892,6 +913,8 @@ const rootRouteChildren: RootRouteChildren = {
   UUserIdRoute: UUserIdRoute,
   AiBondhuIndexRoute: AiBondhuIndexRoute,
   ProfileIndexRoute: ProfileIndexRoute,
+  ApiPublicHooksCheckPredictionAccuracyRoute:
+    ApiPublicHooksCheckPredictionAccuracyRoute,
   ApiPublicHooksFetchGovtPricesRoute: ApiPublicHooksFetchGovtPricesRoute,
   ApiPublicHooksSendScheduledBroadcastsRoute:
     ApiPublicHooksSendScheduledBroadcastsRoute,
