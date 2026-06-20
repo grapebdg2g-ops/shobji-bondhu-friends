@@ -139,7 +139,14 @@ function PricesPage() {
           <Link to="/dashboard" className="h-10 w-10 rounded-full bg-white/15 flex items-center justify-center">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <h1 className="text-xl font-bold">বাজার দর</h1>
+          <h1 className="text-xl font-bold flex-1">বাজার দর</h1>
+          <Link
+            to="/price-prediction"
+            className="px-3 py-2 rounded-full bg-white/20 hover:bg-white/30 text-white text-sm font-semibold flex items-center gap-1.5 active:scale-95 transition"
+          >
+            <BarChart3 className="h-4 w-4" />
+            পূর্বাভাস
+          </Link>
         </div>
 
         <div className="mt-4 flex items-center gap-2">
