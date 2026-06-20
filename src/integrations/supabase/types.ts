@@ -390,6 +390,36 @@ export type Database = {
         }
         Relationships: []
       }
+      price_predictions: {
+        Row: {
+          created_at: string
+          data_points: number
+          district: string
+          id: string
+          prediction_json: Json
+          product_name: string
+          trend: string | null
+        }
+        Insert: {
+          created_at?: string
+          data_points?: number
+          district: string
+          id?: string
+          prediction_json: Json
+          product_name: string
+          trend?: string | null
+        }
+        Update: {
+          created_at?: string
+          data_points?: number
+          district?: string
+          id?: string
+          prediction_json?: Json
+          product_name?: string
+          trend?: string | null
+        }
+        Relationships: []
+      }
       prices: {
         Row: {
           category: string
@@ -782,6 +812,16 @@ export type Database = {
       }
       decrement_likes: { Args: { post_id: string }; Returns: undefined }
       get_my_phone: { Args: never; Returns: string }
+      get_price_history: {
+        Args: { p_days?: number; p_district: string; p_product: string }
+        Returns: {
+          avg_price: number
+          day: string
+          max_price: number
+          min_price: number
+          sample_count: number
+        }[]
+      }
       get_public_user_roles: {
         Args: { _ids: string[] }
         Returns: {
