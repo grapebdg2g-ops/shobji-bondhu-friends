@@ -1,0 +1,214 @@
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { getDistrictLatLng } from "@/lib/bd-data";
+
+type HistoryRow = {
+  day: string;
+  avg_price: number;
+  min_price: number;
+  max_price: number;
+  sample_count: number;
+};
+
+export type Prediction = {
+  direction: "বাড়বে" | "কমবে" | "স্থির থাকবে";
+  confidence: number;
+  predicted_change_percent: number;
+  timeframe: string;
+  current_avg_price: number;
+  predicted_price_range: { min: number; max: number };
+  main_reason: string;
+  factors: string[];
+  advice: string;
+  risk_level: "কম" | "মাঝারি" | "বেশি";
+};
+
+const CACHE_HOURS = 6;
+
+function getSeason(): "রবি" | "খরিফ-১" | "খরিফ-২" {
+  const m = new Date().getMonth() + 1;
+  if (m >= 11 || m <= 2) return "রবি";
+  if (m >= 3 && m <= 6) return "খরিফ-১";
+  return "খরিফ-২";
+}
+
+function computeTrend(history: HistoryRow[]): "rising" | "falling" | "stable" {
+  if (!history || history.length < 7) return "stable";
+  const recent = history.slice(-7);
+  const older = history.slice(-14, -7);
+  if (!recent.length || !older.length) return "stable";
+  const avg = (rows: HistoryRow[]) =>
+    rows.reduce((s, r) => s + Number(r.avg_price), 0) / rows.length;
+  const r = avg(recent);
+  const o = avg(older);
+  if (!o) return "stable";
+  const change = ((r - o) / o) * 100;
+  if (change > 5) return "rising";
+  if (change < -5) return "falling";
+  return "stable";
+}
+
+export const getPricePrediction = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({
+      product: z.string().min(1).max(100),
+      district: z.string().min(1).max(100),
+      upazila: z.string().min(1).max(100).nullable().optional(),
+    }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { product, district } = data;
+
+    // ── Cache: reuse same product+district within 6h ──
+    const cacheSince = new Date(Date.now() - CACHE_HOURS * 3600 * 1000).toISOString();
+    const { data: cached } = await supabase
+      .from("price_predictions")
+      .select("prediction_json, data_points, trend, created_at")
+      .eq("product_name", product)
+      .eq("district", district)
+      .gte("created_at", cacheSince)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (cached) {
+      return {
+        prediction: cached.prediction_json as Prediction,
+        trend: (cached.trend ?? "stable") as "rising" | "falling" | "stable",
+        cached: true,
+        cached_at: cached.created_at,
+        history: [] as HistoryRow[],
+      };
+    }
+
+    // ── Step 1: history ──
+    const { data: historyRaw } = await supabase.rpc("get_price_history", {
+      p_product: product,
+      p_district: district,
+      p_days: 30,
+    });
+    const history = (historyRaw ?? []) as HistoryRow[];
+
+    // ── Step 2: weather ──
+    const [lat, lon] = getDistrictLatLng(district);
+    let weather: { daily?: { precipitation_sum?: number[]; temperature_2m_max?: number[] } } = {};
+    try {
+      const wRes = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=precipitation_sum,temperature_2m_max&timezone=Asia%2FDhaka&forecast_days=7`,
+      );
+      if (wRes.ok) weather = await wRes.json();
+    } catch (e) {
+      console.warn("[prediction] weather fetch failed:", e);
+    }
+
+    // ── Step 3 & 4 ──
+    const season = getSeason();
+    const trend = computeTrend(history);
+
+    const currentAvg =
+      history.length > 0 ? Number(history[history.length - 1]!.avg_price) : 0;
+
+    // ── Step 5: Kimi AI ──
+    const apiKey =
+      process.env.KIMI_API_KEY ?? process.env.NEXT_PUBLIC_KIMI_API_KEY ?? "";
+
+    if (!apiKey) {
+      throw new Error("KIMI_API_KEY not configured");
+    }
+
+    const prompt = `তুমি বাংলাদেশের একজন কৃষি বাজার বিশেষজ্ঞ।
+নিচের তথ্য বিশ্লেষণ করে ${product} এর দাম পূর্বাভাস দাও।
+
+বর্তমান তথ্য:
+- পণ্য: ${product}
+- জেলা: ${district}
+- মৌসুম: ${season}
+- বর্তমান ট্রেন্ড: ${trend}
+- বর্তমান গড় দাম: ${currentAvg} টাকা
+- গত ৩০ দিনের দৈনিক গড় দাম (শেষ ১০ দিন):
+${JSON.stringify(history.slice(-10))}
+
+আবহাওয়া পূর্বাভাস (৭ দিন):
+- বৃষ্টিপাত (mm): ${(weather.daily?.precipitation_sum ?? []).slice(0, 7).join(", ")}
+- সর্বোচ্চ তাপমাত্রা (°C): ${(weather.daily?.temperature_2m_max ?? []).slice(0, 7).join(", ")}
+
+বিবেচনা করো:
+1. মৌসুমি প্রভাব (এখন ${season} মৌসুম)
+2. আবহাওয়ার প্রভাব
+3. ঐতিহাসিক দামের ট্রেন্ড
+4. সাধারণ বাজার নিয়মকানুন
+
+শুধু এই JSON format এ উত্তর দাও, কোনো অতিরিক্ত text নয়:
+{
+  "direction": "বাড়বে|কমবে|স্থির থাকবে",
+  "confidence": 75,
+  "predicted_change_percent": 8,
+  "timeframe": "আগামী ৭ দিনে",
+  "current_avg_price": ${currentAvg},
+  "predicted_price_range": { "min": 42, "max": 52 },
+  "main_reason": "মূল কারণ এক লাইনে",
+  "factors": ["কারণ ১", "কারণ ২", "কারণ ৩"],
+  "advice": "কৃষকের জন্য পরামর্শ",
+  "risk_level": "কম|মাঝারি|বেশি"
+}`;
+
+    const kimiRes = await fetch("https://api.moonshot.ai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "moonshot-v1-8k",
+        max_tokens: 600,
+        temperature: 0.3,
+        messages: [{ role: "user", content: prompt }],
+      }),
+    });
+
+    if (!kimiRes.ok) {
+      const txt = await kimiRes.text().catch(() => "");
+      throw new Error(`Kimi API error ${kimiRes.status}: ${txt.slice(0, 200)}`);
+    }
+
+    const kimiData = (await kimiRes.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    const raw = kimiData.choices?.[0]?.message?.content ?? "";
+    const cleaned = raw.replace(/```json|```/g, "").trim();
+
+    let prediction: Prediction;
+    try {
+      prediction = JSON.parse(cleaned) as Prediction;
+    } catch {
+      // Try to extract JSON object from text
+      const match = cleaned.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error("Kimi returned non-JSON output");
+      prediction = JSON.parse(match[0]) as Prediction;
+    }
+
+    // ── Step 6: save (uses service role to bypass RLS write restriction) ──
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin.from("price_predictions").insert({
+        product_name: product,
+        district,
+        prediction_json: prediction,
+        data_points: history.length,
+        trend,
+      });
+    } catch (e) {
+      console.warn("[prediction] cache save failed:", e);
+    }
+
+    return {
+      prediction,
+      trend,
+      cached: false,
+      cached_at: null,
+      history: history.slice(-14),
+    };
+  });
