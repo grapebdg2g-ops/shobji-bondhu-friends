@@ -429,6 +429,42 @@ export type Database = {
         }
         Relationships: []
       }
+      price_alerts: {
+        Row: {
+          alert_threshold: number
+          created_at: string
+          direction: string
+          district: string
+          id: string
+          is_active: boolean
+          last_triggered: string | null
+          product_name: string
+          user_id: string
+        }
+        Insert: {
+          alert_threshold?: number
+          created_at?: string
+          direction?: string
+          district: string
+          id?: string
+          is_active?: boolean
+          last_triggered?: string | null
+          product_name: string
+          user_id: string
+        }
+        Update: {
+          alert_threshold?: number
+          created_at?: string
+          direction?: string
+          district?: string
+          id?: string
+          is_active?: boolean
+          last_triggered?: string | null
+          product_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       price_predictions: {
         Row: {
           created_at: string

@@ -213,3 +213,33 @@ ${JSON.stringify(history.slice(-10))}
       history: history.slice(-14),
     };
   });
+
+export const setPriceAlert = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({
+      product: z.string().min(1).max(100),
+      district: z.string().min(1).max(100),
+      threshold: z.number().min(1).max(100).default(10),
+      direction: z.enum(["both", "up", "down"]).default("both"),
+    }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { error } = await supabase
+      .from("price_alerts")
+      .upsert(
+        {
+          user_id: userId,
+          product_name: data.product,
+          district: data.district,
+          alert_threshold: data.threshold,
+          direction: data.direction,
+          is_active: true,
+        },
+        { onConflict: "user_id,product_name,district" },
+      );
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+

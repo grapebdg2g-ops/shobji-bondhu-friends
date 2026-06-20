@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ArrowLeft, Plus, MapPin, TrendingUp, TrendingDown, Sprout,
+  ArrowLeft, Plus, MapPin, TrendingUp, TrendingDown, Sprout, BarChart3,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DISTRICTS, getUpazilas } from "@/lib/bd-data";
@@ -139,7 +139,14 @@ function PricesPage() {
           <Link to="/dashboard" className="h-10 w-10 rounded-full bg-white/15 flex items-center justify-center">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <h1 className="text-xl font-bold">বাজার দর</h1>
+          <h1 className="text-xl font-bold flex-1">বাজার দর</h1>
+          <Link
+            to="/price-prediction"
+            className="px-3 py-2 rounded-full bg-white/20 hover:bg-white/30 text-white text-sm font-semibold flex items-center gap-1.5 active:scale-95 transition"
+          >
+            <BarChart3 className="h-4 w-4" />
+            পূর্বাভাস
+          </Link>
         </div>
 
         <div className="mt-4 flex items-center gap-2">
@@ -274,7 +281,16 @@ function PricesPage() {
                   ) : (
                     <span>{p.user_name || "অজ্ঞাত"}</span>
                   )}
-                  <span>{timeAgo(p.created_at)}</span>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      to="/price-prediction"
+                      search={{ product: p.product_name, district: p.district }}
+                      className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold text-[11px] hover:bg-emerald-100"
+                    >
+                      📊 পূর্বাভাস
+                    </Link>
+                    <span>{timeAgo(p.created_at)}</span>
+                  </div>
                 </div>
               </article>
             );
