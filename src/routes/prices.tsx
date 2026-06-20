@@ -281,7 +281,16 @@ function PricesPage() {
                   ) : (
                     <span>{p.user_name || "অজ্ঞাত"}</span>
                   )}
-                  <span>{timeAgo(p.created_at)}</span>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      to="/price-prediction"
+                      search={{ product: p.product_name, district: p.district }}
+                      className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold text-[11px] hover:bg-emerald-100"
+                    >
+                      📊 পূর্বাভাস
+                    </Link>
+                    <span>{timeAgo(p.created_at)}</span>
+                  </div>
                 </div>
               </article>
             );
