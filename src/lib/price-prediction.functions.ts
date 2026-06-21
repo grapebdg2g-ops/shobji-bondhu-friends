@@ -112,12 +112,10 @@ export const getPricePrediction = createServerFn({ method: "POST" })
     const currentAvg =
       history.length > 0 ? Number(history[history.length - 1]!.avg_price) : 0;
 
-    // ── Step 5: Kimi AI ──
-    const apiKey =
-      process.env.KIMI_API_KEY ?? process.env.NEXT_PUBLIC_KIMI_API_KEY ?? "";
-
+    // ── Step 5: Lovable AI Gateway ──
+    const apiKey = process.env.LOVABLE_API_KEY ?? "";
     if (!apiKey) {
-      throw new Error("KIMI_API_KEY not configured");
+      throw new Error("LOVABLE_API_KEY not configured");
     }
 
     const prompt = `তুমি বাংলাদেশের একজন কৃষি বাজার বিশেষজ্ঞ।
@@ -156,29 +154,34 @@ ${JSON.stringify(history.slice(-10))}
   "risk_level": "কম|মাঝারি|বেশি"
 }`;
 
-    const kimiRes = await fetch("https://api.moonshot.ai/v1/chat/completions", {
+    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "moonshot-v1-8k",
-        max_tokens: 600,
-        temperature: 0.3,
+        model: "google/gemini-3-flash-preview",
         messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
       }),
     });
 
-    if (!kimiRes.ok) {
-      const txt = await kimiRes.text().catch(() => "");
-      throw new Error(`Kimi API error ${kimiRes.status}: ${txt.slice(0, 200)}`);
+    if (!aiRes.ok) {
+      const txt = await aiRes.text().catch(() => "");
+      if (aiRes.status === 429) {
+        throw new Error("AI rate limit exceeded. Please try again shortly.");
+      }
+      if (aiRes.status === 402) {
+        throw new Error("AI credits exhausted. Please add credits in workspace settings.");
+      }
+      throw new Error(`AI gateway error ${aiRes.status}: ${txt.slice(0, 200)}`);
     }
 
-    const kimiData = (await kimiRes.json()) as {
+    const aiData = (await aiRes.json()) as {
       choices?: Array<{ message?: { content?: string } }>;
     };
-    const raw = kimiData.choices?.[0]?.message?.content ?? "";
+    const raw = aiData.choices?.[0]?.message?.content ?? "";
     const cleaned = raw.replace(/```json|```/g, "").trim();
 
     let prediction: Prediction;
