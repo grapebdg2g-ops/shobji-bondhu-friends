@@ -28,6 +28,7 @@ const TABS: { key: OrganicFertilizerKey; label: string; icon: string }[] = [
   { key: "goborSar", label: "গোবর সার", icon: "🐄" },
   { key: "compost", label: "কম্পোস্ট", icon: "♻️" },
   { key: "vermicompost", label: "ভার্মি কম্পোস্ট", icon: "🪱" },
+  { key: "trichoCompost", label: "ট্রাইকো কম্পোস্ট", icon: "🍄" },
   { key: "greenManure", label: "সবুজ সার", icon: "🌿" },
   { key: "biopesticide", label: "জৈব বালাইনাশক", icon: "🌶️" },
 ];
@@ -36,6 +37,7 @@ const CALC_KEYS: Record<OrganicFertilizerKey, keyof typeof ORGANIC_APPLICATION_R
   goborSar: "gobor",
   compost: "compost",
   vermicompost: "vermicompost",
+  trichoCompost: "trichoCompost",
   greenManure: null,
   biopesticide: null,
 };
@@ -44,6 +46,7 @@ const REDUCTION_KEYS: Record<OrganicFertilizerKey, keyof typeof CHEMICAL_REDUCTI
   goborSar: "gobor",
   compost: "compost",
   vermicompost: "vermicompost",
+  trichoCompost: "trichoCompost",
   greenManure: "greenManure",
   biopesticide: null,
 };
