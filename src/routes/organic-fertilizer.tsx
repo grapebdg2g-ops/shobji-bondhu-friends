@@ -7,6 +7,8 @@ import {
   CHEMICAL_REDUCTION,
   type OrganicFertilizerKey,
 } from "@/data/organic-fertilizer-guide";
+import { UNIT_LABEL, UNIT_TO_SHOTOK, type Unit } from "@/data/fertilizer-guide";
+import { toBn } from "@/lib/bn";
 
 export const Route = createFileRoute("/organic-fertilizer")({
   component: OrganicFertilizerPage,
