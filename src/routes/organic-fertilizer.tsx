@@ -430,15 +430,12 @@ function Calculator({ activeKey }: { activeKey: OrganicFertilizerKey }) {
 
   const [crop, setCrop] = useState<string>(crops[0]);
   const [areaInput, setAreaInput] = useState<string>("1");
-  const [unit, setUnit] = useState<"শতক" | "বিঘা" | "একর">("বিঘা");
-  const [showResult, setShowResult] = useState(false);
-
-  // Conversions to bigha (1 bigha = 33 শতক = ~0.33 একর; 1 একর = 3 বিঘা)
-  const toBigha = (n: number) =>
-    unit === "বিঘা" ? n : unit === "শতক" ? n / 33 : n * 3;
+  const [unit, setUnit] = useState<Unit>("bigha");
 
   const area = Number(areaInput) || 0;
-  const bigha = toBigha(area);
+  const shotok = area * UNIT_TO_SHOTOK[unit];
+  const bigha = shotok / 33;
+
   const ratePerBigha = (rates as any)[crop] as number;
   const totalKg = useMemo(() => Math.round(ratePerBigha * bigha), [ratePerBigha, bigha]);
 
@@ -459,6 +456,11 @@ function Calculator({ activeKey }: { activeKey: OrganicFertilizerKey }) {
       )
     : 0;
 
+  const bn1 = (n: number) => toBn(n.toFixed(1).replace(/\.0$/, ""));
+  const conv = shotok > 0
+    ? `= ${bn1(shotok)} শতক = ${bn1(shotok / 33)} বিঘা = ${bn1(shotok / 100)} একর`
+    : "";
+
   return (
     <Card title="কতটুকু দেবেন?">
       <div className="space-y-3">
@@ -466,10 +468,7 @@ function Calculator({ activeKey }: { activeKey: OrganicFertilizerKey }) {
           <label className="text-xs font-semibold text-gray-600">ফসল বাছাই করুন</label>
           <select
             value={crop}
-            onChange={(e) => {
-              setCrop(e.target.value);
-              setShowResult(false);
-            }}
+            onChange={(e) => setCrop(e.target.value)}
             className="mt-1 w-full h-11 rounded-xl border border-gray-200 px-3 bg-white text-sm"
           >
             {crops.map((c) => (
@@ -483,44 +482,34 @@ function Calculator({ activeKey }: { activeKey: OrganicFertilizerKey }) {
           <div className="mt-1 flex gap-2">
             <input
               type="number"
+              inputMode="decimal"
               min={0}
               step="0.1"
               value={areaInput}
-              onChange={(e) => {
-                setAreaInput(e.target.value);
-                setShowResult(false);
-              }}
-              className="flex-1 h-11 rounded-xl border border-gray-200 px-3 text-sm"
+              onChange={(e) => setAreaInput(e.target.value)}
+              className="flex-1 h-11 rounded-xl border border-gray-200 px-3 text-sm font-semibold"
             />
-            <div className="flex rounded-xl bg-gray-100 p-0.5">
-              {(["শতক", "বিঘা", "একর"] as const).map((u) => (
-                <button
-                  key={u}
-                  onClick={() => { setUnit(u); setShowResult(false); }}
-                  className={`px-3 text-xs font-semibold rounded-lg transition ${
-                    unit === u ? "bg-white text-emerald-700 shadow-sm" : "text-gray-600"
-                  }`}
-                >
-                  {u}
-                </button>
+            <select
+              value={unit}
+              onChange={(e) => setUnit(e.target.value as Unit)}
+              className="h-11 px-3 rounded-xl bg-gray-100 text-sm font-semibold"
+            >
+              {(Object.keys(UNIT_LABEL) as Unit[]).map((u) => (
+                <option key={u} value={u}>{UNIT_LABEL[u]}</option>
               ))}
-            </div>
+            </select>
           </div>
+          {conv && (
+            <p className="mt-1.5 text-xs text-emerald-700 font-semibold">{conv}</p>
+          )}
         </div>
 
-        <button
-          onClick={() => setShowResult(true)}
-          disabled={!area}
-          className="w-full h-11 rounded-xl bg-[#2D6A4F] text-white font-bold text-sm disabled:opacity-50 active:scale-[0.98]"
-        >
-          হিসাব করুন
-        </button>
-
-        {showResult && area > 0 && (
+        {area > 0 && (
           <div className="mt-2 bg-emerald-50 border border-emerald-200 rounded-2xl p-4 space-y-3">
             <div className="font-bold text-emerald-900">
-              {crop} — {area} {unit}-এর জন্য
+              {crop} — {toBn(area)} {UNIT_LABEL[unit]}-এর জন্য
             </div>
+
 
             <div className="flex items-center justify-between bg-white rounded-xl p-3">
               <span className="flex items-center gap-2 text-sm font-semibold text-gray-800">
