@@ -125,7 +125,7 @@ function PlanAdvisory() {
 
   async function handleShare() {
     const url = window.location.href;
-    const title = `${guide.icon} ${plan.crop_type} পরামর্শ — কৃষিবন্ধু`;
+    const title = `${guide?.icon ?? ""} ${plan?.crop_type ?? ""} পরামর্শ — কৃষিবন্ধু`;
     if (navigator.share) {
       try { await navigator.share({ title, url }); } catch { /* cancelled */ }
     } else {
