@@ -97,8 +97,12 @@ function Dashboard() {
         <DashboardWeatherWidget district={user?.district} upazila={user?.upazila} />
       </div>
 
+      {/* Crop Advisory urgent tasks */}
+      <CropAdvisoryWidget />
+
       {/* SECTION 3 — AI কৃষি সমাধান */}
       <AiSolutionsSection />
+
 
       {/* SECTION 4 — Quick Actions */}
       <QuickActionsSection />
