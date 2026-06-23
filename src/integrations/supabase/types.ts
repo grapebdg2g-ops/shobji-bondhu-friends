@@ -65,6 +65,38 @@ export type Database = {
         }
         Relationships: []
       }
+      crop_task_completions: {
+        Row: {
+          completed_at: string
+          id: string
+          plan_id: string
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          plan_id: string
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          plan_id?: string
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crop_task_completions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "user_crop_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       disease_history: {
         Row: {
           created_at: string
@@ -787,6 +819,33 @@ export type Database = {
           id?: string
           result_json?: Json
           soil_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_crop_plans: {
+        Row: {
+          created_at: string
+          crop_type: string
+          id: string
+          is_active: boolean
+          planting_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          crop_type: string
+          id?: string
+          is_active?: boolean
+          planting_date: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          crop_type?: string
+          id?: string
+          is_active?: boolean
+          planting_date?: string
           user_id?: string
         }
         Relationships: []

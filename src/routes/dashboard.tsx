@@ -29,6 +29,7 @@ import { WeatherAlertBanner } from "@/components/krishi/weather-alert-banner";
 import { DashboardWeatherWidget } from "@/components/krishi/dashboard-weather-widget";
 import { useSidebar } from "@/components/krishi/app-sidebar";
 import { CreatePostSheet } from "@/components/krishi/create-post-sheet";
+import { CropAdvisoryWidget } from "@/components/krishi/crop-advisory-widget";
 import { useMutedIds } from "@/hooks/use-muted-users";
 import { supabase } from "@/integrations/supabase/client";
 import type { Post } from "@/hooks/use-feed";
@@ -97,8 +98,12 @@ function Dashboard() {
         <DashboardWeatherWidget district={user?.district} upazila={user?.upazila} />
       </div>
 
+      {/* Crop Advisory urgent tasks */}
+      <CropAdvisoryWidget />
+
       {/* SECTION 3 — AI কৃষি সমাধান */}
       <AiSolutionsSection />
+
 
       {/* SECTION 4 — Quick Actions */}
       <QuickActionsSection />

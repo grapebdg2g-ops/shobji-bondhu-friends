@@ -23,9 +23,11 @@ import { Route as FeedRouteImport } from './routes/feed'
 import { Route as ExchangeRouteImport } from './routes/exchange'
 import { Route as DiseaseDetectionRouteImport } from './routes/disease-detection'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CropGuideRouteImport } from './routes/crop-guide'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfileIndexRouteImport } from './routes/profile.index'
+import { Route as CropGuideIndexRouteImport } from './routes/crop-guide.index'
 import { Route as AiBondhuIndexRouteImport } from './routes/ai-bondhu.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as VegetableGuideSlugRouteImport } from './routes/vegetable-guide.$slug'
@@ -47,6 +49,8 @@ import { Route as AdminDiseasesRouteImport } from './routes/admin.diseases'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
+import { Route as CropGuidePlanPlanIdRouteImport } from './routes/crop-guide.plan.$planId'
+import { Route as CropGuideNewCropRouteImport } from './routes/crop-guide.new.$crop'
 import { Route as ApiPublicHooksWeatherAlertsRouteImport } from './routes/api/public/hooks/weather-alerts'
 import { Route as ApiPublicHooksSendScheduledBroadcastsRouteImport } from './routes/api/public/hooks/send-scheduled-broadcasts'
 import { Route as ApiPublicHooksFetchGovtPricesRouteImport } from './routes/api/public/hooks/fetch-govt-prices'
@@ -122,6 +126,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CropGuideRoute = CropGuideRouteImport.update({
+  id: '/crop-guide',
+  path: '/crop-guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -136,6 +145,11 @@ const ProfileIndexRoute = ProfileIndexRouteImport.update({
   id: '/profile/',
   path: '/profile/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const CropGuideIndexRoute = CropGuideIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CropGuideRoute,
 } as any)
 const AiBondhuIndexRoute = AiBondhuIndexRouteImport.update({
   id: '/ai-bondhu/',
@@ -242,6 +256,16 @@ const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AdminRoute,
 } as any)
+const CropGuidePlanPlanIdRoute = CropGuidePlanPlanIdRouteImport.update({
+  id: '/plan/$planId',
+  path: '/plan/$planId',
+  getParentRoute: () => CropGuideRoute,
+} as any)
+const CropGuideNewCropRoute = CropGuideNewCropRouteImport.update({
+  id: '/new/$crop',
+  path: '/new/$crop',
+  getParentRoute: () => CropGuideRoute,
+} as any)
 const ApiPublicHooksWeatherAlertsRoute =
   ApiPublicHooksWeatherAlertsRouteImport.update({
     id: '/api/public/hooks/weather-alerts',
@@ -270,6 +294,7 @@ const ApiPublicHooksCheckPredictionAccuracyRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/crop-guide': typeof CropGuideRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/disease-detection': typeof DiseaseDetectionRoute
   '/exchange': typeof ExchangeRoute
@@ -305,7 +330,10 @@ export interface FileRoutesByFullPath {
   '/vegetable-guide/$slug': typeof VegetableGuideSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/ai-bondhu/': typeof AiBondhuIndexRoute
+  '/crop-guide/': typeof CropGuideIndexRoute
   '/profile/': typeof ProfileIndexRoute
+  '/crop-guide/new/$crop': typeof CropGuideNewCropRoute
+  '/crop-guide/plan/$planId': typeof CropGuidePlanPlanIdRoute
   '/api/public/hooks/check-prediction-accuracy': typeof ApiPublicHooksCheckPredictionAccuracyRoute
   '/api/public/hooks/fetch-govt-prices': typeof ApiPublicHooksFetchGovtPricesRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
@@ -348,7 +376,10 @@ export interface FileRoutesByTo {
   '/vegetable-guide/$slug': typeof VegetableGuideSlugRoute
   '/admin': typeof AdminIndexRoute
   '/ai-bondhu': typeof AiBondhuIndexRoute
+  '/crop-guide': typeof CropGuideIndexRoute
   '/profile': typeof ProfileIndexRoute
+  '/crop-guide/new/$crop': typeof CropGuideNewCropRoute
+  '/crop-guide/plan/$planId': typeof CropGuidePlanPlanIdRoute
   '/api/public/hooks/check-prediction-accuracy': typeof ApiPublicHooksCheckPredictionAccuracyRoute
   '/api/public/hooks/fetch-govt-prices': typeof ApiPublicHooksFetchGovtPricesRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
@@ -358,6 +389,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/crop-guide': typeof CropGuideRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/disease-detection': typeof DiseaseDetectionRoute
   '/exchange': typeof ExchangeRoute
@@ -393,7 +425,10 @@ export interface FileRoutesById {
   '/vegetable-guide/$slug': typeof VegetableGuideSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/ai-bondhu/': typeof AiBondhuIndexRoute
+  '/crop-guide/': typeof CropGuideIndexRoute
   '/profile/': typeof ProfileIndexRoute
+  '/crop-guide/new/$crop': typeof CropGuideNewCropRoute
+  '/crop-guide/plan/$planId': typeof CropGuidePlanPlanIdRoute
   '/api/public/hooks/check-prediction-accuracy': typeof ApiPublicHooksCheckPredictionAccuracyRoute
   '/api/public/hooks/fetch-govt-prices': typeof ApiPublicHooksFetchGovtPricesRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
@@ -404,6 +439,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/crop-guide'
     | '/dashboard'
     | '/disease-detection'
     | '/exchange'
@@ -439,7 +475,10 @@ export interface FileRouteTypes {
     | '/vegetable-guide/$slug'
     | '/admin/'
     | '/ai-bondhu/'
+    | '/crop-guide/'
     | '/profile/'
+    | '/crop-guide/new/$crop'
+    | '/crop-guide/plan/$planId'
     | '/api/public/hooks/check-prediction-accuracy'
     | '/api/public/hooks/fetch-govt-prices'
     | '/api/public/hooks/send-scheduled-broadcasts'
@@ -482,7 +521,10 @@ export interface FileRouteTypes {
     | '/vegetable-guide/$slug'
     | '/admin'
     | '/ai-bondhu'
+    | '/crop-guide'
     | '/profile'
+    | '/crop-guide/new/$crop'
+    | '/crop-guide/plan/$planId'
     | '/api/public/hooks/check-prediction-accuracy'
     | '/api/public/hooks/fetch-govt-prices'
     | '/api/public/hooks/send-scheduled-broadcasts'
@@ -491,6 +533,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/crop-guide'
     | '/dashboard'
     | '/disease-detection'
     | '/exchange'
@@ -526,7 +569,10 @@ export interface FileRouteTypes {
     | '/vegetable-guide/$slug'
     | '/admin/'
     | '/ai-bondhu/'
+    | '/crop-guide/'
     | '/profile/'
+    | '/crop-guide/new/$crop'
+    | '/crop-guide/plan/$planId'
     | '/api/public/hooks/check-prediction-accuracy'
     | '/api/public/hooks/fetch-govt-prices'
     | '/api/public/hooks/send-scheduled-broadcasts'
@@ -536,6 +582,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  CropGuideRoute: typeof CropGuideRouteWithChildren
   DashboardRoute: typeof DashboardRoute
   DiseaseDetectionRoute: typeof DiseaseDetectionRoute
   ExchangeRoute: typeof ExchangeRoute
@@ -665,6 +712,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/crop-guide': {
+      id: '/crop-guide'
+      path: '/crop-guide'
+      fullPath: '/crop-guide'
+      preLoaderRoute: typeof CropGuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -685,6 +739,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/profile/'
       preLoaderRoute: typeof ProfileIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/crop-guide/': {
+      id: '/crop-guide/'
+      path: '/'
+      fullPath: '/crop-guide/'
+      preLoaderRoute: typeof CropGuideIndexRouteImport
+      parentRoute: typeof CropGuideRoute
     }
     '/ai-bondhu/': {
       id: '/ai-bondhu/'
@@ -833,6 +894,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAnalyticsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/crop-guide/plan/$planId': {
+      id: '/crop-guide/plan/$planId'
+      path: '/plan/$planId'
+      fullPath: '/crop-guide/plan/$planId'
+      preLoaderRoute: typeof CropGuidePlanPlanIdRouteImport
+      parentRoute: typeof CropGuideRoute
+    }
+    '/crop-guide/new/$crop': {
+      id: '/crop-guide/new/$crop'
+      path: '/new/$crop'
+      fullPath: '/crop-guide/new/$crop'
+      preLoaderRoute: typeof CropGuideNewCropRouteImport
+      parentRoute: typeof CropGuideRoute
+    }
     '/api/public/hooks/weather-alerts': {
       id: '/api/public/hooks/weather-alerts'
       path: '/api/public/hooks/weather-alerts'
@@ -894,6 +969,22 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface CropGuideRouteChildren {
+  CropGuideIndexRoute: typeof CropGuideIndexRoute
+  CropGuideNewCropRoute: typeof CropGuideNewCropRoute
+  CropGuidePlanPlanIdRoute: typeof CropGuidePlanPlanIdRoute
+}
+
+const CropGuideRouteChildren: CropGuideRouteChildren = {
+  CropGuideIndexRoute: CropGuideIndexRoute,
+  CropGuideNewCropRoute: CropGuideNewCropRoute,
+  CropGuidePlanPlanIdRoute: CropGuidePlanPlanIdRoute,
+}
+
+const CropGuideRouteWithChildren = CropGuideRoute._addFileChildren(
+  CropGuideRouteChildren,
+)
+
 interface PricePredictionRouteChildren {
   PricePredictionHistoryRoute: typeof PricePredictionHistoryRoute
 }
@@ -921,6 +1012,7 @@ const VegetableGuideRouteWithChildren = VegetableGuideRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  CropGuideRoute: CropGuideRouteWithChildren,
   DashboardRoute: DashboardRoute,
   DiseaseDetectionRoute: DiseaseDetectionRoute,
   ExchangeRoute: ExchangeRoute,
