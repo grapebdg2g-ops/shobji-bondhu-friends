@@ -41,7 +41,25 @@ function VegetableGuidePage() {
         <p className="text-sm text-white/85 mt-1">২২+ সবজির পূর্ণাঙ্গ চাষ পদ্ধতি</p>
       </header>
 
-      <div className="px-4 -mt-4">
+      <CropAdvisoryWidget />
+
+      <div className="px-4 mt-4">
+        <Link
+          to="/crop-guide"
+          className="block bg-white rounded-2xl p-4 border border-emerald-200 active:scale-[0.99] transition"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">📋</span>
+            <div className="flex-1">
+              <p className="font-bold text-gray-900 text-sm">ফসল পরামর্শ</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">রোপণ থেকে বিক্রি পর্যন্ত সম্পূর্ণ গাইড</p>
+            </div>
+            <span className="text-emerald-600 text-sm font-semibold">দেখুন →</span>
+          </div>
+        </Link>
+      </div>
+
+      <div className="px-4 mt-4">
         <div className="bg-white rounded-2xl p-3 shadow-sm flex items-center gap-2">
           <Search className="h-5 w-5 text-gray-400 ml-1" />
           <input
