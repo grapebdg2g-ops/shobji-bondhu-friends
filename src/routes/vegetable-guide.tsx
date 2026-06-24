@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { ArrowLeft, Search } from "lucide-react";
 import { VEGETABLES, CATEGORY_LABELS, type VegCategory } from "@/data/vegetable-guide";
+import { CropAdvisoryWidget } from "@/components/krishi/crop-advisory-widget";
 
 export const Route = createFileRoute("/vegetable-guide")({
   component: VegetableGuidePage,
