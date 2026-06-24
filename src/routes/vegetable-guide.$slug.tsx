@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate, notFound } from "@tanstack/react-router";
-import { ArrowLeft, Leaf, Droplets, Bug, Sprout, Package, TrendingUp, Calculator, Stethoscope, BarChart3 } from "lucide-react";
+import { ArrowLeft, Leaf, Droplets, Bug, Sprout, Package, TrendingUp, Calculator, Stethoscope, BarChart3, Wallet, Coins, Users, Sparkles, CalendarDays } from "lucide-react";
 import { getVegetableBySlug, type Vegetable } from "@/data/vegetable-guide";
+import { getEconomicsBySlug, calcTotalCost, fmtBDT, toBn, type VegEconomics } from "@/data/vegetable-economics";
 
 export const Route = createFileRoute("/vegetable-guide/$slug")({
   component: VegetableDetailPage,
