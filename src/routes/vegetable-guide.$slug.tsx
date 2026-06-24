@@ -37,6 +37,7 @@ export const Route = createFileRoute("/vegetable-guide/$slug")({
 function VegetableDetailPage() {
   const { veg } = Route.useLoaderData() as { veg: Vegetable };
   const navigate = useNavigate();
+  const econ = getEconomicsBySlug(veg.slug);
 
   return (
     <main className="min-h-screen bg-[#F0FFF4] md:max-w-[560px] md:mx-auto pb-12">
