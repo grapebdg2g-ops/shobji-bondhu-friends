@@ -165,6 +165,14 @@ const AI_CARDS = [
     iconBg: "bg-red-100",
     iconColor: "text-red-700",
   },
+  {
+    href: "/crop-planner",
+    Icon: Sparkles,
+    title: "ফসল পরিকল্পনা",
+    desc: "মাটি ও লক্ষ্য অনুযায়ী সেরা ফসল সুপারিশ",
+    iconBg: "bg-yellow-100",
+    iconColor: "text-yellow-700",
+  },
 ];
 
 function AiSolutionsSection() {
