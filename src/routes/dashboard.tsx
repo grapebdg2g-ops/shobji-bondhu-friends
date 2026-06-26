@@ -22,6 +22,7 @@ import {
   ThumbsUp,
   MessageCircle,
   HelpCircle,
+  Sparkles,
 } from "lucide-react";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useUser } from "@/contexts/user-context";
@@ -164,6 +165,14 @@ const AI_CARDS = [
     desc: "পোকা ও রোগ দমনের নিরাপদ পদ্ধতি",
     iconBg: "bg-red-100",
     iconColor: "text-red-700",
+  },
+  {
+    href: "/crop-planner",
+    Icon: Sparkles,
+    title: "ফসল পরিকল্পনা",
+    desc: "মাটি ও লক্ষ্য অনুযায়ী সেরা ফসল সুপারিশ",
+    iconBg: "bg-yellow-100",
+    iconColor: "text-yellow-700",
   },
 ];
 
