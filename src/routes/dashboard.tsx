@@ -22,6 +22,7 @@ import {
   ThumbsUp,
   MessageCircle,
   HelpCircle,
+  Sparkles,
 } from "lucide-react";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useUser } from "@/contexts/user-context";
