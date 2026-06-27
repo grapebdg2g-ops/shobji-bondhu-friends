@@ -35,6 +35,7 @@ import { Route as VegetableGuideSlugRouteImport } from './routes/vegetable-guide
 import { Route as UUserIdRouteImport } from './routes/u.$userId'
 import { Route as ProfileDiseaseHistoryRouteImport } from './routes/profile.disease-history'
 import { Route as PricePredictionHistoryRouteImport } from './routes/price-prediction.history'
+import { Route as CropPlannerMyPlansRouteImport } from './routes/crop-planner.my-plans'
 import { Route as AiBondhuPesticideRouteImport } from './routes/ai-bondhu.pesticide'
 import { Route as AiBondhuDiseaseRouteImport } from './routes/ai-bondhu.disease'
 import { Route as AiBondhuChatRouteImport } from './routes/ai-bondhu.chat'
@@ -187,6 +188,11 @@ const PricePredictionHistoryRoute = PricePredictionHistoryRouteImport.update({
   path: '/history',
   getParentRoute: () => PricePredictionRoute,
 } as any)
+const CropPlannerMyPlansRoute = CropPlannerMyPlansRouteImport.update({
+  id: '/my-plans',
+  path: '/my-plans',
+  getParentRoute: () => CropPlannerRoute,
+} as any)
 const AiBondhuPesticideRoute = AiBondhuPesticideRouteImport.update({
   id: '/ai-bondhu/pesticide',
   path: '/ai-bondhu/pesticide',
@@ -301,7 +307,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/crop-guide': typeof CropGuideRouteWithChildren
-  '/crop-planner': typeof CropPlannerRoute
+  '/crop-planner': typeof CropPlannerRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/disease-detection': typeof DiseaseDetectionRoute
   '/exchange': typeof ExchangeRoute
@@ -331,6 +337,7 @@ export interface FileRoutesByFullPath {
   '/ai-bondhu/chat': typeof AiBondhuChatRoute
   '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
+  '/crop-planner/my-plans': typeof CropPlannerMyPlansRoute
   '/price-prediction/history': typeof PricePredictionHistoryRoute
   '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
@@ -348,7 +355,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/crop-planner': typeof CropPlannerRoute
+  '/crop-planner': typeof CropPlannerRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/disease-detection': typeof DiseaseDetectionRoute
   '/exchange': typeof ExchangeRoute
@@ -378,6 +385,7 @@ export interface FileRoutesByTo {
   '/ai-bondhu/chat': typeof AiBondhuChatRoute
   '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
+  '/crop-planner/my-plans': typeof CropPlannerMyPlansRoute
   '/price-prediction/history': typeof PricePredictionHistoryRoute
   '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
@@ -398,7 +406,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/crop-guide': typeof CropGuideRouteWithChildren
-  '/crop-planner': typeof CropPlannerRoute
+  '/crop-planner': typeof CropPlannerRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/disease-detection': typeof DiseaseDetectionRoute
   '/exchange': typeof ExchangeRoute
@@ -428,6 +436,7 @@ export interface FileRoutesById {
   '/ai-bondhu/chat': typeof AiBondhuChatRoute
   '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
+  '/crop-planner/my-plans': typeof CropPlannerMyPlansRoute
   '/price-prediction/history': typeof PricePredictionHistoryRoute
   '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
@@ -479,6 +488,7 @@ export interface FileRouteTypes {
     | '/ai-bondhu/chat'
     | '/ai-bondhu/disease'
     | '/ai-bondhu/pesticide'
+    | '/crop-planner/my-plans'
     | '/price-prediction/history'
     | '/profile/disease-history'
     | '/u/$userId'
@@ -526,6 +536,7 @@ export interface FileRouteTypes {
     | '/ai-bondhu/chat'
     | '/ai-bondhu/disease'
     | '/ai-bondhu/pesticide'
+    | '/crop-planner/my-plans'
     | '/price-prediction/history'
     | '/profile/disease-history'
     | '/u/$userId'
@@ -575,6 +586,7 @@ export interface FileRouteTypes {
     | '/ai-bondhu/chat'
     | '/ai-bondhu/disease'
     | '/ai-bondhu/pesticide'
+    | '/crop-planner/my-plans'
     | '/price-prediction/history'
     | '/profile/disease-history'
     | '/u/$userId'
@@ -595,7 +607,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   CropGuideRoute: typeof CropGuideRouteWithChildren
-  CropPlannerRoute: typeof CropPlannerRoute
+  CropPlannerRoute: typeof CropPlannerRouteWithChildren
   DashboardRoute: typeof DashboardRoute
   DiseaseDetectionRoute: typeof DiseaseDetectionRoute
   ExchangeRoute: typeof ExchangeRoute
@@ -809,6 +821,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PricePredictionHistoryRouteImport
       parentRoute: typeof PricePredictionRoute
     }
+    '/crop-planner/my-plans': {
+      id: '/crop-planner/my-plans'
+      path: '/my-plans'
+      fullPath: '/crop-planner/my-plans'
+      preLoaderRoute: typeof CropPlannerMyPlansRouteImport
+      parentRoute: typeof CropPlannerRoute
+    }
     '/ai-bondhu/pesticide': {
       id: '/ai-bondhu/pesticide'
       path: '/ai-bondhu/pesticide'
@@ -1005,6 +1024,18 @@ const CropGuideRouteWithChildren = CropGuideRoute._addFileChildren(
   CropGuideRouteChildren,
 )
 
+interface CropPlannerRouteChildren {
+  CropPlannerMyPlansRoute: typeof CropPlannerMyPlansRoute
+}
+
+const CropPlannerRouteChildren: CropPlannerRouteChildren = {
+  CropPlannerMyPlansRoute: CropPlannerMyPlansRoute,
+}
+
+const CropPlannerRouteWithChildren = CropPlannerRoute._addFileChildren(
+  CropPlannerRouteChildren,
+)
+
 interface PricePredictionRouteChildren {
   PricePredictionHistoryRoute: typeof PricePredictionHistoryRoute
 }
@@ -1033,7 +1064,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   CropGuideRoute: CropGuideRouteWithChildren,
-  CropPlannerRoute: CropPlannerRoute,
+  CropPlannerRoute: CropPlannerRouteWithChildren,
   DashboardRoute: DashboardRoute,
   DiseaseDetectionRoute: DiseaseDetectionRoute,
   ExchangeRoute: ExchangeRoute,
