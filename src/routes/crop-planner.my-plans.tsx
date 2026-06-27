@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Plus, ChevronRight, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/user-context";
-import { getCrop } from "@/data/master-crop-data";
+import { getCrop, getAllCrops, type CropData } from "@/data/master-crop-data";
 import { toBn } from "@/lib/bn";
 import { daysSince, formatBnDate } from "@/lib/bn-date";
 import { toast } from "sonner";
@@ -22,6 +22,10 @@ type Plan = {
   is_active: boolean;
   created_at: string;
 };
+
+function findCrop(key: string): CropData | null {
+  return getCrop(key) ?? getAllCrops().find((c) => c.name === key) ?? null;
+}
 
 function MyPlansPage() {
   const navigate = useNavigate();
@@ -78,29 +82,12 @@ function MyPlansPage() {
 
         <div className="space-y-3">
           {plans.map((p) => {
-            const crop = getCrop(p.crop_type) ?? Object.values({
-              ...Object.fromEntries([]),
-            });
-            // Fallback search by name
-            const cropObj = getCrop(p.crop_type)
-              ?? Object.values((globalThis as never) ?? {})
-                .filter(() => false) as never;
-            void crop; void cropObj;
-            // Look up by id or name
-            const c = getCrop(p.crop_type)
-              ?? (function () {
-                const all = Object.values(
-                  (typeof window !== "undefined" ? {} : {})
-                );
-                void all;
-                return null;
-              })();
-            const cropData = c ?? findByName(p.crop_type);
-            const icon = cropData?.icon ?? "🌱";
-            const total = cropData?.totalDays ?? 120;
+            const c = findCrop(p.crop_type);
+            const icon = c?.icon ?? "🌱";
+            const total = c?.totalDays ?? 120;
             const days = Math.max(0, daysSince(p.planting_date));
             const pct = Math.min(100, Math.round((days / total) * 100));
-            const stage = cropData?.stages.find((s) => days >= s.startDay && days < s.endDay);
+            const stage = c?.stages.find((s) => days >= s.startDay && days < s.endDay);
             const todayTask = stage?.tasks[0];
 
             return (
@@ -160,12 +147,4 @@ function MyPlansPage() {
       </section>
     </main>
   );
-}
-
-// Fallback: lookup CropData by Bengali name (legacy plans store name)
-function findByName(name: string) {
-  // Lazy require getAllCrops to keep import surface tidy
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { getAllCrops } = require("@/data/master-crop-data") as typeof import("@/data/master-crop-data");
-  return getAllCrops().find((c) => c.name === name) ?? null;
 }
