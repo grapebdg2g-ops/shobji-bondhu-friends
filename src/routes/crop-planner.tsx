@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft, Sparkles, ChevronRight, ChevronLeft, Zap, Target, Check,
-  Droplets, CloudRain, CloudDrizzle, TrendingUp, Shield, Wheat, Home,
+  Droplets, CloudRain, CloudDrizzle, TrendingUp, Shield, Home,
   Leaf, Scale, X, Star, AlertTriangle, ChevronDown, ChevronUp,
 } from "lucide-react";
 import {
