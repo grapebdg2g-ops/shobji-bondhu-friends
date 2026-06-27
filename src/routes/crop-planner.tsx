@@ -77,14 +77,8 @@ function CropPlannerPage() {
   const top = recs[0];
   const others = recs.slice(1);
 
-  // Unsuitable: filter by soil mismatch or water mismatch — top 2
-  const unsuitable = useMemo(() => {
-    if (screen !== "results") return [];
-    const all = Object.values((globalThis as never)) // not used; replaced below
-    void all;
-    // Use master CROPS via helper
-    return [];
-  }, [screen]);
+
+
 
   // Loading auto-advance
   useEffect(() => {
