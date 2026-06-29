@@ -1,32 +1,60 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
-import { ArrowLeft, Search } from "lucide-react";
-import { VEGETABLES, CATEGORY_LABELS, type VegCategory } from "@/data/vegetable-guide";
+import { ArrowLeft, Search, Flame, TrendingUp } from "lucide-react";
+import { getAllCrops, type Category, type RiskLevel } from "@/data/master-crop-data";
+import { toBn } from "@/lib/bn";
 import { CropAdvisoryWidget } from "@/components/krishi/crop-advisory-widget";
 
 export const Route = createFileRoute("/vegetable-guide")({
   component: VegetableGuidePage,
   head: () => ({
     meta: [
-      { title: "সবজি চাষ গাইড — কৃষিবন্ধু" },
-      { name: "description", content: "জনপ্রিয় সবজির চাষ পদ্ধতি, মৌসুম ও যত্ন সম্পর্কে বিস্তারিত নির্দেশিকা।" },
+      { title: "ফসল চাষ গাইড — কৃষিবন্ধু" },
+      { name: "description", content: "২৭+ ফসলের পূর্ণাঙ্গ চাষ পদ্ধতি, লাভ, ঝুঁকি ও জাত-পরিচিতি।" },
     ],
   }),
 });
 
-type Filter = "all" | VegCategory;
-const FILTERS: Filter[] = ["all", "winter", "summer", "all-year", "fruit", "root"];
+type Filter = "all" | Category;
+const FILTERS: { id: Filter; label: string }[] = [
+  { id: "all", label: "সবগুলো" },
+  { id: "সবজি", label: "সবজি" },
+  { id: "ধান্য", label: "ধান্য" },
+  { id: "মসলা", label: "মসলা" },
+  { id: "তেল", label: "তেল" },
+  { id: "কন্দাল", label: "কন্দাল" },
+];
+
+const RISK_STYLE: Record<RiskLevel, { bg: string; text: string; icon: string }> = {
+  কম: { bg: "bg-emerald-50", text: "text-emerald-700", icon: "🟢" },
+  মাঝারি: { bg: "bg-amber-50", text: "text-amber-700", icon: "🟡" },
+  বেশি: { bg: "bg-red-50", text: "text-red-700", icon: "🔴" },
+};
+
+function fmtTk(n: number) {
+  // Convert to thousands (হাজার) for compactness
+  const k = Math.round(n / 1000);
+  return `৳${toBn(k)} হাজার`;
+}
+
+function seasonText(seasons: string[], plantingMonths: number[]) {
+  const monthsBn = ["জানু", "ফেব্রু", "মার্চ", "এপ্রি", "মে", "জুন", "জুলা", "আগ", "সেপ্ট", "অক্টো", "নভে", "ডিসে"];
+  if (plantingMonths.length === 0) return seasons.join(", ");
+  const first = monthsBn[plantingMonths[0] - 1];
+  const last = monthsBn[plantingMonths[plantingMonths.length - 1] - 1];
+  return `${seasons.join("/")} (${first}${first !== last ? `-${last}` : ""})`;
+}
 
 function VegetableGuidePage() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
-  const [filter, setFilter] = useState<Filter>("all");
+  const [filter, setFilter] = useState<Filter>("সবজি");
 
   const filtered = useMemo(() => {
     const s = q.trim();
-    return VEGETABLES.filter((v) => {
-      const matchQ = !s || v.name.includes(s) || v.season.includes(s);
-      const matchF = filter === "all" || v.category.includes(filter);
+    return getAllCrops().filter((c) => {
+      const matchQ = !s || c.name.includes(s) || c.nameEn.toLowerCase().includes(s.toLowerCase());
+      const matchF = filter === "all" || c.category === filter;
       return matchQ && matchF;
     });
   }, [q, filter]);
@@ -37,8 +65,8 @@ function VegetableGuidePage() {
         <button onClick={() => navigate({ to: "/dashboard" })} className="h-9 w-9 rounded-full bg-white/15 flex items-center justify-center">
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="mt-4 text-2xl font-bold">সবজি চাষ গাইড</h1>
-        <p className="text-sm text-white/85 mt-1">২২+ সবজির পূর্ণাঙ্গ চাষ পদ্ধতি</p>
+        <h1 className="mt-4 text-2xl font-bold">ফসল চাষ গাইড</h1>
+        <p className="text-sm text-white/85 mt-1">{toBn(getAllCrops().length)}+ ফসলের পূর্ণাঙ্গ তথ্য</p>
       </header>
 
       <CropAdvisoryWidget />
@@ -65,7 +93,7 @@ function VegetableGuidePage() {
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="সবজি খুঁজুন..."
+            placeholder="ফসল খুঁজুন..."
             className="flex-1 h-9 outline-none text-sm bg-transparent"
           />
         </div>
@@ -74,36 +102,59 @@ function VegetableGuidePage() {
       <div className="px-4 mt-4 flex gap-2 overflow-x-auto no-scrollbar pb-1">
         {FILTERS.map((f) => (
           <button
-            key={f}
-            onClick={() => setFilter(f)}
+            key={f.id}
+            onClick={() => setFilter(f.id)}
             className={`px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap border transition ${
-              filter === f
+              filter === f.id
                 ? "bg-emerald-600 text-white border-emerald-600"
                 : "bg-white text-gray-700 border-gray-200"
             }`}
           >
-            {CATEGORY_LABELS[f]}
+            {f.label}
           </button>
         ))}
       </div>
 
-      <section className="px-4 mt-4 grid grid-cols-2 gap-3">
-        {filtered.map((v) => (
-          <Link
-            key={v.slug}
-            to="/vegetable-guide/$slug"
-            params={{ slug: v.slug }}
-            className="bg-white rounded-2xl p-4 border border-gray-100 active:scale-[0.98] transition block"
-          >
-            <div className="text-3xl mb-2">{v.emoji}</div>
-            <h3 className="font-bold text-gray-900 text-base">{v.name}</h3>
-            <p className="text-[11px] text-gray-500 mt-1">{v.season}</p>
-            <p className="text-[11px] text-emerald-700 mt-1 font-semibold">ফলন: {v.yieldPerBigha}</p>
-            <p className="text-[11px] text-emerald-600 mt-2 font-semibold">বিস্তারিত →</p>
-          </Link>
-        ))}
+      <section className="px-4 mt-4 space-y-3">
+        {filtered.map((c) => {
+          const risk = RISK_STYLE[c.riskLevel];
+          const isHot = c.roi >= 150;
+          return (
+            <Link
+              key={c.id}
+              to="/vegetable-guide/$slug"
+              params={{ slug: c.id }}
+              className="bg-white rounded-2xl p-4 border border-gray-100 active:scale-[0.98] transition block"
+            >
+              <div className="flex items-start gap-3">
+                <span className="text-4xl shrink-0">{c.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold text-gray-900 text-base truncate">{c.name}</h3>
+                    {isHot && <Flame className="h-4 w-4 text-orange-500 shrink-0" />}
+                  </div>
+                  <p className="text-[11px] text-gray-500 mt-0.5">{seasonText(c.seasons, c.plantingMonths)}</p>
+                  <p className="text-[11px] text-emerald-700 mt-1 font-semibold">
+                    ফলন: {toBn(c.yieldMin)}–{toBn(c.yieldMax)} মণ/বিঘা
+                  </p>
+
+                  <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                    <div className="flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2 py-1 rounded-full text-[11px] font-semibold">
+                      <TrendingUp className="h-3 w-3" />
+                      লাভ: {fmtTk(c.profitMin)}–{fmtTk(c.profitMax)}
+                    </div>
+                    <div className={`flex items-center gap-1 ${risk.bg} ${risk.text} px-2 py-1 rounded-full text-[11px] font-semibold`}>
+                      {risk.icon} ঝুঁকি: {c.riskLevel}
+                    </div>
+                  </div>
+                </div>
+                <span className="text-emerald-600 text-xs font-semibold whitespace-nowrap self-end">বিস্তারিত →</span>
+              </div>
+            </Link>
+          );
+        })}
         {filtered.length === 0 && (
-          <div className="col-span-2 text-center text-gray-500 py-12 text-sm">কোন সবজি পাওয়া যায়নি</div>
+          <div className="text-center text-gray-500 py-12 text-sm">কোন ফসল পাওয়া যায়নি</div>
         )}
       </section>
     </main>
