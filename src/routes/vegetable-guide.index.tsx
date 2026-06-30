@@ -5,7 +5,7 @@ import { getAllCrops, type Category, type RiskLevel } from "@/data/master-crop-d
 import { toBn } from "@/lib/bn";
 import { CropAdvisoryWidget } from "@/components/krishi/crop-advisory-widget";
 
-export const Route = createFileRoute("/vegetable-guide")({
+export const Route = createFileRoute("/vegetable-guide/")({
   component: VegetableGuidePage,
   head: () => ({
     meta: [

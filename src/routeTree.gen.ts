@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WeatherRouteImport } from './routes/weather'
-import { Route as VegetableGuideRouteImport } from './routes/vegetable-guide'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PricesRouteImport } from './routes/prices'
 import { Route as PricePredictionRouteImport } from './routes/price-prediction'
@@ -27,6 +26,7 @@ import { Route as CropPlannerRouteImport } from './routes/crop-planner'
 import { Route as CropGuideRouteImport } from './routes/crop-guide'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VegetableGuideIndexRouteImport } from './routes/vegetable-guide.index'
 import { Route as ProfileIndexRouteImport } from './routes/profile.index'
 import { Route as CropGuideIndexRouteImport } from './routes/crop-guide.index'
 import { Route as AiBondhuIndexRouteImport } from './routes/ai-bondhu.index'
@@ -61,11 +61,6 @@ import { Route as ApiPublicHooksCheckPredictionAccuracyRouteImport } from './rou
 const WeatherRoute = WeatherRouteImport.update({
   id: '/weather',
   path: '/weather',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const VegetableGuideRoute = VegetableGuideRouteImport.update({
-  id: '/vegetable-guide',
-  path: '/vegetable-guide',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -148,6 +143,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VegetableGuideIndexRoute = VegetableGuideIndexRouteImport.update({
+  id: '/vegetable-guide/',
+  path: '/vegetable-guide/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileIndexRoute = ProfileIndexRouteImport.update({
   id: '/profile/',
   path: '/profile/',
@@ -169,9 +169,9 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   getParentRoute: () => AdminRoute,
 } as any)
 const VegetableGuideSlugRoute = VegetableGuideSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => VegetableGuideRoute,
+  id: '/vegetable-guide/$slug',
+  path: '/vegetable-guide/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const UUserIdRoute = UUserIdRouteImport.update({
   id: '/u/$userId',
@@ -320,7 +320,6 @@ export interface FileRoutesByFullPath {
   '/price-prediction': typeof PricePredictionRouteWithChildren
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
-  '/vegetable-guide': typeof VegetableGuideRouteWithChildren
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
@@ -346,6 +345,7 @@ export interface FileRoutesByFullPath {
   '/ai-bondhu/': typeof AiBondhuIndexRoute
   '/crop-guide/': typeof CropGuideIndexRoute
   '/profile/': typeof ProfileIndexRoute
+  '/vegetable-guide/': typeof VegetableGuideIndexRoute
   '/crop-guide/new/$crop': typeof CropGuideNewCropRoute
   '/crop-guide/plan/$planId': typeof CropGuidePlanPlanIdRoute
   '/api/public/hooks/check-prediction-accuracy': typeof ApiPublicHooksCheckPredictionAccuracyRoute
@@ -368,7 +368,6 @@ export interface FileRoutesByTo {
   '/price-prediction': typeof PricePredictionRouteWithChildren
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
-  '/vegetable-guide': typeof VegetableGuideRouteWithChildren
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
@@ -394,6 +393,7 @@ export interface FileRoutesByTo {
   '/ai-bondhu': typeof AiBondhuIndexRoute
   '/crop-guide': typeof CropGuideIndexRoute
   '/profile': typeof ProfileIndexRoute
+  '/vegetable-guide': typeof VegetableGuideIndexRoute
   '/crop-guide/new/$crop': typeof CropGuideNewCropRoute
   '/crop-guide/plan/$planId': typeof CropGuidePlanPlanIdRoute
   '/api/public/hooks/check-prediction-accuracy': typeof ApiPublicHooksCheckPredictionAccuracyRoute
@@ -419,7 +419,6 @@ export interface FileRoutesById {
   '/price-prediction': typeof PricePredictionRouteWithChildren
   '/prices': typeof PricesRoute
   '/register': typeof RegisterRoute
-  '/vegetable-guide': typeof VegetableGuideRouteWithChildren
   '/weather': typeof WeatherRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
@@ -445,6 +444,7 @@ export interface FileRoutesById {
   '/ai-bondhu/': typeof AiBondhuIndexRoute
   '/crop-guide/': typeof CropGuideIndexRoute
   '/profile/': typeof ProfileIndexRoute
+  '/vegetable-guide/': typeof VegetableGuideIndexRoute
   '/crop-guide/new/$crop': typeof CropGuideNewCropRoute
   '/crop-guide/plan/$planId': typeof CropGuidePlanPlanIdRoute
   '/api/public/hooks/check-prediction-accuracy': typeof ApiPublicHooksCheckPredictionAccuracyRoute
@@ -471,7 +471,6 @@ export interface FileRouteTypes {
     | '/price-prediction'
     | '/prices'
     | '/register'
-    | '/vegetable-guide'
     | '/weather'
     | '/admin/analytics'
     | '/admin/audit'
@@ -497,6 +496,7 @@ export interface FileRouteTypes {
     | '/ai-bondhu/'
     | '/crop-guide/'
     | '/profile/'
+    | '/vegetable-guide/'
     | '/crop-guide/new/$crop'
     | '/crop-guide/plan/$planId'
     | '/api/public/hooks/check-prediction-accuracy'
@@ -519,7 +519,6 @@ export interface FileRouteTypes {
     | '/price-prediction'
     | '/prices'
     | '/register'
-    | '/vegetable-guide'
     | '/weather'
     | '/admin/analytics'
     | '/admin/audit'
@@ -545,6 +544,7 @@ export interface FileRouteTypes {
     | '/ai-bondhu'
     | '/crop-guide'
     | '/profile'
+    | '/vegetable-guide'
     | '/crop-guide/new/$crop'
     | '/crop-guide/plan/$planId'
     | '/api/public/hooks/check-prediction-accuracy'
@@ -569,7 +569,6 @@ export interface FileRouteTypes {
     | '/price-prediction'
     | '/prices'
     | '/register'
-    | '/vegetable-guide'
     | '/weather'
     | '/admin/analytics'
     | '/admin/audit'
@@ -595,6 +594,7 @@ export interface FileRouteTypes {
     | '/ai-bondhu/'
     | '/crop-guide/'
     | '/profile/'
+    | '/vegetable-guide/'
     | '/crop-guide/new/$crop'
     | '/crop-guide/plan/$planId'
     | '/api/public/hooks/check-prediction-accuracy'
@@ -620,7 +620,6 @@ export interface RootRouteChildren {
   PricePredictionRoute: typeof PricePredictionRouteWithChildren
   PricesRoute: typeof PricesRoute
   RegisterRoute: typeof RegisterRoute
-  VegetableGuideRoute: typeof VegetableGuideRouteWithChildren
   WeatherRoute: typeof WeatherRoute
   AiBondhuCalculatorRoute: typeof AiBondhuCalculatorRoute
   AiBondhuCalendarRoute: typeof AiBondhuCalendarRoute
@@ -629,8 +628,10 @@ export interface RootRouteChildren {
   AiBondhuPesticideRoute: typeof AiBondhuPesticideRoute
   ProfileDiseaseHistoryRoute: typeof ProfileDiseaseHistoryRoute
   UUserIdRoute: typeof UUserIdRoute
+  VegetableGuideSlugRoute: typeof VegetableGuideSlugRoute
   AiBondhuIndexRoute: typeof AiBondhuIndexRoute
   ProfileIndexRoute: typeof ProfileIndexRoute
+  VegetableGuideIndexRoute: typeof VegetableGuideIndexRoute
   ApiPublicHooksCheckPredictionAccuracyRoute: typeof ApiPublicHooksCheckPredictionAccuracyRoute
   ApiPublicHooksFetchGovtPricesRoute: typeof ApiPublicHooksFetchGovtPricesRoute
   ApiPublicHooksSendScheduledBroadcastsRoute: typeof ApiPublicHooksSendScheduledBroadcastsRoute
@@ -644,13 +645,6 @@ declare module '@tanstack/react-router' {
       path: '/weather'
       fullPath: '/weather'
       preLoaderRoute: typeof WeatherRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/vegetable-guide': {
-      id: '/vegetable-guide'
-      path: '/vegetable-guide'
-      fullPath: '/vegetable-guide'
-      preLoaderRoute: typeof VegetableGuideRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -765,6 +759,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vegetable-guide/': {
+      id: '/vegetable-guide/'
+      path: '/vegetable-guide'
+      fullPath: '/vegetable-guide/'
+      preLoaderRoute: typeof VegetableGuideIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile/': {
       id: '/profile/'
       path: '/profile'
@@ -795,10 +796,10 @@ declare module '@tanstack/react-router' {
     }
     '/vegetable-guide/$slug': {
       id: '/vegetable-guide/$slug'
-      path: '/$slug'
+      path: '/vegetable-guide/$slug'
       fullPath: '/vegetable-guide/$slug'
       preLoaderRoute: typeof VegetableGuideSlugRouteImport
-      parentRoute: typeof VegetableGuideRoute
+      parentRoute: typeof rootRouteImport
     }
     '/u/$userId': {
       id: '/u/$userId'
@@ -1048,18 +1049,6 @@ const PricePredictionRouteWithChildren = PricePredictionRoute._addFileChildren(
   PricePredictionRouteChildren,
 )
 
-interface VegetableGuideRouteChildren {
-  VegetableGuideSlugRoute: typeof VegetableGuideSlugRoute
-}
-
-const VegetableGuideRouteChildren: VegetableGuideRouteChildren = {
-  VegetableGuideSlugRoute: VegetableGuideSlugRoute,
-}
-
-const VegetableGuideRouteWithChildren = VegetableGuideRoute._addFileChildren(
-  VegetableGuideRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
@@ -1077,7 +1066,6 @@ const rootRouteChildren: RootRouteChildren = {
   PricePredictionRoute: PricePredictionRouteWithChildren,
   PricesRoute: PricesRoute,
   RegisterRoute: RegisterRoute,
-  VegetableGuideRoute: VegetableGuideRouteWithChildren,
   WeatherRoute: WeatherRoute,
   AiBondhuCalculatorRoute: AiBondhuCalculatorRoute,
   AiBondhuCalendarRoute: AiBondhuCalendarRoute,
@@ -1086,8 +1074,10 @@ const rootRouteChildren: RootRouteChildren = {
   AiBondhuPesticideRoute: AiBondhuPesticideRoute,
   ProfileDiseaseHistoryRoute: ProfileDiseaseHistoryRoute,
   UUserIdRoute: UUserIdRoute,
+  VegetableGuideSlugRoute: VegetableGuideSlugRoute,
   AiBondhuIndexRoute: AiBondhuIndexRoute,
   ProfileIndexRoute: ProfileIndexRoute,
+  VegetableGuideIndexRoute: VegetableGuideIndexRoute,
   ApiPublicHooksCheckPredictionAccuracyRoute:
     ApiPublicHooksCheckPredictionAccuracyRoute,
   ApiPublicHooksFetchGovtPricesRoute: ApiPublicHooksFetchGovtPricesRoute,
@@ -1098,13 +1088,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
