@@ -763,7 +763,7 @@ export const CROPS: Record<string, CropData> = {
       { month: 1, type: 'harvest', title: 'সংগ্রহ শুরু', desc: 'জানুয়ারি থেকে তোলা শুরু' },
       { month: 3, type: 'harvest', title: 'শেষ সংগ্রহ', desc: 'মার্চে শেষ করুন' },
     ],
-    bestSellingMonths: [1, 2, 12],
+    bestSellingMonths: [10, 11, 12, 1],
     demandLevel: 'বেশি',
     exportPotential: true,
     goodCompanions: ['তুলসি', 'গাঁদা ফুল', 'পেঁয়াজ'],
