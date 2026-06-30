@@ -257,7 +257,9 @@ function FinancialSection({ crop }: { crop: CropData }) {
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
             <p className="text-xs font-bold text-amber-800 flex items-center gap-1"><Lightbulb className="h-3.5 w-3.5" /> দাম সম্পর্কে জানুন</p>
             <p className="text-xs text-gray-800 mt-1.5 leading-relaxed">
-              {MONTHS_FULL[crop.bestSellingMonths[0] - 1]} মাসে {crop.name}-এর দাম সবচেয়ে বেশি থাকে। সেই অনুযায়ী রোপণের পরিকল্পনা করুন।
+              {crop.bestSellingMonths.length > 1
+                ? `${MONTHS_FULL[crop.bestSellingMonths[0] - 1]} থেকে ${MONTHS_FULL[crop.bestSellingMonths[crop.bestSellingMonths.length - 1] - 1]}`
+                : MONTHS_FULL[crop.bestSellingMonths[0] - 1]} মাসে {crop.name}-এর দাম সবচেয়ে বেশি থাকে। সেই অনুযায়ী রোপণের পরিকল্পনা করুন।
             </p>
           </div>
         )}
