@@ -670,8 +670,14 @@ export const CROPS: Record<string, CropData> = {
     varieties: [
       { name: 'বারি টমেটো-১৪', type: 'উফশী', daysToHarvest: 140, yieldPerBigha: 95, special: 'রোগ সহিষ্ণু' },
       { name: 'বারি টমেটো-১৫', type: 'উফশী', daysToHarvest: 145, yieldPerBigha: 100 },
+      { name: 'রতন/বারি টমেটো-১', type: 'উফশী', daysToHarvest: 140, yieldPerBigha: 95, special: 'শীতকালে দেশজুড়ে জনপ্রিয়' },
+      { name: 'মানিক/বারি টমেটো-২', type: 'উফশী', daysToHarvest: 142, yieldPerBigha: 98, special: 'শীতকালে বহুল পরিচিত' },
       { name: 'রতন (হাইব্রিড)', type: 'হাইব্রিড', daysToHarvest: 140, yieldPerBigha: 115 },
       { name: 'মাহি (হাইব্রিড)', type: 'হাইব্রিড', daysToHarvest: 138, yieldPerBigha: 120, special: 'সর্বোচ্চ ফলন' },
+      { name: 'লাল বাহাদুর (লাল তীর)', type: 'হাইব্রিড', daysToHarvest: 135, yieldPerBigha: 125, special: 'গ্রীষ্মকালীন, প্রচণ্ড গরমে টিকে থাকে, উচ্চ ফলন' },
+      { name: 'বাহুবলী', type: 'হাইব্রিড', daysToHarvest: 138, yieldPerBigha: 120, special: 'সারা দেশে ব্যাপক চাষ' },
+      { name: 'বিপুল প্লাস', type: 'হাইব্রিড', daysToHarvest: 140, yieldPerBigha: 120, special: 'সারা দেশে ব্যাপক চাষ' },
+      { name: 'আনসাল F1 (Seminis/Bayer)', type: 'হাইব্রিড', daysToHarvest: 135, yieldPerBigha: 130, special: 'গ্রীষ্মকালীন; ৪৫°C পর্যন্ত তাপ ও প্রতিকূল আবহাওয়া সহিষ্ণু; ভালো দামের সময় অক্টো–জানু ও এপ্রিল–আগস্ট; আগাম চাষে আগস্টের শেষে চারা রোপন' },
     ],
     stages: [
       { id: 'seedbed', name: 'বীজতলা', icon: '🌱', startDay: 0, endDay: 25,
