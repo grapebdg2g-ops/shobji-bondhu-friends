@@ -957,6 +957,7 @@ export type Database = {
         }[]
       }
       decrement_likes: { Args: { post_id: string }; Returns: undefined }
+      get_exchange_phone: { Args: { _id: string }; Returns: string }
       get_my_phone: { Args: never; Returns: string }
       get_price_history: {
         Args: { p_days?: number; p_district: string; p_product: string }
