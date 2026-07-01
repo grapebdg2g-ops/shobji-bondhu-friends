@@ -316,6 +316,8 @@ function SeasonSection({ crop }: { crop: CropData }) {
 function VarietiesSection({ crop }: { crop: CropData }) {
   const [compare, setCompare] = useState(false);
   const [filter, setFilter] = useState<string>("সব");
+  const [open, setOpen] = useState(false);
+
   if (crop.varieties.length === 0) return null;
   const bestYield = Math.max(...crop.varieties.map(v => v.yieldPerBigha));
 
@@ -339,7 +341,17 @@ function VarietiesSection({ crop }: { crop: CropData }) {
 
   return (
     <SectionCard title="বাংলাদেশে প্রচলিত জাত" icon="🌱">
+      <button
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        className="w-full flex items-center justify-between text-sm font-semibold text-gray-800 bg-gray-50 hover:bg-gray-100 rounded-xl px-3 py-2 transition"
+      >
+        <span>{open ? "জাত তালিকা লুকান" : `জাত তালিকা দেখুন (${toBn(crop.varieties.length)}টি)`}</span>
+        {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+      </button>
+      {open && <div className="mt-3">
       {availableCats.length > 2 && (
+
         <div className="flex gap-1.5 overflow-x-auto pb-2 mb-2 -mx-1 px-1">
           {availableCats.map(c => (
             <button
@@ -409,7 +421,9 @@ function VarietiesSection({ crop }: { crop: CropData }) {
           </table>
         </div>
       )}
+      </div>}
     </SectionCard>
+
   );
 }
 
