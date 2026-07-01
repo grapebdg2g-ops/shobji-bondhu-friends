@@ -19,15 +19,13 @@ type ServerFilters = Omit<ExchangeFilters, "query">;
 const exchangesKey = (f: ServerFilters) =>
   ["exchanges", f.district, f.type, f.freeOnly, f.sort] as const;
 
+const EXCHANGE_COLS =
+  "id,created_at,title,description,type,is_free,price,unit,district,upazila,image_url,is_active,user_name,user_id";
+
 async function fetchExchanges(filters: ServerFilters): Promise<Exchange[]> {
-  const isAuthed = !!(await supabase.auth.getSession()).data.session;
   let q = supabase
     .from("exchanges")
-    .select(
-      isAuthed
-        ? "*"
-        : "id,created_at,title,description,type,is_free,price,unit,district,upazila,image_url,is_active,user_name,user_id",
-    )
+    .select(EXCHANGE_COLS)
     .eq("is_active", true)
     .limit(100);
   if (filters.district) q = q.eq("district", filters.district);

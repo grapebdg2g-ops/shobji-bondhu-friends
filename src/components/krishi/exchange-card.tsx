@@ -67,7 +67,27 @@ function CardImage({ src, type }: { src?: string | null; type: ExchangeType }) {
 
 function CardBody({ item }: { item: Exchange }) {
   const meta = TYPE_META[(item.type as ExchangeType) ?? "seed"] ?? TYPE_META.seed;
-  const wa = toWaLink(item.user_phone);
+  const [loadingWa, setLoadingWa] = useState(false);
+
+  const handleContact = async () => {
+    if (loadingWa) return;
+    setLoadingWa(true);
+    try {
+      const { data, error } = await supabase.rpc("get_exchange_phone" as never, { _id: item.id } as never);
+      if (error) throw error;
+      const wa = toWaLink(data as string | null);
+      if (!wa) {
+        toast.error("যোগাযোগের নম্বর পাওয়া যায়নি");
+        return;
+      }
+      window.open(wa, "_blank", "noopener,noreferrer");
+    } catch {
+      toast.error("যোগাযোগ করা যায়নি — সাইন-ইন প্রয়োজন");
+    } finally {
+      setLoadingWa(false);
+    }
+  };
+
   return (
     <div className="flex-1 min-w-0">
       <div className="flex items-start gap-1">
@@ -107,18 +127,14 @@ function CardBody({ item }: { item: Exchange }) {
         <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />{timeAgoBn(item.created_at)}</span>
       </div>
       <div className="mt-2 flex justify-end">
-        {wa ? (
-          <a
-            href={wa}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 bg-[#0E8B8B] text-white text-sm font-bold px-3 py-1.5 rounded-lg active:scale-95"
-          >
-            <Phone className="h-3.5 w-3.5" /> যোগাযোগ করুন
-          </a>
-        ) : (
-          <span className="text-[11px] text-muted-foreground">নম্বর নেই</span>
-        )}
+        <button
+          type="button"
+          onClick={handleContact}
+          disabled={loadingWa}
+          className="inline-flex items-center gap-1.5 bg-[#0E8B8B] text-white text-sm font-bold px-3 py-1.5 rounded-lg active:scale-95 disabled:opacity-60"
+        >
+          <Phone className="h-3.5 w-3.5" /> {loadingWa ? "লোড হচ্ছে..." : "যোগাযোগ করুন"}
+        </button>
       </div>
     </div>
   );
