@@ -456,7 +456,7 @@ function UserDetailDialog({ userId, onClose }: { userId: string | null; onClose:
     enabled: !!userId,
     queryFn: async () => {
       const [prof, posts, exch, dx, reports, phoneRpc] = await Promise.all([
-        supabase.from("profiles").select("*").eq("id", userId!).single(),
+        supabase.from("profiles").select("id, name, district, upazila, crops, role, created_at, updated_at, avatar_url, bio, posts_count, exchanges_count, prices_count, is_verified, is_suspended, suspension_reason, suspension_until, verified_at, verified_by, expert_specialty, expert_institution, last_active, total_reports").eq("id", userId!).single(),
         supabase.from("posts").select("id, content, created_at").eq("user_id", userId!).order("created_at", { ascending: false }).limit(10),
         supabase.from("exchanges").select("id, title, created_at").eq("user_id", userId!).order("created_at", { ascending: false }).limit(10),
         supabase.from("disease_history").select("id, disease_name, crop_type, created_at").eq("user_id", userId!).order("created_at", { ascending: false }).limit(10),
