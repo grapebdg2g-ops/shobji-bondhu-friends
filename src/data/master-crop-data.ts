@@ -811,6 +811,24 @@ export const CROPS: Record<string, CropData> = {
       { name: 'বারি ফুলকপি-১', type: 'উফশী', daysToHarvest: 85, yieldPerBigha: 70, special: 'আগাম' },
       { name: 'হোয়াইট সুপার', type: 'হাইব্রিড', daysToHarvest: 90, yieldPerBigha: 95 },
       { name: 'স্নোবল', type: 'উফশী', daysToHarvest: 95, yieldPerBigha: 80 },
+      // আগাম জাত (ভাদ্র-আশ্বিনে বীজ → কার্তিক-অগ্রহায়ণে বাজার)
+      { name: 'কার্তিকী / পটনাই / অগ্রহায়ণী', type: 'উফশী', daysToHarvest: 75, yieldPerBigha: 65, special: 'আগাম — আর্লিপানাই, আর্লিস্নোবলও এই দলে' },
+      { name: 'ট্রপিক্যাল-৫৫', type: 'হাইব্রিড', daysToHarvest: 60, yieldPerBigha: 90, special: 'আগাম, গরম সহনশীল' },
+      { name: 'সামার ডায়মন্ড F1', type: 'হাইব্রিড', daysToHarvest: 65, yieldPerBigha: 95, special: 'আগাম, গ্রীষ্মে ভালো' },
+      { name: 'স্নো কুইন F1 / হিট মাস্টার / মিজুকি', type: 'হাইব্রিড', daysToHarvest: 70, yieldPerBigha: 100, special: 'আগাম হাইব্রিড সিরিজ' },
+      { name: 'সুপার ট্যাবি F1 / হোয়াইট ক্রাউন F1 / এভারেস্ট', type: 'হাইব্রিড', daysToHarvest: 70, yieldPerBigha: 100, special: 'আগাম, উচ্চ ফলন' },
+      // মাঝারি জাত (কার্তিক-অগ্রহায়ণে রোপণ → পৌষ-মাঘে সংগ্রহ)
+      { name: 'পৌষালী / রাক্ষুসী', type: 'উফশী', daysToHarvest: 90, yieldPerBigha: 80, special: 'মাঝারি মৌসুম' },
+      { name: 'স্নোবল-X / স্নোবল-Y', type: 'উফশী', daysToHarvest: 95, yieldPerBigha: 85, special: 'মাঝারি, জনপ্রিয়' },
+      { name: 'হোয়াইট টপ / স্লোওয়েভ / বিগশট', type: 'হাইব্রিড', daysToHarvest: 90, yieldPerBigha: 110, special: 'মাঝারি হাইব্রিড' },
+      { name: 'সিভান F1 / চান্ডি F1 / হোয়াইট ফ্ল্যাশ', type: 'হাইব্রিড', daysToHarvest: 90, yieldPerBigha: 110, special: 'মাঝারি, বাজারে চাহিদা বেশি' },
+      // নাবী জাত (মাঘ-ফাল্গুনে ফলন)
+      { name: 'মাঘী / বেনারসি', type: 'উফশী', daysToHarvest: 110, yieldPerBigha: 85, special: 'নাবী জাত' },
+      { name: 'ইউনিক স্নোবল / হোয়াইট মাউন্টেন', type: 'উফশী', daysToHarvest: 115, yieldPerBigha: 85, special: 'নাবী, বড় ফুল' },
+      { name: 'ক্রিস্টমাস / এরফাট / হোয়াইট জায়ান্ট F1', type: 'হাইব্রিড', daysToHarvest: 110, yieldPerBigha: 115, special: 'নাবী হাইব্রিড' },
+      // রঙিন / পুষ্টিসমৃদ্ধ আধুনিক জাত
+      { name: 'ভ্যালেন্টিনা পিঙ্ক', type: 'হাইব্রিড', daysToHarvest: 90, yieldPerBigha: 80, special: 'রঙিন — গোলাপি/বেগুনি, উচ্চ দাম' },
+      { name: 'ক্যারোটিনা ইয়োলো', type: 'হাইব্রিড', daysToHarvest: 90, yieldPerBigha: 80, special: 'রঙিন — হলুদ/কমলা, ক্যারোটিন সমৃদ্ধ' },
     ],
     stages: [
       { id: 'seedbed', name: 'বীজতলা', icon: '🌱', startDay: 0, endDay: 25,
