@@ -421,7 +421,9 @@ function VarietiesSection({ crop }: { crop: CropData }) {
           </table>
         </div>
       )}
+      </div>}
     </SectionCard>
+
   );
 }
 
