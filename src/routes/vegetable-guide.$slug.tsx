@@ -315,13 +315,49 @@ function SeasonSection({ crop }: { crop: CropData }) {
 // ════════ SECTION 3: Varieties ════════
 function VarietiesSection({ crop }: { crop: CropData }) {
   const [compare, setCompare] = useState(false);
+  const [filter, setFilter] = useState<string>("সব");
   if (crop.varieties.length === 0) return null;
   const bestYield = Math.max(...crop.varieties.map(v => v.yieldPerBigha));
 
+  const categorize = (v: Variety): string => {
+    const s = (v.special ?? "").toLowerCase();
+    if (s.includes("রঙিন")) return "রঙিন";
+    if (s.includes("আগাম")) return "আগাম";
+    if (s.includes("নাবী")) return "নাবী";
+    if (s.includes("মাঝারি")) return "মাঝারি";
+    return "অন্যান্য";
+  };
+
+  const CATS = ["সব", "আগাম", "মাঝারি", "নাবী", "রঙিন"] as const;
+  const counts = CATS.reduce<Record<string, number>>((acc, c) => {
+    acc[c] = c === "সব" ? crop.varieties.length : crop.varieties.filter(v => categorize(v) === c).length;
+    return acc;
+  }, {});
+  const availableCats = CATS.filter(c => counts[c] > 0);
+
+  const shown = filter === "সব" ? crop.varieties : crop.varieties.filter(v => categorize(v) === filter);
+
   return (
     <SectionCard title="বাংলাদেশে প্রচলিত জাত" icon="🌱">
+      {availableCats.length > 2 && (
+        <div className="flex gap-1.5 overflow-x-auto pb-2 mb-2 -mx-1 px-1">
+          {availableCats.map(c => (
+            <button
+              key={c}
+              onClick={() => setFilter(c)}
+              className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border transition ${
+                filter === c
+                  ? "bg-emerald-600 text-white border-emerald-600"
+                  : "bg-white text-gray-700 border-gray-200 hover:border-emerald-300"
+              }`}
+            >
+              {c} <span className="opacity-70">({toBn(counts[c])})</span>
+            </button>
+          ))}
+        </div>
+      )}
       <div className="space-y-2.5">
-        {crop.varieties.map((v) => {
+        {shown.map((v) => {
           const isBest = v.yieldPerBigha === bestYield;
           return (
             <div key={v.name} className="border border-gray-100 rounded-xl p-3 relative">
@@ -342,7 +378,11 @@ function VarietiesSection({ crop }: { crop: CropData }) {
             </div>
           );
         })}
+        {shown.length === 0 && (
+          <p className="text-center text-sm text-gray-500 py-4">এই ক্যাটাগরিতে কোনো জাত নেই</p>
+        )}
       </div>
+
 
       <button onClick={() => setCompare(c => !c)} className="mt-3 w-full text-sm font-semibold text-emerald-700 bg-emerald-50 rounded-xl py-2">
         {compare ? "তুলনা বন্ধ করুন" : "জাত তুলনা করুন →"}
