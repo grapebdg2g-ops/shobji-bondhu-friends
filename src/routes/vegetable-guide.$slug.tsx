@@ -316,6 +316,8 @@ function SeasonSection({ crop }: { crop: CropData }) {
 function VarietiesSection({ crop }: { crop: CropData }) {
   const [compare, setCompare] = useState(false);
   const [filter, setFilter] = useState<string>("সব");
+  const [open, setOpen] = useState(false);
+
   if (crop.varieties.length === 0) return null;
   const bestYield = Math.max(...crop.varieties.map(v => v.yieldPerBigha));
 
