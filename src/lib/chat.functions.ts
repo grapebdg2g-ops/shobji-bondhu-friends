@@ -118,22 +118,16 @@ export const suggestFollowUps = createServerFn({ method: "POST" })
       .map((m) => `${m.role === "user" ? "কৃষক" : "সহকারী"}: ${m.content}`)
       .join("\n");
     try {
-      const raw = await callGateway({
-        model: MODEL,
-        temperature: 0.5,
-        max_tokens: 200,
-        messages: [
-          {
-            role: "system",
-            content:
-              'তুমি একটি JSON generator। শুধু একটি JSON array দাও, অন্য কিছু নয়। format: ["প্রশ্ন১","প্রশ্ন২","প্রশ্ন৩"]',
-          },
+      const raw = await callGemini(
+        'তুমি একটি JSON generator। শুধু একটি JSON array দাও, অন্য কিছু নয়। format: ["প্রশ্ন১","প্রশ্ন২","প্রশ্ন৩"]',
+        [
           {
             role: "user",
             content: `নিচের কৃষি কথোপকথন পড়ে ৩টি সংক্ষিপ্ত (৫-৭ শব্দ) বাংলা follow-up প্রশ্ন দাও। শুধু JSON array।\n\n${transcript}`,
           },
         ],
-      });
+        { temperature: 0.5, maxTokens: 200 },
+      );
       const match = raw.match(/\[[\s\S]*\]/);
       if (!match) return { suggestions: [] };
       const arr = JSON.parse(match[0]);
