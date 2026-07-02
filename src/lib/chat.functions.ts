@@ -25,8 +25,8 @@ const SuggestInputSchema = z.object({
   messages: z.array(MessageSchema).min(1).max(20),
 });
 
-const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-3-flash-preview";
+const GEMINI_MODEL = "gemini-2.0-flash";
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 function getCurrentSeason() {
   const m = new Date().getMonth() + 1;
@@ -61,22 +61,43 @@ function buildSystemPrompt(ctx?: z.infer<typeof UserContextSchema>) {
 ৭. নিশ্চিত না হলে "কৃষি অফিসে জিজ্ঞেস করুন" বলো`;
 }
 
-async function callGateway(body: unknown): Promise<string> {
-  const key = process.env.LOVABLE_API_KEY;
+type ChatMsg = z.infer<typeof MessageSchema>;
+
+async function callGemini(
+  system: string,
+  messages: ChatMsg[],
+  opts: { temperature?: number; maxTokens?: number } = {},
+): Promise<string> {
+  const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("AI সেবা এখন উপলব্ধ নয়");
-  const res = await fetch(GATEWAY_URL, {
+  const contents = messages.map((m) => ({
+    role: m.role === "user" ? "user" : "model",
+    parts: [{ text: m.content }],
+  }));
+  const res = await fetch(`${GEMINI_URL}?key=${key}`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${key}`,
-    },
-    body: JSON.stringify(body),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      system_instruction: { parts: [{ text: system }] },
+      contents,
+      generationConfig: {
+        temperature: opts.temperature ?? 0.7,
+        maxOutputTokens: opts.maxTokens ?? 500,
+        topP: 0.8,
+      },
+      safetySettings: [
+        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+      ],
+    }),
   });
   if (res.status === 429) throw new Error("অনেক অনুরোধ এসেছে, একটু পরে আবার চেষ্টা করুন");
-  if (res.status === 402) throw new Error("AI ক্রেডিট শেষ, অনুগ্রহ করে ওয়ার্কস্পেসে যোগ করুন");
-  if (!res.ok) throw new Error("AI সেবা সাড়া দিচ্ছে না");
-  const json = await res.json();
-  return (json?.choices?.[0]?.message?.content ?? "").trim();
+  if (!res.ok) {
+    const err = await res.text().catch(() => "");
+    console.error("Gemini API error", res.status, err);
+    throw new Error("AI সেবা সাড়া দিচ্ছে না");
+  }
+  const data = await res.json();
+  return (data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "").trim();
 }
 
 export const chatWithAI = createServerFn({ method: "POST" })
@@ -84,12 +105,7 @@ export const chatWithAI = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => InputSchema.parse(d))
   .handler(async ({ data }): Promise<{ reply: string }> => {
     const system = buildSystemPrompt(data.userContext);
-    const reply = await callGateway({
-      model: MODEL,
-      temperature: 0.7,
-      max_tokens: 600,
-      messages: [{ role: "system", content: system }, ...data.messages],
-    });
+    const reply = await callGemini(system, data.messages, { temperature: 0.7, maxTokens: 500 });
     return { reply: reply || "দুঃখিত, উত্তর তৈরি করতে পারিনি।" };
   });
 
@@ -102,22 +118,16 @@ export const suggestFollowUps = createServerFn({ method: "POST" })
       .map((m) => `${m.role === "user" ? "কৃষক" : "সহকারী"}: ${m.content}`)
       .join("\n");
     try {
-      const raw = await callGateway({
-        model: MODEL,
-        temperature: 0.5,
-        max_tokens: 200,
-        messages: [
-          {
-            role: "system",
-            content:
-              'তুমি একটি JSON generator। শুধু একটি JSON array দাও, অন্য কিছু নয়। format: ["প্রশ্ন১","প্রশ্ন২","প্রশ্ন৩"]',
-          },
+      const raw = await callGemini(
+        'তুমি একটি JSON generator। শুধু একটি JSON array দাও, অন্য কিছু নয়। format: ["প্রশ্ন১","প্রশ্ন২","প্রশ্ন৩"]',
+        [
           {
             role: "user",
             content: `নিচের কৃষি কথোপকথন পড়ে ৩টি সংক্ষিপ্ত (৫-৭ শব্দ) বাংলা follow-up প্রশ্ন দাও। শুধু JSON array।\n\n${transcript}`,
           },
         ],
-      });
+        { temperature: 0.5, maxTokens: 200 },
+      );
       const match = raw.match(/\[[\s\S]*\]/);
       if (!match) return { suggestions: [] };
       const arr = JSON.parse(match[0]);
