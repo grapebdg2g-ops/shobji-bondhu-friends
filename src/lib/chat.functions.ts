@@ -25,8 +25,8 @@ const SuggestInputSchema = z.object({
   messages: z.array(MessageSchema).min(1).max(20),
 });
 
-const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-3-flash-preview";
+const GEMINI_MODEL = "gemini-2.0-flash";
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 function getCurrentSeason() {
   const m = new Date().getMonth() + 1;
@@ -61,22 +61,43 @@ function buildSystemPrompt(ctx?: z.infer<typeof UserContextSchema>) {
 ৭. নিশ্চিত না হলে "কৃষি অফিসে জিজ্ঞেস করুন" বলো`;
 }
 
-async function callGateway(body: unknown): Promise<string> {
-  const key = process.env.LOVABLE_API_KEY;
+type ChatMsg = z.infer<typeof MessageSchema>;
+
+async function callGemini(
+  system: string,
+  messages: ChatMsg[],
+  opts: { temperature?: number; maxTokens?: number } = {},
+): Promise<string> {
+  const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("AI সেবা এখন উপলব্ধ নয়");
-  const res = await fetch(GATEWAY_URL, {
+  const contents = messages.map((m) => ({
+    role: m.role === "user" ? "user" : "model",
+    parts: [{ text: m.content }],
+  }));
+  const res = await fetch(`${GEMINI_URL}?key=${key}`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${key}`,
-    },
-    body: JSON.stringify(body),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      system_instruction: { parts: [{ text: system }] },
+      contents,
+      generationConfig: {
+        temperature: opts.temperature ?? 0.7,
+        maxOutputTokens: opts.maxTokens ?? 500,
+        topP: 0.8,
+      },
+      safetySettings: [
+        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+      ],
+    }),
   });
   if (res.status === 429) throw new Error("অনেক অনুরোধ এসেছে, একটু পরে আবার চেষ্টা করুন");
-  if (res.status === 402) throw new Error("AI ক্রেডিট শেষ, অনুগ্রহ করে ওয়ার্কস্পেসে যোগ করুন");
-  if (!res.ok) throw new Error("AI সেবা সাড়া দিচ্ছে না");
-  const json = await res.json();
-  return (json?.choices?.[0]?.message?.content ?? "").trim();
+  if (!res.ok) {
+    const err = await res.text().catch(() => "");
+    console.error("Gemini API error", res.status, err);
+    throw new Error("AI সেবা সাড়া দিচ্ছে না");
+  }
+  const data = await res.json();
+  return (data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "").trim();
 }
 
 export const chatWithAI = createServerFn({ method: "POST" })
