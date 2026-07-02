@@ -25,7 +25,8 @@ const SuggestInputSchema = z.object({
   messages: z.array(MessageSchema).min(1).max(20),
 });
 
-const GEMINI_MODEL = "gemini-2.0-flash";
+// সরাসরি Gemini 2.5 Flash মডেল সেট করা হলো
+const GEMINI_MODEL = "gemini-2.5-flash";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 function getCurrentSeason() {
@@ -37,10 +38,11 @@ function getCurrentSeason() {
 
 function buildSystemPrompt(ctx?: z.infer<typeof UserContextSchema>) {
   const name = ctx?.name || "কৃষক ভাই";
-  const district = ctx?.district || "অজানা";
-  const upazila = ctx?.upazila || "অজানা";
+  const district = ctx?.district || "চট্টগ্রাম";
+  const upazila = ctx?.upazila || "নবীনগর";
   const crops = ctx?.crops?.length ? ctx.crops.join(", ") : "উল্লেখ নেই";
   const today = new Date().toLocaleDateString("bn-BD");
+  
   return `তুমি "কৃষি বন্ধু" — বাংলাদেশের কৃষকদের জন্য একটি AI সহকারী।
 
 ব্যবহারকারীর তথ্য:
@@ -52,13 +54,13 @@ function buildSystemPrompt(ctx?: z.infer<typeof UserContextSchema>) {
 - মৌসুম: ${getCurrentSeason()}
 
 তোমার নিয়ম:
-১. সবসময় বাংলায় উত্তর দাও
-২. সহজ ও সংক্ষিপ্ত রাখো (সর্বোচ্চ ১৫০ শব্দ)
-৩. কৃষি বিষয়ক প্রশ্নে সরাসরি উত্তর দাও
-৪. স্থানীয় বাজার ও মৌসুম উল্লেখ করো
-৫. প্রয়োজনে numbered list ব্যবহার করো
-৬. ক্ষতিকর পরামর্শ কখনো দেবে না
-৭. নিশ্চিত না হলে "কৃষি অফিসে জিজ্ঞেস করুন" বলো`;
+১. সবসময় একেবারে শুদ্ধ ও প্রমিত বাংলায় (Formal Bengali) উত্তর দাও। কোনোভাবেই অপ্রাতিষ্ঠানিক বা আঞ্চলিক শব্দ ব্যবহার করবে না।
+২. সহজ ও সংক্ষিপ্ত রাখো (সর্বোচ্চ ১৫০ শব্দ)।
+৩. কৃষি বিষয়ক প্রশ্নে সরাসরি উত্তর দাও।
+৪. স্থানীয় বাজার ও মৌসুম উল্লেখ করো।
+৫. প্রয়োজনে numbered list ব্যবহার করো।
+৬. ক্ষতিকর পরামর্শ কখনো দেবে না।
+৭. নিশ্চিত না হলে বিনীতভাবে "কৃষি অফিসে জিজ্ঞেস করুন" বলো।`;
 }
 
 type ChatMsg = z.infer<typeof MessageSchema>;
@@ -70,10 +72,12 @@ async function callGemini(
 ): Promise<string> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("AI সেবা এখন উপলব্ধ নয়");
+  
   const contents = messages.map((m) => ({
     role: m.role === "user" ? "user" : "model",
     parts: [{ text: m.content }],
   }));
+  
   const res = await fetch(`${GEMINI_URL}?key=${key}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -90,12 +94,14 @@ async function callGemini(
       ],
     }),
   });
+  
   if (res.status === 429) throw new Error("অনেক অনুরোধ এসেছে, একটু পরে আবার চেষ্টা করুন");
   if (!res.ok) {
     const err = await res.text().catch(() => "");
     console.error("Gemini API error", res.status, err);
     throw new Error("AI সেবা সাড়া দিচ্ছে না");
   }
+  
   const data = await res.json();
   return (data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "").trim();
 }
@@ -123,7 +129,7 @@ export const suggestFollowUps = createServerFn({ method: "POST" })
         [
           {
             role: "user",
-            content: `নিচের কৃষি কথোপকথন পড়ে ৩টি সংক্ষিপ্ত (৫-৭ শব্দ) বাংলা follow-up প্রশ্ন দাও। শুধু JSON array।\n\n${transcript}`,
+            content: `নিচের কৃষি কথোপকথন পড়ে ৩টি সংক্ষিপ্ত (৫-৭ শব্দ) শুদ্ধ বাংলার follow-up প্রশ্ন দাও। শুধু JSON array।\n\n${transcript}`,
           },
         ],
         { temperature: 0.5, maxTokens: 200 },
