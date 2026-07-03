@@ -111,7 +111,7 @@ export const chatWithAI = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => InputSchema.parse(d))
   .handler(async ({ data }): Promise<{ reply: string }> => {
     const system = buildSystemPrompt(data.userContext);
-    const reply = await callGemini(system, data.messages, { temperature: 0.7, maxTokens: 500 });
+    const reply = await callGemini(system, data.messages, { temperature: 0.7, maxTokens: 4096 });
     return { reply: reply || "দুঃখিত, উত্তর তৈরি করতে পারিনি।" };
   });
 
