@@ -62,7 +62,7 @@ function CropDetailPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F0FFF4] md:max-w-[560px] md:mx-auto pb-32">
+    <main className="min-h-screen bg-[#F0FFF4] md:max-w-[560px] md:mx-auto pb-48 md:pb-32">
       {/* HEADER */}
       <header className="px-5 pt-8 pb-6 rounded-b-3xl text-white" style={{ background: "var(--gradient-brand)" }}>
         <div className="flex items-center justify-between">
