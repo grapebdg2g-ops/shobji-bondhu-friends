@@ -104,7 +104,7 @@ function CropDetailPage() {
       </div>
 
       {/* Sticky bottom bar */}
-      <div className="fixed bottom-0 left-0 right-0 md:max-w-[560px] md:left-1/2 md:-translate-x-1/2 bg-white border-t border-gray-200 px-3 py-2.5 flex gap-2 z-30">
+      <div className="fixed bottom-16 md:bottom-0 left-0 right-0 md:max-w-[560px] md:left-1/2 md:-translate-x-1/2 bg-white border-t border-gray-200 px-3 py-2.5 flex gap-2 z-30">
         <Link
           to="/crop-guide"
           className="flex-1 flex flex-col items-center bg-emerald-600 text-white rounded-xl py-2 text-[11px] font-semibold"
