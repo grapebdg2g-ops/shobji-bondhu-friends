@@ -75,7 +75,7 @@ function ChatPage() {
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 pb-36">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 pb-52 md:pb-36">
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${m.role === "user" ? "bg-[#2D6A4F] text-white" : "bg-white border border-gray-100 text-gray-800"}`}>
@@ -93,7 +93,7 @@ function ChatPage() {
         <div ref={endRef} />
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 md:max-w-[560px] md:mx-auto bg-white border-t">
+      <div className="fixed bottom-16 md:bottom-0 left-0 right-0 md:max-w-[560px] md:mx-auto bg-white border-t">
         {suggestions.length > 0 && !loading && (
           <div className="px-3 pt-2 pb-1 flex gap-2 overflow-x-auto scrollbar-hide">
             {suggestions.map((s, i) => (
