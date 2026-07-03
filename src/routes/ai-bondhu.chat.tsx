@@ -93,7 +93,7 @@ function ChatPage() {
         <div ref={endRef} />
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 md:max-w-[560px] md:mx-auto bg-white border-t">
+      <div className="fixed bottom-16 md:bottom-0 left-0 right-0 md:max-w-[560px] md:mx-auto bg-white border-t">
         {suggestions.length > 0 && !loading && (
           <div className="px-3 pt-2 pb-1 flex gap-2 overflow-x-auto scrollbar-hide">
             {suggestions.map((s, i) => (
