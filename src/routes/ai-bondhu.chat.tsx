@@ -25,6 +25,7 @@ function ChatPage() {
   const { user } = useUser();
   const chat = useServerFn(chatWithAI);
   const suggest = useServerFn(suggestFollowUps);
+  const feedback = useServerFn(recordCacheFeedback);
   const transcribe = useServerFn(transcribeAudio);
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
