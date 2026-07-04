@@ -75,7 +75,7 @@ function ChatPage() {
         </button>
         <div className="min-w-0">
           <h1 className="font-bold text-sm sm:text-base truncate">কৃষি বন্ধু</h1>
-          <p className="text-[10px] sm:text-[11px] text-gray-500 truncate">Gemini AI কৃষি সহকারী</p>
+          <p className="text-[10px] sm:text-[11px] text-gray-500 truncate">আপনার AI কৃষি সহকারী</p>
         </div>
       </header>
 
