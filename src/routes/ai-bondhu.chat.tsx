@@ -70,6 +70,68 @@ function ChatPage() {
 
   const send = () => sendText(input.trim());
 
+  const pickMime = () => {
+    const opts = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/mpeg"];
+    for (const t of opts) {
+      if (typeof MediaRecorder !== "undefined" && MediaRecorder.isTypeSupported(t)) return t;
+    }
+    return "";
+  };
+
+  const startRecording = async () => {
+    if (recording || transcribing || loading) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const mime = pickMime();
+      const rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+      chunksRef.current = [];
+      rec.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      rec.onstop = async () => {
+        const type = rec.mimeType || "audio/webm";
+        const blob = new Blob(chunksRef.current, { type });
+        streamRef.current?.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+        if (blob.size < 1000) { toast.error("রেকর্ডিং খুব ছোট, আবার চেষ্টা করুন"); return; }
+        setTranscribing(true);
+        try {
+          const buf = await blob.arrayBuffer();
+          let bin = "";
+          const bytes = new Uint8Array(buf);
+          const chunk = 0x8000;
+          for (let i = 0; i < bytes.length; i += chunk) {
+            bin += String.fromCharCode(...bytes.subarray(i, i + chunk));
+          }
+          const b64 = btoa(bin);
+          const res = await transcribe({ data: { audioBase64: b64, mimeType: type } });
+          const text = res.text?.trim();
+          if (text) setInput((prev) => (prev ? prev + " " : "") + text);
+          else toast.error("কিছু শোনা গেল না");
+        } catch (e) {
+          toast.error(e instanceof Error ? e.message : "ভয়েস রূপান্তর ব্যর্থ");
+        } finally {
+          setTranscribing(false);
+        }
+      };
+      rec.start();
+      recorderRef.current = rec;
+      setRecording(true);
+    } catch {
+      toast.error("মাইক্রোফোন অনুমতি প্রয়োজন");
+    }
+  };
+
+  const stopRecording = () => {
+    if (!recording) return;
+    recorderRef.current?.stop();
+    recorderRef.current = null;
+    setRecording(false);
+  };
+
+  useEffect(() => () => {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+  }, []);
+
   return (
     <main className="min-h-[100dvh] flex flex-col bg-[#F0FFF4] w-full md:max-w-[640px] md:mx-auto md:border-x md:border-gray-100">
       <header className="px-3 sm:px-4 py-2.5 sm:py-3 bg-white border-b flex items-center gap-2 sm:gap-3 sticky top-0 z-10">
