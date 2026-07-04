@@ -185,7 +185,7 @@ function ChatPage() {
 
       <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-3 sm:py-4 space-y-2.5 sm:space-y-3 pb-56 md:pb-40">
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+          <div key={i} className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
             <div
               className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-3.5 sm:px-4 py-2 sm:py-2.5 text-[13.5px] sm:text-sm leading-relaxed whitespace-pre-wrap break-words ${
                 m.role === "user" ? "bg-[#2D6A4F] text-white" : "bg-white border border-gray-100 text-gray-800"
@@ -193,6 +193,35 @@ function ChatPage() {
             >
               {m.content}
             </div>
+            {m.role === "assistant" && m.cacheId && (
+              <div className="mt-1 ml-1 flex items-center gap-2 text-[11px] text-gray-500">
+                <span>এই উত্তর সহায়ক ছিল?</span>
+                <button
+                  onClick={() => submitFeedback(i, true)}
+                  disabled={!!m.feedback}
+                  aria-label="সহায়ক"
+                  className={`h-6 w-6 rounded-full flex items-center justify-center border transition ${
+                    m.feedback === "up"
+                      ? "bg-green-100 border-green-300 text-green-700"
+                      : "border-gray-200 hover:bg-gray-100 disabled:opacity-50"
+                  }`}
+                >
+                  <ThumbsUp className="h-3 w-3" />
+                </button>
+                <button
+                  onClick={() => submitFeedback(i, false)}
+                  disabled={!!m.feedback}
+                  aria-label="সহায়ক নয়"
+                  className={`h-6 w-6 rounded-full flex items-center justify-center border transition ${
+                    m.feedback === "down"
+                      ? "bg-red-100 border-red-300 text-red-700"
+                      : "border-gray-200 hover:bg-gray-100 disabled:opacity-50"
+                  }`}
+                >
+                  <ThumbsDown className="h-3 w-3" />
+                </button>
+              </div>
+            )}
           </div>
         ))}
         {loading && (
