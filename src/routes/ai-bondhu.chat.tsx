@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Send, Loader2, Mic, Square } from "lucide-react";
-import { chatWithAI, suggestFollowUps } from "@/lib/chat.functions";
+import { ArrowLeft, Send, Loader2, Mic, Square, ThumbsUp, ThumbsDown } from "lucide-react";
+import { chatWithAI, suggestFollowUps, recordCacheFeedback } from "@/lib/chat.functions";
 import { transcribeAudio } from "@/lib/transcribe.functions";
 import { useUser } from "@/contexts/user-context";
 import { toast } from "sonner";
@@ -12,7 +12,13 @@ export const Route = createFileRoute("/ai-bondhu/chat")({
   head: () => ({ meta: [{ title: "কৃষি বন্ধু — AI সহকারী" }] }),
 });
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = {
+  role: "user" | "assistant";
+  content: string;
+  source?: "cache" | "gemini";
+  cacheId?: string | null;
+  feedback?: "up" | "down" | null;
+};
 
 function ChatPage() {
   const navigate = useNavigate();
