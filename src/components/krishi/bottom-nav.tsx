@@ -38,7 +38,7 @@ export function BottomNav() {
             style={{ background: "var(--gradient-brand)" }}
           >
             <Sparkles className="h-6 w-6" strokeWidth={2.4} />
-            <span className="text-[10px] font-bold mt-0.5 leading-none">বন্ধু</span>
+            <span className="text-[10px] font-bold mt-0.5 leading-none">হোম</span>
           </Link>
         </div>
 
