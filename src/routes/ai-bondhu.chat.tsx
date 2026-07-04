@@ -42,7 +42,7 @@ function ChatPage() {
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, loading]);
 
-  const sendText = async (text: string) => {
+  const sendText = async (text: string, opts: { skipCache?: boolean } = {}) => {
     if (!text || loading) return;
     const next: Msg[] = [...messages, { role: "user", content: text }];
     setMessages(next);
@@ -58,8 +58,13 @@ function ChatPage() {
             crops: user.crops,
           }
         : undefined;
-      const res = await chat({ data: { messages: next.slice(-10), userContext } });
-      const updated: Msg[] = [...next, { role: "assistant", content: res.reply }];
+      const res = await chat({
+        data: { messages: next.slice(-10), userContext, skipCache: opts.skipCache },
+      });
+      const updated: Msg[] = [
+        ...next,
+        { role: "assistant", content: res.reply, source: res.source, cacheId: res.cacheId, feedback: null },
+      ];
       setMessages(updated);
       // Fire-and-forget suggestion fetch
       suggest({ data: { messages: updated.slice(-6) } })
@@ -76,6 +81,29 @@ function ChatPage() {
   };
 
   const send = () => sendText(input.trim());
+
+  const submitFeedback = async (idx: number, helpful: boolean) => {
+    const m = messages[idx];
+    if (!m || m.role !== "assistant" || !m.cacheId || m.feedback) return;
+    setMessages((prev) => prev.map((x, i) => (i === idx ? { ...x, feedback: helpful ? "up" : "down" } : x)));
+    try {
+      await feedback({ data: { cacheId: m.cacheId, helpful } });
+      if (helpful) {
+        toast.success("ধন্যবাদ! আপনার মতামত সাহায্য করবে।");
+      } else {
+        toast.info("ধন্যবাদ! নতুন উত্তর খুঁজছি...");
+        // Re-ask the previous user question, bypassing cache
+        const prevUser = [...messages.slice(0, idx)].reverse().find((x) => x.role === "user");
+        if (prevUser) {
+          // Remove the disliked assistant message + trailing so the retry is clean
+          setMessages((prev) => prev.slice(0, idx));
+          await sendText(prevUser.content, { skipCache: true });
+        }
+      }
+    } catch {
+      toast.error("মতামত সংরক্ষণ ব্যর্থ");
+    }
+  };
 
   const pickMime = () => {
     const opts = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/mpeg"];
