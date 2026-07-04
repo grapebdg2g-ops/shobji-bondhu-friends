@@ -19,15 +19,22 @@ const UserContextSchema = z
 const InputSchema = z.object({
   messages: z.array(MessageSchema).min(1).max(20),
   userContext: UserContextSchema,
+  skipCache: z.boolean().optional(),
 });
 
 const SuggestInputSchema = z.object({
   messages: z.array(MessageSchema).min(1).max(20),
 });
 
-// সরাসরি Gemini 2.5 Flash মডেল সেট করা হলো
+const FeedbackSchema = z.object({
+  cacheId: z.string().uuid(),
+  helpful: z.boolean(),
+});
+
 const GEMINI_MODEL = "gemini-2.5-flash";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const EMBEDDING_URL =
+  "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent";
 
 function getCurrentSeason() {
   const m = new Date().getMonth() + 1;
@@ -36,13 +43,41 @@ function getCurrentSeason() {
   return "খরিফ-২";
 }
 
+function detectCategory(q: string): string {
+  const s = q.toLowerCase();
+  if (/রোগ|পোকা|ব্লাস্ট|ব্লাইট|পচা|হলুদ|দাগ|মরে/.test(s)) return "disease";
+  if (/সার|ইউরিয়া|টিএসপি|এমওপি|সেচ|পানি/.test(s)) return "fertilizer";
+  if (/দাম|বাজার|বিক্রি|দর|লাভ|কোথায়/.test(s)) return "market";
+  if (/বৃষ্টি|ঝড়|আবহাওয়া|রোদ|খরা|বন্যা/.test(s)) return "weather";
+  if (/কখন|লাগাবো|বপন|রোপণ|মৌসুম|চাষ/.test(s)) return "planting";
+  return "general";
+}
+
+function detectCropType(q: string): string {
+  const crops: Record<string, string[]> = {
+    "ধান": ["ধান", "বোরো", "আমন", "আউশ"],
+    "আলু": ["আলু"],
+    "টমেটো": ["টমেটো"],
+    "পেঁয়াজ": ["পেঁয়াজ"],
+    "বেগুন": ["বেগুন"],
+    "মরিচ": ["মরিচ"],
+    "সরিষা": ["সরিষা"],
+    "গম": ["গম"],
+    "ভুট্টা": ["ভুট্টা"],
+  };
+  for (const [crop, kws] of Object.entries(crops)) {
+    if (kws.some((k) => q.includes(k))) return crop;
+  }
+  return "general";
+}
+
 function buildSystemPrompt(ctx?: z.infer<typeof UserContextSchema>) {
   const name = ctx?.name || "কৃষক ভাই";
   const district = ctx?.district || "চট্টগ্রাম";
   const upazila = ctx?.upazila || "নবীনগর";
   const crops = ctx?.crops?.length ? ctx.crops.join(", ") : "উল্লেখ নেই";
   const today = new Date().toLocaleDateString("bn-BD");
-  
+
   return `তুমি "কৃষি বন্ধু" — বাংলাদেশের কৃষকদের জন্য একটি AI সহকারী।
 
 ব্যবহারকারীর তথ্য:
@@ -72,12 +107,12 @@ async function callGemini(
 ): Promise<string> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("AI সেবা এখন উপলব্ধ নয়");
-  
+
   const contents = messages.map((m) => ({
     role: m.role === "user" ? "user" : "model",
     parts: [{ text: m.content }],
   }));
-  
+
   const res = await fetch(`${GEMINI_URL}?key=${key}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -94,25 +129,108 @@ async function callGemini(
       ],
     }),
   });
-  
+
   if (res.status === 429) throw new Error("অনেক অনুরোধ এসেছে, একটু পরে আবার চেষ্টা করুন");
   if (!res.ok) {
     const err = await res.text().catch(() => "");
     console.error("Gemini API error", res.status, err);
     throw new Error("AI সেবা সাড়া দিচ্ছে না");
   }
-  
+
   const data = await res.json();
   return (data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "").trim();
+}
+
+async function generateEmbedding(text: string): Promise<number[] | null> {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) return null;
+  try {
+    const res = await fetch(`${EMBEDDING_URL}?key=${key}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "models/text-embedding-004",
+        content: { parts: [{ text }] },
+        taskType: "SEMANTIC_SIMILARITY",
+      }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const values = data?.embedding?.values;
+    return Array.isArray(values) ? values : null;
+  } catch {
+    return null;
+  }
 }
 
 export const chatWithAI = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => InputSchema.parse(d))
-  .handler(async ({ data }): Promise<{ reply: string }> => {
-    const system = buildSystemPrompt(data.userContext);
-    const reply = await callGemini(system, data.messages, { temperature: 0.7, maxTokens: 4096 });
-    return { reply: reply || "দুঃখিত, উত্তর তৈরি করতে পারিনি।" };
+  .handler(
+    async ({
+      data,
+    }): Promise<{ reply: string; source: "cache" | "gemini"; cacheId: string | null; similarity?: number }> => {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+      const lastUser = [...data.messages].reverse().find((m) => m.role === "user");
+      const userQuestion = lastUser?.content?.trim() ?? "";
+      const category = detectCategory(userQuestion);
+      const season = getCurrentSeason();
+      const cropType = detectCropType(userQuestion);
+      const singleTurn = data.messages.length <= 2;
+
+      let embedding: number[] | null = null;
+      if (userQuestion && singleTurn && !data.skipCache) {
+        embedding = await generateEmbedding(userQuestion);
+      }
+
+      // Cache lookup
+      if (embedding) {
+        const { data: hits } = await supabaseAdmin.rpc("search_cache" as never, {
+          query_embedding: embedding as unknown as string,
+          similarity_threshold: 0.82,
+          max_results: 1,
+          filter_category: category,
+          filter_season: season,
+        } as never);
+        const arr = (hits as Array<{ id: string; answer: string; similarity: number }> | null) ?? [];
+        if (arr.length > 0) {
+          const hit = arr[0];
+          await supabaseAdmin.rpc("increment_cache_hit" as never, { _id: hit.id } as never);
+          return { reply: hit.answer, source: "cache", cacheId: hit.id, similarity: hit.similarity };
+        }
+      }
+
+      // Cache miss → Gemini
+      const system = buildSystemPrompt(data.userContext);
+      const reply = await callGemini(system, data.messages, { temperature: 0.7, maxTokens: 4096 });
+      const finalReply = reply || "দুঃখিত, উত্তর তৈরি করতে পারিনি।";
+
+      if (embedding && reply) {
+        await supabaseAdmin.from("ai_chat_cache" as never).insert({
+          question: userQuestion,
+          embedding: embedding as unknown as string,
+          answer: finalReply,
+          category,
+          crop_type: cropType,
+          season,
+        } as never);
+      }
+
+      return { reply: finalReply, source: "gemini", cacheId: null };
+    },
+  );
+
+export const recordCacheFeedback = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => FeedbackSchema.parse(d))
+  .handler(async ({ data }): Promise<{ ok: true }> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.rpc("record_cache_feedback" as never, {
+      _id: data.cacheId,
+      _helpful: data.helpful,
+    } as never);
+    return { ok: true };
   });
 
 export const suggestFollowUps = createServerFn({ method: "POST" })
