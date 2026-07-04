@@ -186,6 +186,63 @@ function AnalyticsPage() {
         </div>
       </Card>
 
+      <Card title="🗄️ AI Cache পরিসংখ্যান">
+        {(() => {
+          const total = cacheStats?.total ?? 0;
+          const active = cacheStats?.active ?? 0;
+          const hits = cacheStats?.totalHits ?? 0;
+          const totalReq = hits + active;
+          const hitRate = totalReq > 0 ? Math.round((hits / totalReq) * 100) : 0;
+          const tokensSaved = hits * 350;
+          return (
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+                <MiniStat label="মোট Cache" value={`${toBn(active)} টি`} />
+                <MiniStat label="মোট Hit" value={`${toBn(hits)} বার`} />
+                <MiniStat label="Hit Rate" value={`${toBn(hitRate)}%`} />
+                <MiniStat label="Token সাশ্রয়" value={`~${toBn(tokensSaved)}`} />
+              </div>
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <MiniStat label="👍 সহায়ক" value={toBn(cacheStats?.helpful ?? 0)} />
+                <MiniStat label="👎 সহায়ক নয়" value={toBn(cacheStats?.unhelpful ?? 0)} />
+              </div>
+
+              <p className="text-xs font-bold text-gray-600 mb-1">বিভাগ অনুযায়ী</p>
+              <ul className="mb-3 space-y-1">
+                {(cacheStats?.byCategory ?? []).map((c) => {
+                  const pct = active > 0 ? Math.round((c.count / active) * 100) : 0;
+                  return (
+                    <li key={c.category} className="flex items-center gap-2 text-xs">
+                      <span className="w-24 truncate">{c.category}</span>
+                      <div className="flex-1 h-2 bg-gray-100 rounded">
+                        <div className="h-2 bg-purple-500 rounded" style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="w-16 text-right font-bold">{toBn(pct)}% ({toBn(c.count)})</span>
+                    </li>
+                  );
+                })}
+                {(cacheStats?.byCategory?.length ?? 0) === 0 && (
+                  <li className="text-[11px] text-gray-400 py-2 text-center">তথ্য নেই</li>
+                )}
+              </ul>
+
+              <p className="text-xs font-bold text-gray-600 mb-1">শীর্ষ প্রশ্ন (সর্বাধিক hit)</p>
+              <ul className="space-y-1">
+                {(cacheStats?.topQuestions ?? []).map((q, idx) => (
+                  <li key={q.id} className="flex justify-between text-xs gap-2">
+                    <span className="truncate">{toBn(idx + 1)}. {q.question}</span>
+                    <span className="font-bold shrink-0">{toBn(q.hit_count)} বার</span>
+                  </li>
+                ))}
+                {(cacheStats?.topQuestions?.length ?? 0) === 0 && (
+                  <li className="text-[11px] text-gray-400 py-2 text-center">তথ্য নেই</li>
+                )}
+              </ul>
+            </>
+          );
+        })()}
+      </Card>
+
     </div>
   );
 }
