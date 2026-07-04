@@ -19,6 +19,12 @@ function ChatPage() {
   const { user } = useUser();
   const chat = useServerFn(chatWithAI);
   const suggest = useServerFn(suggestFollowUps);
+  const transcribe = useServerFn(transcribeAudio);
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
   const [messages, setMessages] = useState<Msg[]>([
     { role: "assistant", content: "আসসালামু আলাইকুম! আমি কৃষি বন্ধু — আপনার কৃষি বিষয়ক যেকোনো প্রশ্ন করুন।" },
   ]);
