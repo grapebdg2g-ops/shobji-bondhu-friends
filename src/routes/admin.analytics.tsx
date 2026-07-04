@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
 import { Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { getCacheStats } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
 import { toBn, fmtBdt } from "@/lib/bn";
 import { subDays } from "date-fns";
