@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Send, Loader2 } from "lucide-react";
+import { ArrowLeft, Send, Loader2, Mic, Square } from "lucide-react";
 import { chatWithAI, suggestFollowUps } from "@/lib/chat.functions";
+import { transcribeAudio } from "@/lib/transcribe.functions";
 import { useUser } from "@/contexts/user-context";
 import { toast } from "sonner";
 
@@ -18,6 +19,12 @@ function ChatPage() {
   const { user } = useUser();
   const chat = useServerFn(chatWithAI);
   const suggest = useServerFn(suggestFollowUps);
+  const transcribe = useServerFn(transcribeAudio);
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
   const [messages, setMessages] = useState<Msg[]>([
     { role: "assistant", content: "আসসালামু আলাইকুম! আমি কৃষি বন্ধু — আপনার কৃষি বিষয়ক যেকোনো প্রশ্ন করুন।" },
   ]);
@@ -62,6 +69,68 @@ function ChatPage() {
   };
 
   const send = () => sendText(input.trim());
+
+  const pickMime = () => {
+    const opts = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/mpeg"];
+    for (const t of opts) {
+      if (typeof MediaRecorder !== "undefined" && MediaRecorder.isTypeSupported(t)) return t;
+    }
+    return "";
+  };
+
+  const startRecording = async () => {
+    if (recording || transcribing || loading) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const mime = pickMime();
+      const rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+      chunksRef.current = [];
+      rec.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      rec.onstop = async () => {
+        const type = rec.mimeType || "audio/webm";
+        const blob = new Blob(chunksRef.current, { type });
+        streamRef.current?.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+        if (blob.size < 1000) { toast.error("রেকর্ডিং খুব ছোট, আবার চেষ্টা করুন"); return; }
+        setTranscribing(true);
+        try {
+          const buf = await blob.arrayBuffer();
+          let bin = "";
+          const bytes = new Uint8Array(buf);
+          const chunk = 0x8000;
+          for (let i = 0; i < bytes.length; i += chunk) {
+            bin += String.fromCharCode(...bytes.subarray(i, i + chunk));
+          }
+          const b64 = btoa(bin);
+          const res = await transcribe({ data: { audioBase64: b64, mimeType: type } });
+          const text = res.text?.trim();
+          if (text) setInput((prev) => (prev ? prev + " " : "") + text);
+          else toast.error("কিছু শোনা গেল না");
+        } catch (e) {
+          toast.error(e instanceof Error ? e.message : "ভয়েস রূপান্তর ব্যর্থ");
+        } finally {
+          setTranscribing(false);
+        }
+      };
+      rec.start();
+      recorderRef.current = rec;
+      setRecording(true);
+    } catch {
+      toast.error("মাইক্রোফোন অনুমতি প্রয়োজন");
+    }
+  };
+
+  const stopRecording = () => {
+    if (!recording) return;
+    recorderRef.current?.stop();
+    recorderRef.current = null;
+    setRecording(false);
+  };
+
+  useEffect(() => () => {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+  }, []);
 
   return (
     <main className="min-h-[100dvh] flex flex-col bg-[#F0FFF4] w-full md:max-w-[640px] md:mx-auto md:border-x md:border-gray-100">
@@ -123,13 +192,24 @@ function ChatPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
-            placeholder="আপনার প্রশ্ন লিখুন..."
+            placeholder={recording ? "শুনছি..." : transcribing ? "রূপান্তর হচ্ছে..." : "আপনার প্রশ্ন লিখুন..."}
             enterKeyHint="send"
-            className="flex-1 min-w-0 h-11 px-4 rounded-full bg-gray-100 text-sm outline-none focus:ring-2 focus:ring-[#2D6A4F]/30"
+            disabled={recording || transcribing}
+            className="flex-1 min-w-0 h-11 px-4 rounded-full bg-gray-100 text-sm outline-none focus:ring-2 focus:ring-[#2D6A4F]/30 disabled:opacity-70"
           />
           <button
+            onClick={recording ? stopRecording : startRecording}
+            disabled={loading || transcribing}
+            aria-label={recording ? "রেকর্ডিং বন্ধ করুন" : "ভয়েস রেকর্ড করুন"}
+            className={`h-11 w-11 shrink-0 rounded-full flex items-center justify-center active:scale-95 transition disabled:opacity-50 ${
+              recording ? "bg-red-500 text-white animate-pulse" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+          >
+            {transcribing ? <Loader2 className="h-5 w-5 animate-spin" /> : recording ? <Square className="h-4 w-4" /> : <Mic className="h-5 w-5" />}
+          </button>
+          <button
             onClick={send}
-            disabled={loading || !input.trim()}
+            disabled={loading || !input.trim() || recording || transcribing}
             aria-label="পাঠান"
             className="h-11 w-11 shrink-0 rounded-full bg-[#2D6A4F] text-white flex items-center justify-center disabled:opacity-50 active:scale-95 transition"
           >
