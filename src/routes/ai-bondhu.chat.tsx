@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Send, Loader2, Mic, Square } from "lucide-react";
-import { chatWithAI, suggestFollowUps } from "@/lib/chat.functions";
+import { ArrowLeft, Send, Loader2, Mic, Square, ThumbsUp, ThumbsDown } from "lucide-react";
+import { chatWithAI, suggestFollowUps, recordCacheFeedback } from "@/lib/chat.functions";
 import { transcribeAudio } from "@/lib/transcribe.functions";
 import { useUser } from "@/contexts/user-context";
 import { toast } from "sonner";
@@ -12,13 +12,20 @@ export const Route = createFileRoute("/ai-bondhu/chat")({
   head: () => ({ meta: [{ title: "কৃষি বন্ধু — AI সহকারী" }] }),
 });
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = {
+  role: "user" | "assistant";
+  content: string;
+  source?: "cache" | "gemini";
+  cacheId?: string | null;
+  feedback?: "up" | "down" | null;
+};
 
 function ChatPage() {
   const navigate = useNavigate();
   const { user } = useUser();
   const chat = useServerFn(chatWithAI);
   const suggest = useServerFn(suggestFollowUps);
+  const feedback = useServerFn(recordCacheFeedback);
   const transcribe = useServerFn(transcribeAudio);
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
@@ -35,7 +42,7 @@ function ChatPage() {
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, loading]);
 
-  const sendText = async (text: string) => {
+  const sendText = async (text: string, opts: { skipCache?: boolean } = {}) => {
     if (!text || loading) return;
     const next: Msg[] = [...messages, { role: "user", content: text }];
     setMessages(next);
@@ -51,8 +58,13 @@ function ChatPage() {
             crops: user.crops,
           }
         : undefined;
-      const res = await chat({ data: { messages: next.slice(-10), userContext } });
-      const updated: Msg[] = [...next, { role: "assistant", content: res.reply }];
+      const res = await chat({
+        data: { messages: next.slice(-10), userContext, skipCache: opts.skipCache },
+      });
+      const updated: Msg[] = [
+        ...next,
+        { role: "assistant", content: res.reply, source: res.source, cacheId: res.cacheId, feedback: null },
+      ];
       setMessages(updated);
       // Fire-and-forget suggestion fetch
       suggest({ data: { messages: updated.slice(-6) } })
@@ -69,6 +81,29 @@ function ChatPage() {
   };
 
   const send = () => sendText(input.trim());
+
+  const submitFeedback = async (idx: number, helpful: boolean) => {
+    const m = messages[idx];
+    if (!m || m.role !== "assistant" || !m.cacheId || m.feedback) return;
+    setMessages((prev) => prev.map((x, i) => (i === idx ? { ...x, feedback: helpful ? "up" : "down" } : x)));
+    try {
+      await feedback({ data: { cacheId: m.cacheId, helpful } });
+      if (helpful) {
+        toast.success("ধন্যবাদ! আপনার মতামত সাহায্য করবে।");
+      } else {
+        toast.info("ধন্যবাদ! নতুন উত্তর খুঁজছি...");
+        // Re-ask the previous user question, bypassing cache
+        const prevUser = [...messages.slice(0, idx)].reverse().find((x) => x.role === "user");
+        if (prevUser) {
+          // Remove the disliked assistant message + trailing so the retry is clean
+          setMessages((prev) => prev.slice(0, idx));
+          await sendText(prevUser.content, { skipCache: true });
+        }
+      }
+    } catch {
+      toast.error("মতামত সংরক্ষণ ব্যর্থ");
+    }
+  };
 
   const pickMime = () => {
     const opts = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/mpeg"];
@@ -150,7 +185,7 @@ function ChatPage() {
 
       <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-3 sm:py-4 space-y-2.5 sm:space-y-3 pb-56 md:pb-40">
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+          <div key={i} className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
             <div
               className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-3.5 sm:px-4 py-2 sm:py-2.5 text-[13.5px] sm:text-sm leading-relaxed whitespace-pre-wrap break-words ${
                 m.role === "user" ? "bg-[#2D6A4F] text-white" : "bg-white border border-gray-100 text-gray-800"
@@ -158,6 +193,35 @@ function ChatPage() {
             >
               {m.content}
             </div>
+            {m.role === "assistant" && m.cacheId && (
+              <div className="mt-1 ml-1 flex items-center gap-2 text-[11px] text-gray-500">
+                <span>এই উত্তর সহায়ক ছিল?</span>
+                <button
+                  onClick={() => submitFeedback(i, true)}
+                  disabled={!!m.feedback}
+                  aria-label="সহায়ক"
+                  className={`h-6 w-6 rounded-full flex items-center justify-center border transition ${
+                    m.feedback === "up"
+                      ? "bg-green-100 border-green-300 text-green-700"
+                      : "border-gray-200 hover:bg-gray-100 disabled:opacity-50"
+                  }`}
+                >
+                  <ThumbsUp className="h-3 w-3" />
+                </button>
+                <button
+                  onClick={() => submitFeedback(i, false)}
+                  disabled={!!m.feedback}
+                  aria-label="সহায়ক নয়"
+                  className={`h-6 w-6 rounded-full flex items-center justify-center border transition ${
+                    m.feedback === "down"
+                      ? "bg-red-100 border-red-300 text-red-700"
+                      : "border-gray-200 hover:bg-gray-100 disabled:opacity-50"
+                  }`}
+                >
+                  <ThumbsDown className="h-3 w-3" />
+                </button>
+              </div>
+            )}
           </div>
         ))}
         {loading && (

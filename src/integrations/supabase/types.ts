@@ -41,6 +41,54 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_chat_cache: {
+        Row: {
+          answer: string
+          category: string | null
+          created_at: string
+          crop_type: string | null
+          embedding: string | null
+          expires_at: string
+          helpful_count: number
+          hit_count: number
+          id: string
+          question: string
+          season: string | null
+          unhelpful_count: number
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          category?: string | null
+          created_at?: string
+          crop_type?: string | null
+          embedding?: string | null
+          expires_at?: string
+          helpful_count?: number
+          hit_count?: number
+          id?: string
+          question: string
+          season?: string | null
+          unhelpful_count?: number
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          category?: string | null
+          created_at?: string
+          crop_type?: string | null
+          embedding?: string | null
+          expires_at?: string
+          helpful_count?: number
+          hit_count?: number
+          id?: string
+          question?: string
+          season?: string | null
+          unhelpful_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       app_installs: {
         Row: {
           id: string
@@ -956,6 +1004,7 @@ export type Database = {
           phone: string
         }[]
       }
+      cleanup_ai_chat_cache: { Args: never; Returns: undefined }
       decrement_likes: { Args: { post_id: string }; Returns: undefined }
       get_exchange_phone: { Args: { _id: string }; Returns: string }
       get_my_phone: { Args: never; Returns: string }
@@ -984,9 +1033,31 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_cache_hit: { Args: { _id: string }; Returns: undefined }
       increment_comments: { Args: { post_id: string }; Returns: undefined }
       increment_likes: { Args: { post_id: string }; Returns: undefined }
       is_active_user: { Args: { _user_id: string }; Returns: boolean }
+      record_cache_feedback: {
+        Args: { _helpful: boolean; _id: string }
+        Returns: undefined
+      }
+      search_cache: {
+        Args: {
+          filter_category?: string
+          filter_season?: string
+          max_results?: number
+          query_embedding: string
+          similarity_threshold?: number
+        }
+        Returns: {
+          answer: string
+          category: string
+          hit_count: number
+          id: string
+          question: string
+          similarity: number
+        }[]
+      }
     }
     Enums: {
       app_role: "farmer" | "expert" | "moderator" | "admin"
