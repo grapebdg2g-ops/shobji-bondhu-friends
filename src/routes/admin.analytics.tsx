@@ -99,6 +99,14 @@ function AnalyticsPage() {
     },
   });
 
+  const cacheStatsFn = useServerFn(getCacheStats);
+  const { data: cacheStats } = useQuery({
+    queryKey: ["admin", "analytics", "cache"],
+    queryFn: () => cacheStatsFn(),
+  });
+
+
+
 
   const exportCsv = (rows: Array<Record<string, unknown>>, name: string) => {
     if (!rows.length) return;
