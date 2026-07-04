@@ -192,13 +192,24 @@ function ChatPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
-            placeholder="আপনার প্রশ্ন লিখুন..."
+            placeholder={recording ? "শুনছি..." : transcribing ? "রূপান্তর হচ্ছে..." : "আপনার প্রশ্ন লিখুন..."}
             enterKeyHint="send"
-            className="flex-1 min-w-0 h-11 px-4 rounded-full bg-gray-100 text-sm outline-none focus:ring-2 focus:ring-[#2D6A4F]/30"
+            disabled={recording || transcribing}
+            className="flex-1 min-w-0 h-11 px-4 rounded-full bg-gray-100 text-sm outline-none focus:ring-2 focus:ring-[#2D6A4F]/30 disabled:opacity-70"
           />
           <button
+            onClick={recording ? stopRecording : startRecording}
+            disabled={loading || transcribing}
+            aria-label={recording ? "রেকর্ডিং বন্ধ করুন" : "ভয়েস রেকর্ড করুন"}
+            className={`h-11 w-11 shrink-0 rounded-full flex items-center justify-center active:scale-95 transition disabled:opacity-50 ${
+              recording ? "bg-red-500 text-white animate-pulse" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+          >
+            {transcribing ? <Loader2 className="h-5 w-5 animate-spin" /> : recording ? <Square className="h-4 w-4" /> : <Mic className="h-5 w-5" />}
+          </button>
+          <button
             onClick={send}
-            disabled={loading || !input.trim()}
+            disabled={loading || !input.trim() || recording || transcribing}
             aria-label="পাঠান"
             className="h-11 w-11 shrink-0 rounded-full bg-[#2D6A4F] text-white flex items-center justify-center disabled:opacity-50 active:scale-95 transition"
           >
