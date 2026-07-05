@@ -1,6 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import {
+  detectCropFromMasterData,
+  detectDiseaseFromMasterData,
+  buildMasterDataContext,
+} from "@/lib/crop-data";
 
 const MessageSchema = z.object({
   role: z.enum(["user", "assistant"]),
@@ -53,25 +58,10 @@ function detectCategory(q: string): string {
   return "general";
 }
 
-function detectCropType(q: string): string {
-  const crops: Record<string, string[]> = {
-    "ধান": ["ধান", "বোরো", "আমন", "আউশ"],
-    "আলু": ["আলু"],
-    "টমেটো": ["টমেটো"],
-    "পেঁয়াজ": ["পেঁয়াজ"],
-    "বেগুন": ["বেগুন"],
-    "মরিচ": ["মরিচ"],
-    "সরিষা": ["সরিষা"],
-    "গম": ["গম"],
-    "ভুট্টা": ["ভুট্টা"],
-  };
-  for (const [crop, kws] of Object.entries(crops)) {
-    if (kws.some((k) => q.includes(k))) return crop;
-  }
-  return "general";
-}
-
-function buildSystemPrompt(ctx?: z.infer<typeof UserContextSchema>) {
+function buildSystemPrompt(
+  ctx?: z.infer<typeof UserContextSchema>,
+  masterDataContext?: string,
+) {
   const name = ctx?.name || "কৃষক ভাই";
   const district = ctx?.district || "চট্টগ্রাম";
   const upazila = ctx?.upazila || "নবীনগর";
@@ -95,7 +85,8 @@ function buildSystemPrompt(ctx?: z.infer<typeof UserContextSchema>) {
 ৪. স্থানীয় বাজার ও মৌসুম উল্লেখ করো।
 ৫. প্রয়োজনে numbered list ব্যবহার করো।
 ৬. ক্ষতিকর পরামর্শ কখনো দেবে না।
-৭. নিশ্চিত না হলে বিনীতভাবে "কৃষি অফিসে জিজ্ঞেস করুন" বলো।`;
+৭. নিশ্চিত না হলে বিনীতভাবে "কৃষি অফিসে জিজ্ঞেস করুন" বলো।
+${masterDataContext ? `\nপ্রাসঙ্গিক master data (BRRI/BARI/DAE):\n${masterDataContext}\nউপরের data ব্যবহার করে সঠিক ও নির্দিষ্ট পরামর্শ দাও।` : ""}`;
 }
 
 type ChatMsg = z.infer<typeof MessageSchema>;
@@ -176,12 +167,19 @@ export const chatWithAI = createServerFn({ method: "POST" })
       const userQuestion = lastUser?.content?.trim() ?? "";
       const category = detectCategory(userQuestion);
       const season = getCurrentSeason();
-      const cropType = detectCropType(userQuestion);
+      const cropType = detectCropFromMasterData(userQuestion);
+      const disease = detectDiseaseFromMasterData(userQuestion, cropType);
       const singleTurn = data.messages.length <= 2;
+
+      // Enrich question with crop/disease/season context for better embedding match
+      const enrichedQuestion = userQuestion
+        + (cropType ? ` [ফসল: ${cropType}]` : "")
+        + (disease ? ` [সমস্যা: ${disease}]` : "")
+        + ` [মৌসুম: ${season}]`;
 
       let embedding: number[] | null = null;
       if (userQuestion && singleTurn && !data.skipCache) {
-        embedding = await generateEmbedding(userQuestion);
+        embedding = await generateEmbedding(enrichedQuestion);
       }
 
       // Cache lookup
@@ -201,8 +199,9 @@ export const chatWithAI = createServerFn({ method: "POST" })
         }
       }
 
-      // Cache miss → Gemini
-      const system = buildSystemPrompt(data.userContext);
+      // Cache miss → Gemini with master-data enriched prompt
+      const masterCtx = buildMasterDataContext(cropType, disease, category);
+      const system = buildSystemPrompt(data.userContext, masterCtx);
       const reply = await callGemini(system, data.messages, { temperature: 0.7, maxTokens: 4096 });
       const finalReply = reply || "দুঃখিত, উত্তর তৈরি করতে পারিনি।";
 
