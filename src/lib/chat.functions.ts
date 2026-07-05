@@ -85,7 +85,8 @@ function buildSystemPrompt(
 ৪. স্থানীয় বাজার ও মৌসুম উল্লেখ করো।
 ৫. প্রয়োজনে numbered list ব্যবহার করো।
 ৬. ক্ষতিকর পরামর্শ কখনো দেবে না।
-৭. নিশ্চিত না হলে বিনীতভাবে "কৃষি অফিসে জিজ্ঞেস করুন" বলো।`;
+৭. নিশ্চিত না হলে বিনীতভাবে "কৃষি অফিসে জিজ্ঞেস করুন" বলো।
+${masterDataContext ? `\nপ্রাসঙ্গিক master data (BRRI/BARI/DAE):\n${masterDataContext}\nউপরের data ব্যবহার করে সঠিক ও নির্দিষ্ট পরামর্শ দাও।` : ""}`;
 }
 
 type ChatMsg = z.infer<typeof MessageSchema>;
