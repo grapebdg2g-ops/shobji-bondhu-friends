@@ -167,12 +167,19 @@ export const chatWithAI = createServerFn({ method: "POST" })
       const userQuestion = lastUser?.content?.trim() ?? "";
       const category = detectCategory(userQuestion);
       const season = getCurrentSeason();
-      const cropType = detectCropType(userQuestion);
+      const cropType = detectCropFromMasterData(userQuestion);
+      const disease = detectDiseaseFromMasterData(userQuestion, cropType);
       const singleTurn = data.messages.length <= 2;
+
+      // Enrich question with crop/disease/season context for better embedding match
+      const enrichedQuestion = userQuestion
+        + (cropType ? ` [ফসল: ${cropType}]` : "")
+        + (disease ? ` [সমস্যা: ${disease}]` : "")
+        + ` [মৌসুম: ${season}]`;
 
       let embedding: number[] | null = null;
       if (userQuestion && singleTurn && !data.skipCache) {
-        embedding = await generateEmbedding(userQuestion);
+        embedding = await generateEmbedding(enrichedQuestion);
       }
 
       // Cache lookup
@@ -192,8 +199,9 @@ export const chatWithAI = createServerFn({ method: "POST" })
         }
       }
 
-      // Cache miss → Gemini
-      const system = buildSystemPrompt(data.userContext);
+      // Cache miss → Gemini with master-data enriched prompt
+      const masterCtx = buildMasterDataContext(cropType, disease, category);
+      const system = buildSystemPrompt(data.userContext, masterCtx);
       const reply = await callGemini(system, data.messages, { temperature: 0.7, maxTokens: 4096 });
       const finalReply = reply || "দুঃখিত, উত্তর তৈরি করতে পারিনি।";
 
