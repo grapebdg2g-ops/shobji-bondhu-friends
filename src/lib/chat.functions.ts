@@ -58,25 +58,10 @@ function detectCategory(q: string): string {
   return "general";
 }
 
-function detectCropType(q: string): string {
-  const crops: Record<string, string[]> = {
-    "ধান": ["ধান", "বোরো", "আমন", "আউশ"],
-    "আলু": ["আলু"],
-    "টমেটো": ["টমেটো"],
-    "পেঁয়াজ": ["পেঁয়াজ"],
-    "বেগুন": ["বেগুন"],
-    "মরিচ": ["মরিচ"],
-    "সরিষা": ["সরিষা"],
-    "গম": ["গম"],
-    "ভুট্টা": ["ভুট্টা"],
-  };
-  for (const [crop, kws] of Object.entries(crops)) {
-    if (kws.some((k) => q.includes(k))) return crop;
-  }
-  return "general";
-}
-
-function buildSystemPrompt(ctx?: z.infer<typeof UserContextSchema>) {
+function buildSystemPrompt(
+  ctx?: z.infer<typeof UserContextSchema>,
+  masterDataContext?: string,
+) {
   const name = ctx?.name || "কৃষক ভাই";
   const district = ctx?.district || "চট্টগ্রাম";
   const upazila = ctx?.upazila || "নবীনগর";
