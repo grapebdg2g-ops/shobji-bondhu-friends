@@ -38,7 +38,6 @@ import { Route as PricePredictionHistoryRouteImport } from './routes/price-predi
 import { Route as CropPlannerMyPlansRouteImport } from './routes/crop-planner.my-plans'
 import { Route as AiBondhuPesticideRouteImport } from './routes/ai-bondhu.pesticide'
 import { Route as AiBondhuDiseaseRouteImport } from './routes/ai-bondhu.disease'
-import { Route as AiBondhuChatRouteImport } from './routes/ai-bondhu.chat'
 import { Route as AiBondhuCalendarRouteImport } from './routes/ai-bondhu.calendar'
 import { Route as AiBondhuCalculatorRouteImport } from './routes/ai-bondhu.calculator'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
@@ -51,8 +50,10 @@ import { Route as AdminDiseasesRouteImport } from './routes/admin.diseases'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
+import { Route as AiBondhuChatIndexRouteImport } from './routes/ai-bondhu.chat.index'
 import { Route as CropGuidePlanPlanIdRouteImport } from './routes/crop-guide.plan.$planId'
 import { Route as CropGuideNewCropRouteImport } from './routes/crop-guide.new.$crop'
+import { Route as AiBondhuChatSessionIdRouteImport } from './routes/ai-bondhu.chat.$sessionId'
 import { Route as ApiPublicHooksWeatherAlertsRouteImport } from './routes/api/public/hooks/weather-alerts'
 import { Route as ApiPublicHooksSendScheduledBroadcastsRouteImport } from './routes/api/public/hooks/send-scheduled-broadcasts'
 import { Route as ApiPublicHooksFetchGovtPricesRouteImport } from './routes/api/public/hooks/fetch-govt-prices'
@@ -203,11 +204,6 @@ const AiBondhuDiseaseRoute = AiBondhuDiseaseRouteImport.update({
   path: '/ai-bondhu/disease',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AiBondhuChatRoute = AiBondhuChatRouteImport.update({
-  id: '/ai-bondhu/chat',
-  path: '/ai-bondhu/chat',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AiBondhuCalendarRoute = AiBondhuCalendarRouteImport.update({
   id: '/ai-bondhu/calendar',
   path: '/ai-bondhu/calendar',
@@ -268,6 +264,11 @@ const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AdminRoute,
 } as any)
+const AiBondhuChatIndexRoute = AiBondhuChatIndexRouteImport.update({
+  id: '/ai-bondhu/chat/',
+  path: '/ai-bondhu/chat/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CropGuidePlanPlanIdRoute = CropGuidePlanPlanIdRouteImport.update({
   id: '/plan/$planId',
   path: '/plan/$planId',
@@ -277,6 +278,11 @@ const CropGuideNewCropRoute = CropGuideNewCropRouteImport.update({
   id: '/new/$crop',
   path: '/new/$crop',
   getParentRoute: () => CropGuideRoute,
+} as any)
+const AiBondhuChatSessionIdRoute = AiBondhuChatSessionIdRouteImport.update({
+  id: '/ai-bondhu/chat/$sessionId',
+  path: '/ai-bondhu/chat/$sessionId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicHooksWeatherAlertsRoute =
   ApiPublicHooksWeatherAlertsRouteImport.update({
@@ -333,7 +339,6 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRoute
   '/ai-bondhu/calculator': typeof AiBondhuCalculatorRoute
   '/ai-bondhu/calendar': typeof AiBondhuCalendarRoute
-  '/ai-bondhu/chat': typeof AiBondhuChatRoute
   '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
   '/crop-planner/my-plans': typeof CropPlannerMyPlansRoute
@@ -346,8 +351,10 @@ export interface FileRoutesByFullPath {
   '/crop-guide/': typeof CropGuideIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/vegetable-guide/': typeof VegetableGuideIndexRoute
+  '/ai-bondhu/chat/$sessionId': typeof AiBondhuChatSessionIdRoute
   '/crop-guide/new/$crop': typeof CropGuideNewCropRoute
   '/crop-guide/plan/$planId': typeof CropGuidePlanPlanIdRoute
+  '/ai-bondhu/chat/': typeof AiBondhuChatIndexRoute
   '/api/public/hooks/check-prediction-accuracy': typeof ApiPublicHooksCheckPredictionAccuracyRoute
   '/api/public/hooks/fetch-govt-prices': typeof ApiPublicHooksFetchGovtPricesRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
@@ -381,7 +388,6 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersRoute
   '/ai-bondhu/calculator': typeof AiBondhuCalculatorRoute
   '/ai-bondhu/calendar': typeof AiBondhuCalendarRoute
-  '/ai-bondhu/chat': typeof AiBondhuChatRoute
   '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
   '/crop-planner/my-plans': typeof CropPlannerMyPlansRoute
@@ -394,8 +400,10 @@ export interface FileRoutesByTo {
   '/crop-guide': typeof CropGuideIndexRoute
   '/profile': typeof ProfileIndexRoute
   '/vegetable-guide': typeof VegetableGuideIndexRoute
+  '/ai-bondhu/chat/$sessionId': typeof AiBondhuChatSessionIdRoute
   '/crop-guide/new/$crop': typeof CropGuideNewCropRoute
   '/crop-guide/plan/$planId': typeof CropGuidePlanPlanIdRoute
+  '/ai-bondhu/chat': typeof AiBondhuChatIndexRoute
   '/api/public/hooks/check-prediction-accuracy': typeof ApiPublicHooksCheckPredictionAccuracyRoute
   '/api/public/hooks/fetch-govt-prices': typeof ApiPublicHooksFetchGovtPricesRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
@@ -432,7 +440,6 @@ export interface FileRoutesById {
   '/admin/users': typeof AdminUsersRoute
   '/ai-bondhu/calculator': typeof AiBondhuCalculatorRoute
   '/ai-bondhu/calendar': typeof AiBondhuCalendarRoute
-  '/ai-bondhu/chat': typeof AiBondhuChatRoute
   '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
   '/crop-planner/my-plans': typeof CropPlannerMyPlansRoute
@@ -445,8 +452,10 @@ export interface FileRoutesById {
   '/crop-guide/': typeof CropGuideIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/vegetable-guide/': typeof VegetableGuideIndexRoute
+  '/ai-bondhu/chat/$sessionId': typeof AiBondhuChatSessionIdRoute
   '/crop-guide/new/$crop': typeof CropGuideNewCropRoute
   '/crop-guide/plan/$planId': typeof CropGuidePlanPlanIdRoute
+  '/ai-bondhu/chat/': typeof AiBondhuChatIndexRoute
   '/api/public/hooks/check-prediction-accuracy': typeof ApiPublicHooksCheckPredictionAccuracyRoute
   '/api/public/hooks/fetch-govt-prices': typeof ApiPublicHooksFetchGovtPricesRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
@@ -484,7 +493,6 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/ai-bondhu/calculator'
     | '/ai-bondhu/calendar'
-    | '/ai-bondhu/chat'
     | '/ai-bondhu/disease'
     | '/ai-bondhu/pesticide'
     | '/crop-planner/my-plans'
@@ -497,8 +505,10 @@ export interface FileRouteTypes {
     | '/crop-guide/'
     | '/profile/'
     | '/vegetable-guide/'
+    | '/ai-bondhu/chat/$sessionId'
     | '/crop-guide/new/$crop'
     | '/crop-guide/plan/$planId'
+    | '/ai-bondhu/chat/'
     | '/api/public/hooks/check-prediction-accuracy'
     | '/api/public/hooks/fetch-govt-prices'
     | '/api/public/hooks/send-scheduled-broadcasts'
@@ -532,7 +542,6 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/ai-bondhu/calculator'
     | '/ai-bondhu/calendar'
-    | '/ai-bondhu/chat'
     | '/ai-bondhu/disease'
     | '/ai-bondhu/pesticide'
     | '/crop-planner/my-plans'
@@ -545,8 +554,10 @@ export interface FileRouteTypes {
     | '/crop-guide'
     | '/profile'
     | '/vegetable-guide'
+    | '/ai-bondhu/chat/$sessionId'
     | '/crop-guide/new/$crop'
     | '/crop-guide/plan/$planId'
+    | '/ai-bondhu/chat'
     | '/api/public/hooks/check-prediction-accuracy'
     | '/api/public/hooks/fetch-govt-prices'
     | '/api/public/hooks/send-scheduled-broadcasts'
@@ -582,7 +593,6 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/ai-bondhu/calculator'
     | '/ai-bondhu/calendar'
-    | '/ai-bondhu/chat'
     | '/ai-bondhu/disease'
     | '/ai-bondhu/pesticide'
     | '/crop-planner/my-plans'
@@ -595,8 +605,10 @@ export interface FileRouteTypes {
     | '/crop-guide/'
     | '/profile/'
     | '/vegetable-guide/'
+    | '/ai-bondhu/chat/$sessionId'
     | '/crop-guide/new/$crop'
     | '/crop-guide/plan/$planId'
+    | '/ai-bondhu/chat/'
     | '/api/public/hooks/check-prediction-accuracy'
     | '/api/public/hooks/fetch-govt-prices'
     | '/api/public/hooks/send-scheduled-broadcasts'
@@ -623,7 +635,6 @@ export interface RootRouteChildren {
   WeatherRoute: typeof WeatherRoute
   AiBondhuCalculatorRoute: typeof AiBondhuCalculatorRoute
   AiBondhuCalendarRoute: typeof AiBondhuCalendarRoute
-  AiBondhuChatRoute: typeof AiBondhuChatRoute
   AiBondhuDiseaseRoute: typeof AiBondhuDiseaseRoute
   AiBondhuPesticideRoute: typeof AiBondhuPesticideRoute
   ProfileDiseaseHistoryRoute: typeof ProfileDiseaseHistoryRoute
@@ -632,6 +643,8 @@ export interface RootRouteChildren {
   AiBondhuIndexRoute: typeof AiBondhuIndexRoute
   ProfileIndexRoute: typeof ProfileIndexRoute
   VegetableGuideIndexRoute: typeof VegetableGuideIndexRoute
+  AiBondhuChatSessionIdRoute: typeof AiBondhuChatSessionIdRoute
+  AiBondhuChatIndexRoute: typeof AiBondhuChatIndexRoute
   ApiPublicHooksCheckPredictionAccuracyRoute: typeof ApiPublicHooksCheckPredictionAccuracyRoute
   ApiPublicHooksFetchGovtPricesRoute: typeof ApiPublicHooksFetchGovtPricesRoute
   ApiPublicHooksSendScheduledBroadcastsRoute: typeof ApiPublicHooksSendScheduledBroadcastsRoute
@@ -843,13 +856,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AiBondhuDiseaseRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/ai-bondhu/chat': {
-      id: '/ai-bondhu/chat'
-      path: '/ai-bondhu/chat'
-      fullPath: '/ai-bondhu/chat'
-      preLoaderRoute: typeof AiBondhuChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/ai-bondhu/calendar': {
       id: '/ai-bondhu/calendar'
       path: '/ai-bondhu/calendar'
@@ -934,6 +940,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAnalyticsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/ai-bondhu/chat/': {
+      id: '/ai-bondhu/chat/'
+      path: '/ai-bondhu/chat'
+      fullPath: '/ai-bondhu/chat/'
+      preLoaderRoute: typeof AiBondhuChatIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/crop-guide/plan/$planId': {
       id: '/crop-guide/plan/$planId'
       path: '/plan/$planId'
@@ -947,6 +960,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/crop-guide/new/$crop'
       preLoaderRoute: typeof CropGuideNewCropRouteImport
       parentRoute: typeof CropGuideRoute
+    }
+    '/ai-bondhu/chat/$sessionId': {
+      id: '/ai-bondhu/chat/$sessionId'
+      path: '/ai-bondhu/chat/$sessionId'
+      fullPath: '/ai-bondhu/chat/$sessionId'
+      preLoaderRoute: typeof AiBondhuChatSessionIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/weather-alerts': {
       id: '/api/public/hooks/weather-alerts'
@@ -1069,7 +1089,6 @@ const rootRouteChildren: RootRouteChildren = {
   WeatherRoute: WeatherRoute,
   AiBondhuCalculatorRoute: AiBondhuCalculatorRoute,
   AiBondhuCalendarRoute: AiBondhuCalendarRoute,
-  AiBondhuChatRoute: AiBondhuChatRoute,
   AiBondhuDiseaseRoute: AiBondhuDiseaseRoute,
   AiBondhuPesticideRoute: AiBondhuPesticideRoute,
   ProfileDiseaseHistoryRoute: ProfileDiseaseHistoryRoute,
@@ -1078,6 +1097,8 @@ const rootRouteChildren: RootRouteChildren = {
   AiBondhuIndexRoute: AiBondhuIndexRoute,
   ProfileIndexRoute: ProfileIndexRoute,
   VegetableGuideIndexRoute: VegetableGuideIndexRoute,
+  AiBondhuChatSessionIdRoute: AiBondhuChatSessionIdRoute,
+  AiBondhuChatIndexRoute: AiBondhuChatIndexRoute,
   ApiPublicHooksCheckPredictionAccuracyRoute:
     ApiPublicHooksCheckPredictionAccuracyRoute,
   ApiPublicHooksFetchGovtPricesRoute: ApiPublicHooksFetchGovtPricesRoute,
