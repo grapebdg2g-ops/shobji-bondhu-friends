@@ -53,6 +53,7 @@ import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AiBondhuChatIndexRouteImport } from './routes/ai-bondhu.chat.index'
 import { Route as CropGuidePlanPlanIdRouteImport } from './routes/crop-guide.plan.$planId'
 import { Route as CropGuideNewCropRouteImport } from './routes/crop-guide.new.$crop'
+import { Route as AiBondhuChatSessionIdRouteImport } from './routes/ai-bondhu.chat.$sessionId'
 import { Route as ApiPublicHooksWeatherAlertsRouteImport } from './routes/api/public/hooks/weather-alerts'
 import { Route as ApiPublicHooksSendScheduledBroadcastsRouteImport } from './routes/api/public/hooks/send-scheduled-broadcasts'
 import { Route as ApiPublicHooksFetchGovtPricesRouteImport } from './routes/api/public/hooks/fetch-govt-prices'
@@ -278,6 +279,11 @@ const CropGuideNewCropRoute = CropGuideNewCropRouteImport.update({
   path: '/new/$crop',
   getParentRoute: () => CropGuideRoute,
 } as any)
+const AiBondhuChatSessionIdRoute = AiBondhuChatSessionIdRouteImport.update({
+  id: '/ai-bondhu/chat/$sessionId',
+  path: '/ai-bondhu/chat/$sessionId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksWeatherAlertsRoute =
   ApiPublicHooksWeatherAlertsRouteImport.update({
     id: '/api/public/hooks/weather-alerts',
@@ -345,6 +351,7 @@ export interface FileRoutesByFullPath {
   '/crop-guide/': typeof CropGuideIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/vegetable-guide/': typeof VegetableGuideIndexRoute
+  '/ai-bondhu/chat/$sessionId': typeof AiBondhuChatSessionIdRoute
   '/crop-guide/new/$crop': typeof CropGuideNewCropRoute
   '/crop-guide/plan/$planId': typeof CropGuidePlanPlanIdRoute
   '/ai-bondhu/chat/': typeof AiBondhuChatIndexRoute
@@ -393,6 +400,7 @@ export interface FileRoutesByTo {
   '/crop-guide': typeof CropGuideIndexRoute
   '/profile': typeof ProfileIndexRoute
   '/vegetable-guide': typeof VegetableGuideIndexRoute
+  '/ai-bondhu/chat/$sessionId': typeof AiBondhuChatSessionIdRoute
   '/crop-guide/new/$crop': typeof CropGuideNewCropRoute
   '/crop-guide/plan/$planId': typeof CropGuidePlanPlanIdRoute
   '/ai-bondhu/chat': typeof AiBondhuChatIndexRoute
@@ -444,6 +452,7 @@ export interface FileRoutesById {
   '/crop-guide/': typeof CropGuideIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/vegetable-guide/': typeof VegetableGuideIndexRoute
+  '/ai-bondhu/chat/$sessionId': typeof AiBondhuChatSessionIdRoute
   '/crop-guide/new/$crop': typeof CropGuideNewCropRoute
   '/crop-guide/plan/$planId': typeof CropGuidePlanPlanIdRoute
   '/ai-bondhu/chat/': typeof AiBondhuChatIndexRoute
@@ -496,6 +505,7 @@ export interface FileRouteTypes {
     | '/crop-guide/'
     | '/profile/'
     | '/vegetable-guide/'
+    | '/ai-bondhu/chat/$sessionId'
     | '/crop-guide/new/$crop'
     | '/crop-guide/plan/$planId'
     | '/ai-bondhu/chat/'
@@ -544,6 +554,7 @@ export interface FileRouteTypes {
     | '/crop-guide'
     | '/profile'
     | '/vegetable-guide'
+    | '/ai-bondhu/chat/$sessionId'
     | '/crop-guide/new/$crop'
     | '/crop-guide/plan/$planId'
     | '/ai-bondhu/chat'
@@ -594,6 +605,7 @@ export interface FileRouteTypes {
     | '/crop-guide/'
     | '/profile/'
     | '/vegetable-guide/'
+    | '/ai-bondhu/chat/$sessionId'
     | '/crop-guide/new/$crop'
     | '/crop-guide/plan/$planId'
     | '/ai-bondhu/chat/'
@@ -631,6 +643,7 @@ export interface RootRouteChildren {
   AiBondhuIndexRoute: typeof AiBondhuIndexRoute
   ProfileIndexRoute: typeof ProfileIndexRoute
   VegetableGuideIndexRoute: typeof VegetableGuideIndexRoute
+  AiBondhuChatSessionIdRoute: typeof AiBondhuChatSessionIdRoute
   AiBondhuChatIndexRoute: typeof AiBondhuChatIndexRoute
   ApiPublicHooksCheckPredictionAccuracyRoute: typeof ApiPublicHooksCheckPredictionAccuracyRoute
   ApiPublicHooksFetchGovtPricesRoute: typeof ApiPublicHooksFetchGovtPricesRoute
@@ -948,6 +961,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CropGuideNewCropRouteImport
       parentRoute: typeof CropGuideRoute
     }
+    '/ai-bondhu/chat/$sessionId': {
+      id: '/ai-bondhu/chat/$sessionId'
+      path: '/ai-bondhu/chat/$sessionId'
+      fullPath: '/ai-bondhu/chat/$sessionId'
+      preLoaderRoute: typeof AiBondhuChatSessionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/weather-alerts': {
       id: '/api/public/hooks/weather-alerts'
       path: '/api/public/hooks/weather-alerts'
@@ -1077,6 +1097,7 @@ const rootRouteChildren: RootRouteChildren = {
   AiBondhuIndexRoute: AiBondhuIndexRoute,
   ProfileIndexRoute: ProfileIndexRoute,
   VegetableGuideIndexRoute: VegetableGuideIndexRoute,
+  AiBondhuChatSessionIdRoute: AiBondhuChatSessionIdRoute,
   AiBondhuChatIndexRoute: AiBondhuChatIndexRoute,
   ApiPublicHooksCheckPredictionAccuracyRoute:
     ApiPublicHooksCheckPredictionAccuracyRoute,
