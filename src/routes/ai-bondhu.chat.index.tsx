@@ -7,7 +7,7 @@ import { transcribeAudio } from "@/lib/transcribe.functions";
 import { useUser } from "@/contexts/user-context";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/ai-bondhu/chat")({
+export const Route = createFileRoute("/ai-bondhu/chat/")({
   component: ChatPage,
   head: () => ({ meta: [{ title: "কৃষি বন্ধু — AI সহকারী" }] }),
 });
