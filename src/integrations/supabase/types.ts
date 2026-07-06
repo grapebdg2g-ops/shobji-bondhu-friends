@@ -113,6 +113,42 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_sessions: {
+        Row: {
+          category: string | null
+          created_at: string
+          crop_type: string | null
+          id: string
+          is_saved: boolean
+          messages: Json
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          crop_type?: string | null
+          id?: string
+          is_saved?: boolean
+          messages?: Json
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          crop_type?: string | null
+          id?: string
+          is_saved?: boolean
+          messages?: Json
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       crop_task_completions: {
         Row: {
           completed_at: string
