@@ -55,37 +55,37 @@ function Dashboard() {
   }, [loading, user, navigate]);
 
   return (
-    <main className="min-h-screen bg-[#F6FBF7] md:max-w-[720px] md:mx-auto">
+    <main className="min-h-screen w-full bg-[#F6FBF7] md:mx-auto md:max-w-[760px]">
       {/* SECTION 1 — Dynamic Hero */}
-      <header className="relative overflow-hidden px-5 pt-8 pb-14 rounded-b-[32px]" style={{ background: "var(--gradient-brand)" }}>
+      <header className="relative overflow-hidden rounded-b-[32px] px-4 pt-5 pb-12 sm:px-6 sm:pt-7 sm:pb-14" style={{ background: "var(--gradient-brand)" }}>
         <div className="home-float pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[#74C69D]/20 blur-3xl" />
         <div className="pointer-events-none absolute -left-20 bottom-0 h-40 w-40 rounded-full bg-[#F4A261]/15 blur-3xl" />
         <div className="relative z-10">
-          <div className="flex items-center justify-between">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-white/95 ring-1 ring-white/20 backdrop-blur-md">
-              <MapPin className="h-3.5 w-3.5" />
-              <span className="text-xs font-bold">{user?.district ?? "আপনার এলাকা"}</span>
-            </div>
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex shrink-0 items-center gap-2">
               <button
                 onClick={() => setCollapsed(false)}
                 aria-label="মেনু খুলুন"
-                className="hidden h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition hover:bg-white/20 active:scale-95 md:flex"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition hover:bg-white/20 active:scale-95"
               >
                 <Menu className="h-5 w-5" strokeWidth={2.5} />
               </button>
               <button
                 onClick={() => navigate({ to: "/notifications" })}
                 aria-label="বিজ্ঞপ্তি"
-                className="relative h-10 w-10 rounded-full bg-white/10 flex items-center justify-center ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20 active:scale-95"
+                className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20 active:scale-95"
               >
                 <Bell className="h-5 w-5 text-white" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#F4A261] text-[#123B2A] text-[10px] font-extrabold flex items-center justify-center ring-2 ring-[#2D6A4F]">
+                  <span className="absolute -right-1 -top-1 flex min-w-[18px] h-[18px] items-center justify-center rounded-full bg-[#F4A261] px-1 text-[10px] font-extrabold text-[#123B2A] ring-2 ring-[#2D6A4F]">
                     {unreadCount > 9 ? "৯+" : unreadCount}
                   </span>
                 )}
               </button>
+            </div>
+            <div className="ml-auto inline-flex min-w-0 max-w-[62%] items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-white/95 ring-1 ring-white/20 backdrop-blur-md sm:max-w-none">
+              <MapPin className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate text-xs font-bold">{user?.district ?? "আপনার এলাকা"}</span>
             </div>
           </div>
           <div className="mt-7 max-w-xl">
@@ -113,9 +113,7 @@ function Dashboard() {
       <WeatherAlertBanner district={user?.district} />
 
       {/* SECTION 2 — Weather */}
-      <div className="-mt-8">
-        <DashboardWeatherWidget district={user?.district} upazila={user?.upazila} />
-      </div>
+      <DashboardWeatherWidget district={user?.district} upazila={user?.upazila} />
 
       <TodayBrief onCreatePost={() => setCreateOpen(true)} />
 
