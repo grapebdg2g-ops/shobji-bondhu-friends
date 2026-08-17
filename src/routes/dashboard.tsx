@@ -66,14 +66,14 @@ function Dashboard() {
               <button
                 onClick={() => setCollapsed(false)}
                 aria-label="মেনু খুলুন"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition hover:bg-white/20 active:scale-95"
+                className="home-pressable flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20"
               >
                 <Menu className="h-5 w-5" strokeWidth={2.5} />
               </button>
               <button
                 onClick={() => navigate({ to: "/notifications" })}
                 aria-label="বিজ্ঞপ্তি"
-                className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20 active:scale-95"
+                className="home-pressable relative flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20 backdrop-blur-md"
               >
                 <Bell className="h-5 w-5 text-white" />
                 {unreadCount > 0 && (
@@ -90,18 +90,18 @@ function Dashboard() {
           </div>
           <div className="mt-7 max-w-xl">
             <p className="text-sm font-semibold text-white/70">শুভ সকাল, {user?.name || "কৃষক"}</p>
-            <h1 className="mt-1 text-[2rem] font-black leading-tight tracking-tight text-white">আজ কীভাবে সাহায্য করতে পারি?</h1>
+            <h1 className="home-rise-in mt-1 text-[2rem] font-black leading-tight tracking-tight text-white">আজ কীভাবে সাহায্য করতে পারি?</h1>
             <p className="mt-2 max-w-md text-sm leading-relaxed text-white/75">আপনার ফসল, আবহাওয়া এবং বাজারের খবর এক জায়গায় দেখে আজকের সেরা সিদ্ধান্ত নিন।</p>
             <div className="mt-5 flex flex-wrap gap-2">
               <button
                 onClick={() => navigate({ to: "/disease-detection" })}
-                className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-xs font-extrabold text-[#1B4332] shadow-lg shadow-black/10 transition hover:-translate-y-0.5 active:scale-[0.97]"
+                className="home-pressable inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-xs font-extrabold text-[#1B4332] shadow-lg shadow-black/10"
               >
                 <Bug className="h-4 w-4" /> রোগের ছবি তুলুন
               </button>
               <button
                 onClick={() => navigate({ to: "/ai-bondhu/chat" })}
-                className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-xs font-extrabold text-white ring-1 ring-white/25 backdrop-blur-md transition hover:bg-white/20 active:scale-[0.97]"
+                className="home-pressable inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-xs font-extrabold text-white ring-1 ring-white/25 backdrop-blur-md"
               >
                 <Sparkles className="h-4 w-4" /> AI বন্ধুকে জিজ্ঞেস করুন
               </button>
@@ -238,13 +238,13 @@ function AiSolutionsSection() {
             <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-white/80" strokeWidth={2.5} />
           </button>
 
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="home-stagger mt-4 flex flex-wrap gap-2">
             {["টমেটোর পাতায় দাগ", "আজ কী সার দেব?", "বাজারদর কেমন?"] .map((prompt) => (
               <button
                 key={prompt}
                 type="button"
                 onClick={() => navigate({ to: "/ai-bondhu/chat" })}
-                className="rounded-full bg-white/10 px-3 py-2 text-[11px] font-bold text-white ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20 active:scale-[0.97]"
+                className="home-pressable rounded-full bg-white/10 px-3 py-2 text-[11px] font-bold text-white ring-1 ring-white/20 backdrop-blur-md"
               >
                 {prompt}
               </button>
@@ -257,7 +257,7 @@ function AiSolutionsSection() {
                 key={c.href}
                 data-card-index={i}
                 onClick={() => navigate({ to: c.href })}
-                className="snap-start shrink-0 w-[148px] min-w-[148px] rounded-2xl bg-white/95 p-3.5 text-left shadow-lg shadow-black/10 transition active:scale-[0.97]"
+                className="home-pressable snap-start shrink-0 w-[148px] min-w-[148px] rounded-2xl bg-white/95 p-3.5 text-left shadow-[var(--shadow-card)]"
                 style={{ scrollSnapAlign: "start" }}
               >
                 <div className={`mb-2.5 flex h-10 w-10 items-center justify-center rounded-xl ${c.iconBg}`}>
@@ -272,7 +272,7 @@ function AiSolutionsSection() {
             <div className="flex gap-1.5">
               {AI_CARDS.map((_, i) => <span key={i} className={`h-1.5 rounded-full transition-all ${i === activeCard ? "w-5 bg-white" : "w-1.5 bg-white/45"}`} />)}
             </div>
-            <button type="button" onClick={() => navigate({ to: "/ai-bondhu/chat" })} className="inline-flex items-center gap-1.5 rounded-full bg-[#F4A261] px-3 py-2 text-[11px] font-extrabold text-[#123B2A] shadow-sm transition active:scale-[0.97]">
+            <button type="button" onClick={() => navigate({ to: "/ai-bondhu/chat" })} className="home-pressable inline-flex items-center gap-1.5 rounded-full bg-[#F4A261] px-3 py-2 text-[11px] font-extrabold text-[#123B2A] shadow-sm">
               <MessageSquareText className="h-3.5 w-3.5" /> প্রশ্ন করুন
             </button>
           </div>
@@ -302,12 +302,12 @@ function QuickActionsSection() {
         </div>
         <Link to="/ai-bondhu" className="text-xs font-bold text-[#2D6A4F] hover:underline">সব টুল</Link>
       </div>
-      <div className="grid grid-cols-2 gap-2.5">
+      <div className="home-stagger grid grid-cols-2 gap-2.5">
         {QUICK_ACTIONS.map((q) => (
           <Link
             key={q.label}
             to={q.href as never}
-            className="group rounded-[22px] border border-white/80 bg-white p-3.5 shadow-[0_8px_24px_-18px_rgba(27,67,50,0.55)] transition hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
+            className="home-pressable group rounded-[22px] border border-white/80 bg-white p-3.5 shadow-[var(--shadow-card)]"
           >
             <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${q.bg}`}>
               <q.Icon className={`h-5 w-5 ${q.color}`} strokeWidth={2.2} />
@@ -331,16 +331,16 @@ function TodayBrief({ onCreatePost }: { onCreatePost: () => void }) {
 
   return (
     <section className="relative z-10 mt-5 px-4 sm:mt-6">
-      <div className="rounded-[28px] border border-white/80 bg-white/95 p-4 shadow-[0_18px_42px_-24px_rgba(27,67,50,0.55)] backdrop-blur-xl">
+      <div className="home-gradient-border rounded-[28px] border border-white/80 bg-white/95 p-4 shadow-[0_18px_42px_-24px_rgba(27,67,50,0.55)] backdrop-blur-xl">
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-[11px] font-extrabold uppercase tracking-[0.15em] text-[#52B788]">আজকের ফোকাস</p>
             <h2 className="mt-1 text-xl font-black tracking-tight text-gray-900">আপনার কৃষি সারাংশ</h2>
           </div>
           <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-[#F0FFF4] text-[#2D6A4F]">
-            <svg viewBox="0 0 36 36" className="absolute inset-0 h-full w-full -rotate-90">
+            <svg aria-label="আজকের কাজের অগ্রগতি" role="img" viewBox="0 0 36 36" className="absolute inset-0 h-full w-full -rotate-90">
               <path d="M18 3a15 15 0 1 1 0 30a15 15 0 1 1 0-30" fill="none" stroke="currentColor" strokeOpacity=".12" strokeWidth="3" />
-              <path d="M18 3a15 15 0 1 1 0 30a15 15 0 1 1 0-30" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="72 100" />
+              <path d="M18 3a15 15 0 1 1 0 30a15 15 0 1 1 0-30" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="72 100" className="home-ring-draw" />
             </svg>
             <span className="text-[10px] font-black">২/৩</span>
           </div>
@@ -352,11 +352,11 @@ function TodayBrief({ onCreatePost }: { onCreatePost: () => void }) {
           <ArrowUpRight className="ml-auto h-4 w-4 shrink-0 text-[#2D6A4F]" />
         </div>
 
-        <div className="mt-3 grid grid-cols-2 gap-2">
+        <div className="home-stagger mt-3 grid grid-cols-2 gap-2">
           <button
             type="button"
             onClick={() => navigate({ to: "/weather" })}
-            className="group rounded-2xl bg-[#EAF6FF] p-3.5 text-left transition hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
+            className="home-pressable group rounded-2xl bg-[#EAF6FF] p-3.5 text-left"
           >
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/80 text-sky-600 shadow-sm"><CloudRain className="h-5 w-5" /></span>
             <p className="mt-3 text-sm font-extrabold text-gray-900">বৃষ্টির প্রস্তুতি</p>
@@ -365,7 +365,7 @@ function TodayBrief({ onCreatePost }: { onCreatePost: () => void }) {
           <button
             type="button"
             onClick={onCreatePost}
-            className="group rounded-2xl bg-[#FFF3E7] p-3.5 text-left transition hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
+            className="home-pressable group rounded-2xl bg-[#FFF3E7] p-3.5 text-left"
           >
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/80 text-[#E07A2C] shadow-sm"><MessageCircle className="h-5 w-5" /></span>
             <p className="mt-3 text-sm font-extrabold text-gray-900">অভিজ্ঞতা শেয়ার</p>
@@ -401,7 +401,7 @@ function CommunityFeedSection({ userName, onCompose }: { userName: string | null
       {/* Composer */}
       <button
         onClick={onCompose}
-        className="w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-3 flex items-center gap-3 active:scale-[0.99] transition-transform"
+        className="home-pressable w-full rounded-2xl border border-gray-100 bg-white p-3 shadow-sm"
       >
         <div className="h-10 w-10 rounded-full bg-[#2D6A4F] text-white font-bold flex items-center justify-center shrink-0">
           {userName?.[0] ?? "ক"}
@@ -437,7 +437,7 @@ function CommunityFeedSection({ userName, onCompose }: { userName: string | null
 
       <Link
         to="/feed"
-        className="mt-4 w-full inline-flex items-center justify-center gap-1 h-12 rounded-2xl bg-white border border-[#2D6A4F]/20 text-[#2D6A4F] font-bold text-sm active:scale-[0.98] transition-transform"
+        className="home-pressable mt-4 inline-flex h-12 w-full items-center justify-center gap-1 rounded-2xl border border-[#2D6A4F]/20 bg-white text-sm font-bold text-[#2D6A4F]"
       >
         আরো পোস্ট দেখুন
         <ChevronRight className="h-4 w-4" strokeWidth={2.6} />
@@ -450,7 +450,7 @@ function MiniPostCard({ post }: { post: Post }) {
   return (
     <Link
       to="/feed"
-      className="block rounded-2xl bg-white border border-gray-100 shadow-sm overflow-hidden active:scale-[0.99] transition-transform"
+      className="home-pressable block overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
     >
       <div className="p-4">
         <div className="flex items-start gap-3">

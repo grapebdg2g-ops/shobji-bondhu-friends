@@ -98,8 +98,13 @@
 
   --brand-primary: #2D6A4F;
   --brand-accent: #52B788;
+  --brand-surface: #F6FBF7;
+  --brand-warm: #F4A261;
   --gradient-brand: linear-gradient(160deg, #1B4332 0%, #2D6A4F 50%, #52B788 100%);
+  --gradient-soft: linear-gradient(135deg, #F8FFFA 0%, #EFFAF2 100%);
   --shadow-card: 0 4px 14px -4px rgba(45, 106, 79, 0.18);
+  --shadow-lift: 0 14px 32px -20px rgba(27, 67, 50, 0.48);
+  --ease-spring: cubic-bezier(.2, .8, .2, 1);
 }
 
 .dark {
@@ -167,6 +172,67 @@
 .home-float { animation: krishi-float 4s ease-in-out infinite; }
 .home-soft-pulse { animation: krishi-soft-pulse 2.4s ease-in-out infinite; }
 
+@keyframes home-rise-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes home-ring-draw {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 28; }
+}
+
+.home-rise-in {
+  animation: home-rise-in 280ms var(--ease-spring) both;
+}
+
+.home-ring-draw {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 28;
+  animation: home-ring-draw 720ms var(--ease-spring) both;
+}
+
+.home-pressable {
+  transition: transform 140ms var(--ease-spring), box-shadow 140ms ease, background-color 140ms ease;
+}
+
+.home-pressable:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lift);
+}
+
+.home-pressable:active {
+  transform: scale(.98);
+}
+
+.home-gradient-border {
+  position: relative;
+  isolation: isolate;
+}
+
+.home-gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(116, 198, 157, .65), rgba(255, 255, 255, .8), rgba(244, 162, 97, .3));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.home-stagger > * {
+  animation: home-rise-in 280ms var(--ease-spring) both;
+}
+
+.home-stagger > *:nth-child(1) { animation-delay: 40ms; }
+.home-stagger > *:nth-child(2) { animation-delay: 80ms; }
+.home-stagger > *:nth-child(3) { animation-delay: 120ms; }
+.home-stagger > *:nth-child(4) { animation-delay: 160ms; }
+.home-stagger > *:nth-child(5) { animation-delay: 200ms; }
+
 button:focus-visible,
 a:focus-visible,
 [role="button"]:focus-visible {
@@ -182,6 +248,18 @@ a:focus-visible,
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .home-rise-in,
+  .home-ring-draw,
+  .home-float,
+  .home-soft-pulse {
+    animation: none !important;
+  }
+
+  .home-pressable:hover {
+    transform: none;
+    box-shadow: none;
   }
 }
 
