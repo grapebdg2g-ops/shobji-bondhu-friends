@@ -263,13 +263,14 @@ function FeedPage() {
   return (
     <main className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <header className="px-4 pt-10 pb-5 rounded-b-3xl" style={{ background: "var(--gradient-brand)" }}>
-        <div className="flex items-center justify-between gap-3">
+      <header className="relative overflow-hidden rounded-b-[28px] px-4 pb-6 pt-8 sm:px-6" style={{ background: "var(--gradient-brand)" }}>
+        <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[#74C69D]/20 blur-3xl" />
+        <div className="relative z-10 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate({ to: "/dashboard" })}
               aria-label="ফিরে যান"
-              className="h-10 w-10 rounded-full bg-white/15 flex items-center justify-center ring-2 ring-white/20"
+              className="home-pressable flex h-11 w-11 items-center justify-center rounded-full bg-white/15 ring-2 ring-white/20"
             >
               <ArrowLeft className="h-5 w-5 text-white" />
             </button>
@@ -283,7 +284,7 @@ function FeedPage() {
           <button
             onClick={() => setFilterOpen(true)}
             aria-label="ফিল্টার"
-            className="h-10 w-10 rounded-full bg-white/15 flex items-center justify-center ring-2 ring-white/20"
+            className="home-pressable flex h-11 w-11 items-center justify-center rounded-full bg-white/15 ring-2 ring-white/20"
           >
             <SlidersHorizontal className="h-5 w-5 text-white" />
           </button>
@@ -291,8 +292,12 @@ function FeedPage() {
       </header>
 
       {/* Stories row */}
-      <section className="px-4 -mt-3 mb-3">
-        <div className="bg-card rounded-2xl shadow-sm border border-border px-3 py-3 overflow-x-auto">
+      <section className="px-4 -mt-2 mb-4">
+        <div className="mb-2 flex items-center justify-between px-1">
+          <p className="text-xs font-extrabold tracking-tight text-foreground">এখন সক্রিয় কৃষক</p>
+          <span className="text-[10px] font-semibold text-muted-foreground">আপনার এলাকার আপডেট</span>
+        </div>
+        <div className="home-gradient-border overflow-x-auto rounded-2xl border border-border bg-card px-3 py-3 shadow-[var(--shadow-card)]">
           <div className="flex items-start gap-3 w-max">
             <button
               onClick={() => setCreateOpen(true)}
@@ -304,14 +309,14 @@ function FeedPage() {
               <span className="mt-1 text-[10px] font-semibold text-foreground text-center leading-tight">পোস্ট করুন</span>
             </button>
             {activeUsers.map((u, i) => (
-              <div key={`${u.name}-${i}`} className="flex flex-col items-center w-16 shrink-0">
+              <div key={`${u.name}-${i}`} className="home-pressable flex w-16 min-w-[4rem] shrink-0 flex-col items-center rounded-xl px-1 py-1">
                 <div className="h-14 w-14 rounded-full bg-gradient-to-br from-emerald-200 to-emerald-400 p-[2px]">
                   <div className="h-full w-full rounded-full bg-card flex items-center justify-center text-base font-bold text-primary">
                     {u.name.charAt(0)}
                   </div>
                 </div>
-                <span className="mt-1 text-[10px] text-muted-foreground text-center truncate w-full" title={u.district ?? ""}>
-                  {u.district ?? "—"}
+                <span className="mt-1 w-full truncate text-center text-[10px] text-muted-foreground" title={u.district ?? ""}>
+                  {u.name}
                 </span>
               </div>
             ))}
@@ -328,7 +333,7 @@ function FeedPage() {
               refresh();
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
-            className="w-full bg-primary text-primary-foreground rounded-full h-10 px-4 shadow-lg flex items-center justify-center gap-2 font-semibold text-sm active:scale-[0.98]"
+            className="home-pressable flex h-11 w-full items-center justify-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-lg"
           >
             <ArrowUp className="h-4 w-4" />
             <span>{`${newCount}টি নতুন পোস্ট দেখুন`}</span>
@@ -369,7 +374,7 @@ function FeedPage() {
       )}
 
       {/* Posts */}
-      <section className="px-4 space-y-4 mt-2">
+      <section className="home-stagger mt-2 space-y-4 px-4">
         {loading ? (
           <div className="space-y-4">
             {Array.from({ length: 3 }).map((_, i) => <PostSkeleton key={i} />)}
@@ -470,7 +475,7 @@ function PostCard({
   };
 
   return (
-    <article className={`relative rounded-2xl border-2 ${isSuccessHighlight ? "border-amber-400 bg-gradient-to-br from-amber-50 to-white" : meta.border} shadow-sm overflow-hidden`}>
+    <article className={`home-pressable relative overflow-hidden rounded-2xl border-2 ${isSuccessHighlight ? "border-amber-400 bg-gradient-to-br from-amber-50 to-white" : meta.border} shadow-sm`}>
       {isSuccessHighlight && (
         <div className="absolute top-2 right-2 flex items-center gap-1 bg-amber-400 text-white px-2 py-0.5 rounded-full text-[10px] font-bold shadow z-10">
           <Star className="h-3 w-3 fill-current" /> সাফল্যের গল্প
@@ -541,15 +546,15 @@ function PostCard({
       )}
 
       <div className="px-4 py-2 flex items-center justify-around border-t border-border/60">
-        <button onClick={onLike} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold active:scale-95 ${liked ? "text-primary" : "text-muted-foreground"}`}>
+        <button onClick={onLike} className={`home-pressable flex min-h-11 min-w-[5.5rem] items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold ${liked ? "text-primary" : "text-muted-foreground"}`}>
           <ThumbsUp className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />
           <span>উপকারী{post.likes_count > 0 ? ` (${post.likes_count})` : ""}</span>
         </button>
-        <button onClick={() => setShowComments((s) => !s)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold active:scale-95 ${post.type === "help" ? "text-emerald-700" : "text-muted-foreground"}`}>
+        <button onClick={() => setShowComments((s) => !s)} className={`home-pressable flex min-h-11 min-w-[5.5rem] items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold ${post.type === "help" ? "text-emerald-700" : "text-muted-foreground"}`}>
           {post.type === "help" ? <Reply className="h-4 w-4" /> : <MessageCircle className="h-4 w-4" />}
           <span>{post.type === "help" ? "উত্তর দিন" : "মন্তব্য"}{post.comments_count > 0 ? ` (${post.comments_count})` : ""}</span>
         </button>
-        <button onClick={onShare} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-muted-foreground active:scale-95">
+        <button onClick={onShare} className="home-pressable flex min-h-11 min-w-[5.5rem] items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold text-muted-foreground">
           <Share2 className="h-4 w-4" />
           <span>শেয়ার</span>
         </button>
@@ -604,7 +609,7 @@ function FilterSheet({
                 key={o.v}
                 type="button"
                 onClick={() => setDraft((d) => ({ ...d, districtMode: o.v }))}
-                className={`px-3 h-9 rounded-full text-xs font-semibold border ${draft.districtMode === o.v ? "bg-primary text-primary-foreground border-primary" : "bg-background border-input text-foreground"}`}
+                className={`home-pressable min-h-11 rounded-full border px-3 text-xs font-semibold ${draft.districtMode === o.v ? "bg-primary text-primary-foreground border-primary" : "bg-background border-input text-foreground"}`}
               >
                 {o.l}
               </button>
@@ -631,7 +636,7 @@ function FilterSheet({
             <button
               type="button"
               onClick={() => setDraft((d) => ({ ...d, crop: null }))}
-              className={`px-3 h-9 rounded-full text-xs font-semibold border ${draft.crop === null ? "bg-primary text-primary-foreground border-primary" : "bg-background border-input text-foreground"}`}
+              className={`home-pressable min-h-11 rounded-full border px-3 text-xs font-semibold ${draft.crop === null ? "bg-primary text-primary-foreground border-primary" : "bg-background border-input text-foreground"}`}
             >
               সব ফসল
             </button>
@@ -640,7 +645,7 @@ function FilterSheet({
                 key={c}
                 type="button"
                 onClick={() => setDraft((d) => ({ ...d, crop: c }))}
-                className={`px-3 h-9 rounded-full text-xs font-semibold border ${draft.crop === c ? "bg-primary text-primary-foreground border-primary" : "bg-background border-input text-foreground"}`}
+                className={`home-pressable min-h-11 rounded-full border px-3 text-xs font-semibold ${draft.crop === c ? "bg-primary text-primary-foreground border-primary" : "bg-background border-input text-foreground"}`}
               >
                 {c}
               </button>
@@ -656,7 +661,7 @@ function FilterSheet({
                 key={t.value}
                 type="button"
                 onClick={() => toggleType(t.value)}
-                className={`px-3 h-9 rounded-full text-xs font-semibold border ${draft.types.includes(t.value) ? "bg-primary text-primary-foreground border-primary" : "bg-background border-input text-foreground"}`}
+                className={`home-pressable min-h-11 rounded-full border px-3 text-xs font-semibold ${draft.types.includes(t.value) ? "bg-primary text-primary-foreground border-primary" : "bg-background border-input text-foreground"}`}
               >
                 {t.label}
               </button>
