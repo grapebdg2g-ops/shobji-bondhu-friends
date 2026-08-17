@@ -132,7 +132,7 @@ export function DashboardWeatherWidget({
     : upazila ? `${upazila}, ${district}` : district;
 
   return (
-    <section className="w-full px-4 pt-4 sm:px-5 sm:pt-5">
+    <section className="w-full space-y-4 px-4 pt-4 sm:space-y-5 sm:px-5 sm:pt-5">
       {geoStatus === "prompt" && (
         <button
           onClick={requestGeo}
