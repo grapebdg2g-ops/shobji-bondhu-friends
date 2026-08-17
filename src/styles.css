@@ -153,3 +153,35 @@
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
 
+/* Home page motion primitives */
+@keyframes krishi-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -6px, 0); }
+}
+
+@keyframes krishi-soft-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.96); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+.home-float { animation: krishi-float 4s ease-in-out infinite; }
+.home-soft-pulse { animation: krishi-soft-pulse 2.4s ease-in-out infinite; }
+
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--brand-accent) 72%, white);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+

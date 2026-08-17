@@ -12,16 +12,11 @@ import {
   Leaf,
   FlaskConical,
   ShoppingBasket,
-  Award,
-  Repeat2,
-  CloudSun,
   Bug,
   Sprout,
-  Plus,
   Camera,
   ThumbsUp,
   MessageCircle,
-  HelpCircle,
   Sparkles,
   CircleCheck,
   CloudRain,
@@ -60,38 +55,58 @@ function Dashboard() {
   }, [loading, user, navigate]);
 
   return (
-    <main className="min-h-screen bg-[#F0FFF4] md:max-w-[560px] md:mx-auto">
-      {/* SECTION 1 — Top Bar */}
-      <header className="px-5 pt-8 pb-12 rounded-b-3xl" style={{ background: "var(--gradient-brand)" }}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-white/95">
-            <MapPin className="h-4 w-4" />
-            <span className="text-sm font-medium">{user?.district ?? "—"}</span>
+    <main className="min-h-screen bg-[#F6FBF7] md:max-w-[720px] md:mx-auto">
+      {/* SECTION 1 — Dynamic Hero */}
+      <header className="relative overflow-hidden px-5 pt-8 pb-14 rounded-b-[32px]" style={{ background: "var(--gradient-brand)" }}>
+        <div className="home-float pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[#74C69D]/20 blur-3xl" />
+        <div className="pointer-events-none absolute -left-20 bottom-0 h-40 w-40 rounded-full bg-[#F4A261]/15 blur-3xl" />
+        <div className="relative z-10">
+          <div className="flex items-center justify-between">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-white/95 ring-1 ring-white/20 backdrop-blur-md">
+              <MapPin className="h-3.5 w-3.5" />
+              <span className="text-xs font-bold">{user?.district ?? "আপনার এলাকা"}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCollapsed(false)}
+                aria-label="মেনু খুলুন"
+                className="hidden h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition hover:bg-white/20 active:scale-95 md:flex"
+              >
+                <Menu className="h-5 w-5" strokeWidth={2.5} />
+              </button>
+              <button
+                onClick={() => navigate({ to: "/notifications" })}
+                aria-label="বিজ্ঞপ্তি"
+                className="relative h-10 w-10 rounded-full bg-white/10 flex items-center justify-center ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20 active:scale-95"
+              >
+                <Bell className="h-5 w-5 text-white" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#F4A261] text-[#123B2A] text-[10px] font-extrabold flex items-center justify-center ring-2 ring-[#2D6A4F]">
+                    {unreadCount > 9 ? "৯+" : unreadCount}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
-          <button
-            onClick={() => navigate({ to: "/notifications" })}
-            aria-label="বিজ্ঞপ্তি"
-            className="relative h-10 w-10 rounded-full bg-white/15 flex items-center justify-center ring-2 ring-white/20"
-          >
-            <Bell className="h-5 w-5 text-white" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
-                {unreadCount > 9 ? "৯+" : unreadCount}
-              </span>
-            )}
-          </button>
-        </div>
-        <div className="mt-4">
-          <p className="text-sm text-white/80">স্বাগতম,</p>
-          <h1 className="text-2xl font-bold text-white truncate">{user?.name || "কৃষক"}</h1>
-          <button
-            onClick={() => setCollapsed(false)}
-            aria-label="মেনু খুলুন"
-            className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 ring-1 ring-white/30 text-white transition-colors"
-          >
-            <Menu className="h-5 w-5" strokeWidth={2.75} />
-            <span className="text-sm font-bold">মেনু</span>
-          </button>
+          <div className="mt-7 max-w-xl">
+            <p className="text-sm font-semibold text-white/70">শুভ সকাল, {user?.name || "কৃষক"}</p>
+            <h1 className="mt-1 text-[2rem] font-black leading-tight tracking-tight text-white">আজ কীভাবে সাহায্য করতে পারি?</h1>
+            <p className="mt-2 max-w-md text-sm leading-relaxed text-white/75">আপনার ফসল, আবহাওয়া এবং বাজারের খবর এক জায়গায় দেখে আজকের সেরা সিদ্ধান্ত নিন।</p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <button
+                onClick={() => navigate({ to: "/disease-detection" })}
+                className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-xs font-extrabold text-[#1B4332] shadow-lg shadow-black/10 transition hover:-translate-y-0.5 active:scale-[0.97]"
+              >
+                <Bug className="h-4 w-4" /> রোগের ছবি তুলুন
+              </button>
+              <button
+                onClick={() => navigate({ to: "/ai-bondhu/chat" })}
+                className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-xs font-extrabold text-white ring-1 ring-white/25 backdrop-blur-md transition hover:bg-white/20 active:scale-[0.97]"
+              >
+                <Sparkles className="h-4 w-4" /> AI বন্ধুকে জিজ্ঞেস করুন
+              </button>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -204,48 +219,65 @@ function AiSolutionsSection() {
   }, []);
 
   return (
-    <section className="mt-5">
-      <div
-        className="px-4 py-4 rounded-[20px] mx-4 shadow-[0_12px_28px_-18px_rgba(27,67,50,0.8)]"
-        style={{ background: "var(--gradient-brand)" }}
-      >
-        <button
-          onClick={() => navigate({ to: "/ai-bondhu" })}
-          className="w-full flex items-center justify-between mb-3 text-white"
-        >
-          <h2 className="text-lg font-bold">AI কৃষি সহায়তা</h2>
-          <span className="text-sm font-semibold flex items-center gap-0.5">
-            সব দেখুন <ChevronRight className="h-4 w-4" strokeWidth={2.6} />
-          </span>
-        </button>
-        <div
-          ref={scrollRef}
-          className="flex gap-3 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1"
-          style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}
-        >
-          {AI_CARDS.map((c, i) => (
-            <button
-              key={c.href}
-              data-card-index={i}
-              onClick={() => navigate({ to: c.href })}
-              className="snap-start shrink-0 w-[140px] min-w-[140px] bg-white rounded-2xl p-3.5 shadow-sm active:scale-95 transition-transform text-left"
-              style={{ scrollSnapAlign: "start" }}
-            >
-              <div className={`h-10 w-10 rounded-xl ${c.iconBg} flex items-center justify-center mb-2.5`}>
-                <c.Icon className={`h-5 w-5 ${c.iconColor}`} strokeWidth={2.2} />
+    <section className="mt-6 px-4">
+      <div className="relative overflow-hidden rounded-[28px] p-4 shadow-[0_20px_44px_-24px_rgba(27,67,50,0.9)]" style={{ background: "var(--gradient-brand)" }}>
+        <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-[#74C69D]/25 blur-3xl" />
+        <div className="relative z-10">
+          <button onClick={() => navigate({ to: "/ai-bondhu" })} className="flex w-full items-start justify-between text-left text-white">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/25">
+                  <Sparkles className="h-4 w-4" />
+                  <span className="home-soft-pulse absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-[#F4A261] ring-2 ring-[#2D6A4F]" />
+                </span>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/65">কৃষি সহায়ক</p>
+                  <h2 className="text-lg font-black">AI বন্ধু এখন online</h2>
+                </div>
               </div>
-              <h3 className="font-bold text-sm text-gray-900 leading-tight">{c.title}</h3>
-              <p className="text-[11px] text-gray-500 mt-1 leading-snug">{c.desc}</p>
+              <p className="mt-3 max-w-xs text-xs leading-relaxed text-white/75">আপনার ফসলের যেকোনো প্রশ্ন করুন—ভয়েস বা টেক্সটে সহজ উত্তর পান।</p>
+            </div>
+            <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-white/80" strokeWidth={2.5} />
+          </button>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {["টমেটোর পাতায় দাগ", "আজ কী সার দেব?", "বাজারদর কেমন?"] .map((prompt) => (
+              <button
+                key={prompt}
+                type="button"
+                onClick={() => navigate({ to: "/ai-bondhu/chat" })}
+                className="rounded-full bg-white/10 px-3 py-2 text-[11px] font-bold text-white ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20 active:scale-[0.97]"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+
+          <div ref={scrollRef} className="mt-4 flex gap-3 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1" style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}>
+            {AI_CARDS.map((c, i) => (
+              <button
+                key={c.href}
+                data-card-index={i}
+                onClick={() => navigate({ to: c.href })}
+                className="snap-start shrink-0 w-[148px] min-w-[148px] rounded-2xl bg-white/95 p-3.5 text-left shadow-lg shadow-black/10 transition active:scale-[0.97]"
+                style={{ scrollSnapAlign: "start" }}
+              >
+                <div className={`mb-2.5 flex h-10 w-10 items-center justify-center rounded-xl ${c.iconBg}`}>
+                  <c.Icon className={`h-5 w-5 ${c.iconColor}`} strokeWidth={2.2} />
+                </div>
+                <h3 className="text-sm font-extrabold leading-tight text-gray-900">{c.title}</h3>
+                <p className="mt-1 text-[11px] leading-snug text-gray-500">{c.desc}</p>
+              </button>
+            ))}
+          </div>
+          <div className="mt-3 flex items-center justify-between">
+            <div className="flex gap-1.5">
+              {AI_CARDS.map((_, i) => <span key={i} className={`h-1.5 rounded-full transition-all ${i === activeCard ? "w-5 bg-white" : "w-1.5 bg-white/45"}`} />)}
+            </div>
+            <button type="button" onClick={() => navigate({ to: "/ai-bondhu/chat" })} className="inline-flex items-center gap-1.5 rounded-full bg-[#F4A261] px-3 py-2 text-[11px] font-extrabold text-[#123B2A] shadow-sm transition active:scale-[0.97]">
+              <MessageSquareText className="h-3.5 w-3.5" /> প্রশ্ন করুন
             </button>
-          ))}
-        </div>
-        <div className="flex justify-center gap-1.5 mt-3">
-          {AI_CARDS.map((_, i) => (
-            <span
-              key={i}
-              className={`h-1.5 rounded-full transition-all ${i === activeCard ? "w-4 bg-white" : "w-1.5 bg-white/50"}`}
-            />
-          ))}
+          </div>
         </div>
       </div>
     </section>
@@ -256,31 +288,39 @@ function AiSolutionsSection() {
 /* ──────────────────────────── SECTION 4 ──────────────────────────── */
 
 const QUICK_ACTIONS = [
-  { href: "/vegetable-guide", Icon: Leaf, label: "চাষাবাদের গাইড", bg: "bg-emerald-100", color: "text-emerald-700" },
-  { href: "/organic-fertilizer", Icon: FlaskConical, label: "জৈব সার", bg: "bg-blue-100", color: "text-blue-700" },
-  { href: "/prices", Icon: ShoppingBasket, label: "সবজি বাজার", bg: "bg-orange-100", color: "text-orange-700" },
-  { href: "/feed?filter=success", Icon: Award, label: "সেরা চাষী", bg: "bg-purple-100", color: "text-purple-700" },
-  { href: "/feed?filter=help", Icon: HelpCircle, label: "জিজ্ঞাসা", bg: "bg-amber-100", color: "text-amber-700" },
-  { href: "/exchange", Icon: Repeat2, label: "বিনিময়", bg: "bg-teal-100", color: "text-teal-700" },
-  { href: "/weather", Icon: CloudSun, label: "আবহাওয়া", bg: "bg-sky-100", color: "text-sky-700" },
-  { href: "/ai-bondhu/disease", Icon: Bug, label: "রোগবালাই", bg: "bg-amber-100", color: "text-amber-700" },
-  { href: "/ai-bondhu/calendar", Icon: Sprout, label: "ফসল পরিকল্প", bg: "bg-lime-100", color: "text-lime-700" },
+  { href: "/disease-detection", Icon: Bug, label: "রোগ শনাক্ত", desc: "ছবি তুলে পরীক্ষা করুন", bg: "bg-[#E8F7EC]", color: "text-[#2D6A4F]" },
+  { href: "/prices", Icon: ShoppingBasket, label: "বাজারদর", desc: "আজকের দাম দেখুন", bg: "bg-[#FFF1E5]", color: "text-[#D96B27]" },
+  { href: "/ai-bondhu/chat", Icon: Sparkles, label: "AI বন্ধু", desc: "ফসল নিয়ে জিজ্ঞেস করুন", bg: "bg-[#F0EBFF]", color: "text-[#7457C7]" },
+  { href: "/crop-planner", Icon: Sprout, label: "ফসল পরিকল্পনা", desc: "চাষের ধাপ সাজান", bg: "bg-[#E7F4FB]", color: "text-[#3186B7]" },
 ];
 
 function QuickActionsSection() {
   return (
-    <section className="mt-5 px-2">
-      <div className="flex gap-2 overflow-x-auto no-scrollbar px-3 pb-2">
+    <section className="mt-6 px-4">
+      <div className="mb-3 flex items-end justify-between px-1">
+        <div>
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#52B788]">দ্রুত শুরু করুন</p>
+          <h2 className="mt-1 text-lg font-black tracking-tight text-gray-900">আজ আপনার কী দরকার?</h2>
+        </div>
+        <Link to="/ai-bondhu" className="text-xs font-bold text-[#2D6A4F] hover:underline">সব টুল</Link>
+      </div>
+      <div className="grid grid-cols-2 gap-2.5">
         {QUICK_ACTIONS.map((q) => (
           <Link
             key={q.label}
             to={q.href as never}
-            className="shrink-0 w-[78px] flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
+            className="group rounded-[22px] border border-white/80 bg-white p-3.5 shadow-[0_8px_24px_-18px_rgba(27,67,50,0.55)] transition hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
           >
-            <div className={`h-14 w-14 rounded-full ${q.bg} flex items-center justify-center shadow-sm`}>
-              <q.Icon className={`h-6 w-6 ${q.color}`} strokeWidth={2.2} />
+            <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${q.bg}`}>
+              <q.Icon className={`h-5 w-5 ${q.color}`} strokeWidth={2.2} />
             </div>
-            <span className="text-[11px] font-semibold text-gray-700 text-center leading-tight">{q.label}</span>
+            <div className="mt-3 flex items-end justify-between gap-2">
+              <div>
+                <h3 className="text-sm font-extrabold text-gray-900">{q.label}</h3>
+                <p className="mt-1 text-[11px] leading-snug text-gray-500">{q.desc}</p>
+              </div>
+              <ArrowUpRight className={`h-4 w-4 shrink-0 ${q.color} transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5`} />
+            </div>
           </Link>
         ))}
       </div>
@@ -292,38 +332,46 @@ function TodayBrief({ onCreatePost }: { onCreatePost: () => void }) {
   const navigate = useNavigate();
 
   return (
-    <section className="px-4 mt-5">
-      <div className="rounded-[24px] bg-white border border-emerald-100 p-4 shadow-[var(--shadow-card)]">
+    <section className="relative z-10 -mt-7 px-4">
+      <div className="rounded-[28px] border border-white/80 bg-white/95 p-4 shadow-[0_18px_42px_-24px_rgba(27,67,50,0.55)] backdrop-blur-xl">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#52B788]">আজকের ফোকাস</p>
-            <h2 className="mt-1 text-xl font-extrabold text-gray-900">আপনার কৃষি সারাংশ</h2>
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.15em] text-[#52B788]">আজকের ফোকাস</p>
+            <h2 className="mt-1 text-xl font-black tracking-tight text-gray-900">আপনার কৃষি সারাংশ</h2>
           </div>
-          <span className="inline-flex items-center gap-1 rounded-full bg-[#F0FFF4] px-2.5 py-1 text-[11px] font-bold text-[#2D6A4F]">
-            <CircleCheck className="h-3.5 w-3.5" /> ৩টি কাজ
-          </span>
+          <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-[#F0FFF4] text-[#2D6A4F]">
+            <svg viewBox="0 0 36 36" className="absolute inset-0 h-full w-full -rotate-90">
+              <path d="M18 3a15 15 0 1 1 0 30a15 15 0 1 1 0-30" fill="none" stroke="currentColor" strokeOpacity=".12" strokeWidth="3" />
+              <path d="M18 3a15 15 0 1 1 0 30a15 15 0 1 1 0-30" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="72 100" />
+            </svg>
+            <span className="text-[10px] font-black">২/৩</span>
+          </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-2 gap-2">
+        <div className="mt-3 flex items-center gap-2 rounded-2xl bg-[#F6FBF7] px-3 py-2.5">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#D8F3DC] text-[#2D6A4F]"><CircleCheck className="h-4 w-4" /></span>
+          <p className="text-xs font-semibold leading-relaxed text-gray-600">আজকের ৩টি কাজের মধ্যে ২টি আপনার জন্য প্রস্তুত।</p>
+          <ArrowUpRight className="ml-auto h-4 w-4 shrink-0 text-[#2D6A4F]" />
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-2">
           <button
             type="button"
             onClick={() => navigate({ to: "/weather" })}
-            className="group rounded-2xl bg-sky-50 p-3 text-left transition hover:-translate-y-0.5 hover:shadow-sm active:scale-[0.98]"
+            className="group rounded-2xl bg-[#EAF6FF] p-3.5 text-left transition hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
           >
-            <CloudRain className="h-5 w-5 text-sky-600" />
-            <p className="mt-2 text-sm font-bold text-gray-900">বৃষ্টির প্রস্তুতি</p>
-            <p className="mt-0.5 text-[11px] leading-snug text-gray-500">আবহাওয়া দেখে আজকের কাজ ঠিক করুন</p>
-            <ArrowUpRight className="mt-2 h-4 w-4 text-sky-600 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/80 text-sky-600 shadow-sm"><CloudRain className="h-5 w-5" /></span>
+            <p className="mt-3 text-sm font-extrabold text-gray-900">বৃষ্টির প্রস্তুতি</p>
+            <p className="mt-1 text-[11px] leading-snug text-gray-500">আবহাওয়া দেখে কাজ ঠিক করুন</p>
           </button>
           <button
             type="button"
             onClick={onCreatePost}
-            className="group rounded-2xl bg-amber-50 p-3 text-left transition hover:-translate-y-0.5 hover:shadow-sm active:scale-[0.98]"
+            className="group rounded-2xl bg-[#FFF3E7] p-3.5 text-left transition hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
           >
-            <MessageCircle className="h-5 w-5 text-amber-600" />
-            <p className="mt-2 text-sm font-bold text-gray-900">অভিজ্ঞতা শেয়ার</p>
-            <p className="mt-0.5 text-[11px] leading-snug text-gray-500">আপনার ফসলের খবর কমিউনিটিতে দিন</p>
-            <ArrowUpRight className="mt-2 h-4 w-4 text-amber-600 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/80 text-[#E07A2C] shadow-sm"><MessageCircle className="h-5 w-5" /></span>
+            <p className="mt-3 text-sm font-extrabold text-gray-900">অভিজ্ঞতা শেয়ার</p>
+            <p className="mt-1 text-[11px] leading-snug text-gray-500">কমিউনিটিতে আপনার খবর দিন</p>
           </button>
         </div>
       </div>
