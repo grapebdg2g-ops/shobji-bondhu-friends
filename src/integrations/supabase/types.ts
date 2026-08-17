@@ -1067,12 +1067,29 @@ export type Database = {
           phone: string
         }[]
       }
-      cancel_connection: { Args: { connection_id: string }; Returns: Json }
+      cancel_connection: {
+        Args: { connection_id: string }
+        Returns: {
+          addressee_id: string
+          created_at: string
+          id: string
+          requester_id: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "connections"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       cleanup_ai_chat_cache: { Args: never; Returns: undefined }
-      get_connection_state: { Args: { target_user_id: string }; Returns: string | null }
-      request_connection: { Args: { target_user_id: string }; Returns: Json }
-      respond_connection: { Args: { connection_id: string; next_status: string }; Returns: Json }
       decrement_likes: { Args: { post_id: string }; Returns: undefined }
+      get_connection_state: {
+        Args: { target_user_id: string }
+        Returns: string
+      }
       get_exchange_phone: { Args: { _id: string }; Returns: string }
       get_my_phone: { Args: never; Returns: string }
       get_price_history: {
@@ -1107,6 +1124,40 @@ export type Database = {
       record_cache_feedback: {
         Args: { _helpful: boolean; _id: string }
         Returns: undefined
+      }
+      request_connection: {
+        Args: { target_user_id: string }
+        Returns: {
+          addressee_id: string
+          created_at: string
+          id: string
+          requester_id: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "connections"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      respond_connection: {
+        Args: { connection_id: string; next_status: string }
+        Returns: {
+          addressee_id: string
+          created_at: string
+          id: string
+          requester_id: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "connections"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       search_cache: {
         Args: {
