@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
-import { MapPin, RefreshCw, Navigation } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, Lightbulb, MapPin, Navigation, RefreshCw, ShieldAlert } from "lucide-react";
 import { getWeatherForecast } from "@/lib/weather.functions";
 import { weatherCodeBn } from "@/lib/weather-rules";
 import { useGeolocation } from "@/hooks/use-geolocation";
@@ -42,10 +42,37 @@ function farmingAdvice(c: CurrentWeather, today: DailyPoint | undefined): {
   return { text: "✅ আজকের আবহাওয়া চাষের জন্য ভালো", tone: "good" };
 }
 
-const toneStyles: Record<"good" | "warn" | "danger", string> = {
-  good: "bg-green-50 border-green-200 text-green-900",
-  warn: "bg-yellow-50 border-yellow-200 text-yellow-900",
-  danger: "bg-orange-50 border-orange-200 text-orange-900",
+const tonePresentation: Record<
+  "good" | "warn" | "danger",
+  { label: string; badge: string; icon: typeof CheckCircle2; card: string; iconWrap: string; iconColor: string; badgeColor: string }
+> = {
+  good: {
+    label: "আবহাওয়া চাষের জন্য ভালো",
+    badge: "নিরাপদ",
+    icon: CheckCircle2,
+    card: "border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-[#F2FBF4]",
+    iconWrap: "bg-emerald-100",
+    iconColor: "text-emerald-700",
+    badgeColor: "bg-emerald-100 text-emerald-700",
+  },
+  warn: {
+    label: "আজ একটু সতর্ক থাকুন",
+    badge: "সতর্কতা",
+    icon: AlertTriangle,
+    card: "border-amber-200 bg-gradient-to-br from-amber-50 via-white to-[#FFF9ED]",
+    iconWrap: "bg-amber-100",
+    iconColor: "text-amber-700",
+    badgeColor: "bg-amber-100 text-amber-700",
+  },
+  danger: {
+    label: "আজ মাঠে যাওয়ার আগে সতর্ক হন",
+    badge: "জরুরি",
+    icon: ShieldAlert,
+    card: "border-orange-200 bg-gradient-to-br from-orange-50 via-white to-[#FFF4ED]",
+    iconWrap: "bg-orange-100",
+    iconColor: "text-orange-700",
+    badgeColor: "bg-orange-100 text-orange-700",
+  },
 };
 
 export function DashboardWeatherWidget({
@@ -179,9 +206,39 @@ export function DashboardWeatherWidget({
       </Link>
 
       {/* Farming advice */}
-      <div className={`rounded-xl border p-3 text-sm font-medium ${toneStyles[advice.tone]}`}>
-        {advice.text}
-      </div>
+      {(() => {
+        const presentation = tonePresentation[advice.tone];
+        const AdviceIcon = presentation.icon;
+        const adviceTitle = advice.text.replace(/^[^\p{L}\p{N}]+/u, "").trim();
+        return (
+          <div
+            role="status"
+            aria-live="polite"
+            className={`rounded-[22px] border p-3.5 shadow-[var(--shadow-card)] transition sm:p-4 ${presentation.card}`}
+          >
+            <div className="flex items-start gap-3">
+              <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${presentation.iconWrap}`}>
+                <AdviceIcon className={`h-5 w-5 ${presentation.iconColor}`} strokeWidth={2.4} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-muted-foreground">আজকের কৃষি পরামর্শ</p>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${presentation.badgeColor}`}>{presentation.badge}</span>
+                </div>
+                <h3 className="mt-1 text-sm font-extrabold leading-snug text-foreground sm:text-base">{presentation.label}</h3>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{adviceTitle}</p>
+              </div>
+              <Lightbulb className={`mt-1 hidden h-4 w-4 shrink-0 sm:block ${presentation.iconColor}`} />
+            </div>
+            <Link
+              to="/weather"
+              className={`mt-3 inline-flex items-center gap-1 text-xs font-extrabold ${presentation.iconColor} transition hover:gap-2`}
+            >
+              বিস্তারিত আবহাওয়া দেখুন <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        );
+      })()}
     </section>
   );
 }
