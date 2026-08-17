@@ -24,6 +24,7 @@ import { Route as DiseaseDetectionRouteImport } from './routes/disease-detection
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CropPlannerRouteImport } from './routes/crop-planner'
 import { Route as CropGuideRouteImport } from './routes/crop-guide'
+import { Route as ConnectionsRouteImport } from './routes/connections'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VegetableGuideIndexRouteImport } from './routes/vegetable-guide.index'
@@ -132,6 +133,11 @@ const CropPlannerRoute = CropPlannerRouteImport.update({
 const CropGuideRoute = CropGuideRouteImport.update({
   id: '/crop-guide',
   path: '/crop-guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConnectionsRoute = ConnectionsRouteImport.update({
+  id: '/connections',
+  path: '/connections',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -312,6 +318,7 @@ const ApiPublicHooksCheckPredictionAccuracyRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/connections': typeof ConnectionsRoute
   '/crop-guide': typeof CropGuideRouteWithChildren
   '/crop-planner': typeof CropPlannerRouteWithChildren
   '/dashboard': typeof DashboardRoute
@@ -362,6 +369,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/connections': typeof ConnectionsRoute
   '/crop-planner': typeof CropPlannerRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/disease-detection': typeof DiseaseDetectionRoute
@@ -413,6 +421,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/connections': typeof ConnectionsRoute
   '/crop-guide': typeof CropGuideRouteWithChildren
   '/crop-planner': typeof CropPlannerRouteWithChildren
   '/dashboard': typeof DashboardRoute
@@ -466,6 +475,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/connections'
     | '/crop-guide'
     | '/crop-planner'
     | '/dashboard'
@@ -516,6 +526,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/connections'
     | '/crop-planner'
     | '/dashboard'
     | '/disease-detection'
@@ -566,6 +577,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/connections'
     | '/crop-guide'
     | '/crop-planner'
     | '/dashboard'
@@ -618,6 +630,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  ConnectionsRoute: typeof ConnectionsRoute
   CropGuideRoute: typeof CropGuideRouteWithChildren
   CropPlannerRoute: typeof CropPlannerRouteWithChildren
   DashboardRoute: typeof DashboardRoute
@@ -756,6 +769,13 @@ declare module '@tanstack/react-router' {
       path: '/crop-guide'
       fullPath: '/crop-guide'
       preLoaderRoute: typeof CropGuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connections': {
+      id: '/connections'
+      path: '/connections'
+      fullPath: '/connections'
+      preLoaderRoute: typeof ConnectionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -1072,6 +1092,7 @@ const PricePredictionRouteWithChildren = PricePredictionRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  ConnectionsRoute: ConnectionsRoute,
   CropGuideRoute: CropGuideRouteWithChildren,
   CropPlannerRoute: CropPlannerRouteWithChildren,
   DashboardRoute: DashboardRoute,
@@ -1109,3 +1130,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

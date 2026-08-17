@@ -1,8 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, MapPin, Sprout, BadgeCheck, Loader2 } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Check, Clock3, Loader2, MapPin, Share2, Sprout, UserPlus, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ContentMenu } from "@/components/krishi/content-menu";
+import { useConnectionState } from "@/hooks/use-connections";
+import { useUser } from "@/contexts/user-context";
 import { EmptyState } from "@/components/krishi/empty-state";
 
 type Profile = {
@@ -31,9 +33,11 @@ export const Route = createFileRoute("/u/$userId")({
 function PublicProfilePage() {
   const { userId } = Route.useParams();
   const navigate = useNavigate();
+  const { user } = useUser();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const { state: connectionState, busy: connectionBusy, request, respond, cancel } = useConnectionState(profile?.id ?? null);
 
   useEffect(() => {
     let cancelled = false;
@@ -112,8 +116,23 @@ function PublicProfilePage() {
               </p>
             )}
             {profile.bio && (
-              <p className="mt-3 text-sm text-foreground/80 max-w-md">{profile.bio}</p>
+              <p className="mt-3 max-w-md text-sm text-foreground/80">{profile.bio}</p>
             )}
+            {user?.id !== profile.id && <div className="mt-4 flex w-full max-w-sm gap-2">
+              {connectionState === "accepted" ? (
+                <div className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-100 text-sm font-extrabold text-emerald-700"><Check className="h-4 w-4" /> সংযুক্ত</div>
+              ) : connectionState === "outgoing_pending" ? (
+                <button type="button" disabled={connectionBusy} onClick={() => void cancel()} className="home-pressable flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-amber-100 text-sm font-extrabold text-amber-700 disabled:opacity-50"><Clock3 className="h-4 w-4" /> অনুরোধ বাতিল</button>
+              ) : connectionState === "incoming_pending" ? (
+                <>
+                  <button type="button" disabled={connectionBusy} onClick={() => void respond("accepted")} className="home-pressable flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-primary text-sm font-extrabold text-primary-foreground disabled:opacity-50"><Check className="h-4 w-4" /> গ্রহণ করুন</button>
+                  <button type="button" disabled={connectionBusy} onClick={() => void respond("declined")} className="home-pressable flex h-11 w-11 items-center justify-center rounded-xl bg-destructive/10 text-destructive disabled:opacity-50" aria-label="প্রত্যাখ্যান"><X className="h-4 w-4" /></button>
+                </>
+              ) : (
+                <button type="button" disabled={connectionBusy} onClick={() => void request()} className="home-pressable flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-primary text-sm font-extrabold text-primary-foreground disabled:opacity-50"><UserPlus className="h-4 w-4" /> সংযোগ করুন</button>
+              )}
+              <button type="button" onClick={() => { void navigator.clipboard?.writeText(window.location.href); }} className="home-pressable flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-card text-primary" aria-label="প্রোফাইল শেয়ার করুন"><Share2 className="h-4 w-4" /></button>
+            </div>}
           </div>
 
           <div className="grid grid-cols-3 gap-2">
