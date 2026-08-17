@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useReducer, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import {
   ArrowLeft,
   Camera,
@@ -399,6 +399,13 @@ function PreviewScreen({
 // ─── Analyzing ─────────────────────────────────────────
 
 function AnalyzingScreen({ imageUrl, onCancel }: { imageUrl: string; onCancel: () => void }) {
+  const [progress, setProgress] = useState(12);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setProgress((value) => Math.min(88, value + 7)), 700);
+    return () => window.clearInterval(timer);
+  }, []);
+
   return (
     <div className="px-5 pt-6 space-y-6 text-center">
       <button
@@ -415,9 +422,20 @@ function AnalyzingScreen({ imageUrl, onCancel }: { imageUrl: string; onCancel: (
           <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent shadow-[0_0_20px_4px] shadow-primary animate-[scan_2s_ease-in-out_infinite]" />
         </div>
       </div>
-      <div>
-        <p className="text-lg font-bold text-foreground">বিশ্লেষণ করা হচ্ছে...</p>
-        <p className="text-sm text-muted-foreground mt-1">সাধারণত ১০-১৫ সেকেন্ড লাগে</p>
+      <div className="mx-auto w-full max-w-sm">
+        <div className="flex items-center justify-between text-sm">
+          <p className="text-lg font-bold text-foreground">বিশ্লেষণ করা হচ্ছে...</p>
+          <span className="font-bold text-primary">{progress}%</span>
+        </div>
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+          <div className="h-full rounded-full bg-gradient-to-r from-[#2D6A4F] to-[#74C69D] transition-[width] duration-500" style={{ width: `${progress}%` }} />
+        </div>
+        <div className="mt-4 grid grid-cols-3 gap-2 text-[11px] font-semibold">
+          <span className="rounded-full bg-primary/10 px-2 py-1 text-primary">ছবি পড়া</span>
+          <span className={`rounded-full px-2 py-1 ${progress > 35 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>রোগ খোঁজা</span>
+          <span className={`rounded-full px-2 py-1 ${progress > 70 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>পরামর্শ তৈরি</span>
+        </div>
+        <p className="text-sm text-muted-foreground mt-3">সাধারণত ১০-১৫ সেকেন্ড লাগে</p>
       </div>
       <button onClick={onCancel} className="text-sm text-muted-foreground underline mx-auto inline-flex items-center gap-1">
         <X className="h-4 w-4" /> বাতিল করুন
