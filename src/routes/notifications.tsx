@@ -1,5 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Bell, CheckCheck, Trash2, Heart, MessageCircle, TrendingDown } from "lucide-react";
+import {
+  ArrowLeft,
+  Bell,
+  Check,
+  CheckCheck,
+  Heart,
+  MessageCircle,
+  Trash2,
+  TrendingDown,
+  UserPlus,
+} from "lucide-react";
 import { useUser } from "@/contexts/user-context";
 import { useNotifications, type Notification } from "@/hooks/use-notifications";
 import { useRef, useState } from "react";
@@ -23,34 +33,51 @@ function timeAgo(iso: string) {
 function iconFor(type: string) {
   if (type === "like") return { Icon: Heart, color: "text-rose-500", bg: "bg-rose-50" };
   if (type === "comment") return { Icon: MessageCircle, color: "text-sky-500", bg: "bg-sky-50" };
-  if (type === "price_alert") return { Icon: TrendingDown, color: "text-amber-600", bg: "bg-amber-50" };
+  if (type === "price_alert")
+    return { Icon: TrendingDown, color: "text-amber-600", bg: "bg-amber-50" };
+  if (type === "connection_request")
+    return { Icon: UserPlus, color: "text-emerald-600", bg: "bg-emerald-50" };
+  if (type === "connection_response")
+    return { Icon: Check, color: "text-primary", bg: "bg-primary/10" };
   return { Icon: Bell, color: "text-primary", bg: "bg-primary/10" };
 }
 
 function NotificationsPage() {
   const navigate = useNavigate();
   const { user } = useUser();
-  const { items, loading, unreadCount, markAllRead, remove } = useNotifications(user?.id ?? null);
+  const { items, loading, unreadCount, markAllRead, markRead, remove } = useNotifications(
+    user?.id ?? null,
+  );
 
-  const open = (n: Notification) => {
-    if (n.ref_type === "post") navigate({ to: "/feed" });
+  const open = async (n: Notification) => {
+    if (!n.is_read) await markRead(n.id);
+    if (n.ref_type === "connection") navigate({ to: "/connections" });
+    else if (n.ref_type === "post") navigate({ to: "/feed" });
     else if (n.ref_type === "price") navigate({ to: "/prices" });
   };
 
   return (
     <main className="min-h-screen bg-background pb-20">
-      <header className="px-4 pt-10 pb-5 rounded-b-3xl" style={{ background: "var(--gradient-brand)" }}>
+      <header
+        className="px-4 pt-10 pb-5 rounded-b-3xl"
+        style={{ background: "var(--gradient-brand)" }}
+      >
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate({ to: "/dashboard" })} aria-label="ফিরে যান"
-              className="h-10 w-10 rounded-full bg-white/15 flex items-center justify-center ring-2 ring-white/20">
+            <button
+              onClick={() => navigate({ to: "/dashboard" })}
+              aria-label="ফিরে যান"
+              className="home-pressable flex h-11 w-11 items-center justify-center rounded-full bg-white/15 ring-2 ring-white/20"
+            >
               <ArrowLeft className="h-5 w-5 text-white" />
             </button>
             <h1 className="text-xl font-bold text-white">বিজ্ঞপ্তি</h1>
           </div>
           {unreadCount > 0 && (
-            <button onClick={markAllRead}
-              className="flex items-center gap-1.5 px-3 h-9 rounded-full bg-white/15 ring-2 ring-white/20 text-white text-xs font-semibold">
+            <button
+              onClick={markAllRead}
+              className="home-pressable flex min-h-11 items-center gap-1.5 rounded-full bg-white/15 px-3 text-xs font-semibold text-white ring-2 ring-white/20"
+            >
               <CheckCheck className="h-4 w-4" /> সব পঠিত
             </button>
           )}
@@ -58,20 +85,41 @@ function NotificationsPage() {
       </header>
 
       <section className="px-4 mt-4 space-y-2">
-        {loading ? <div className="py-10"><LoadingSpinner /></div>
-          : items.length === 0 ? <EmptyState title="কোনো বিজ্ঞপ্তি নেই" description="নতুন প্রতিক্রিয়া, মন্তব্য বা দাম পরিবর্তন হলে এখানে দেখা যাবে" />
-          : items.map((n) => <NotifRow key={n.id} n={n} onOpen={() => open(n)} onDelete={() => remove(n.id)} />)}
+        {loading ? (
+          <div className="py-10">
+            <LoadingSpinner />
+          </div>
+        ) : items.length === 0 ? (
+          <EmptyState
+            title="কোনো বিজ্ঞপ্তি নেই"
+            description="নতুন প্রতিক্রিয়া, মন্তব্য বা দাম পরিবর্তন হলে এখানে দেখা যাবে"
+          />
+        ) : (
+          items.map((n) => (
+            <NotifRow key={n.id} n={n} onOpen={() => open(n)} onDelete={() => remove(n.id)} />
+          ))
+        )}
       </section>
     </main>
   );
 }
 
-function NotifRow({ n, onOpen, onDelete }: { n: Notification; onOpen: () => void; onDelete: () => void }) {
+function NotifRow({
+  n,
+  onOpen,
+  onDelete,
+}: {
+  n: Notification;
+  onOpen: () => void;
+  onDelete: () => void;
+}) {
   const { Icon, color, bg } = iconFor(n.type);
   const [dx, setDx] = useState(0);
   const startX = useRef<number | null>(null);
 
-  const onStart = (x: number) => { startX.current = x; };
+  const onStart = (x: number) => {
+    startX.current = x;
+  };
   const onMove = (x: number) => {
     if (startX.current === null) return;
     const d = Math.min(0, x - startX.current);
@@ -97,8 +145,11 @@ function NotifRow({ n, onOpen, onDelete }: { n: Notification; onOpen: () => void
         onMouseMove={(e) => e.buttons === 1 && onMove(e.clientX)}
         onMouseUp={onEnd}
         onMouseLeave={onEnd}
-        style={{ transform: `translateX(${dx}px)`, transition: startX.current === null ? "transform 0.2s" : "none" }}
-        className={`relative w-full text-left flex items-start gap-3 p-4 rounded-2xl border ${n.is_read ? "bg-card border-border" : "bg-primary/5 border-primary/30"}`}
+        style={{
+          transform: `translateX(${dx}px)`,
+          transition: startX.current === null ? "transform 0.2s" : "none",
+        }}
+        className={`home-pressable relative flex min-h-[76px] w-full items-start gap-3 rounded-2xl border p-4 text-left ${n.is_read ? "bg-card border-border" : "bg-primary/5 border-primary/30"}`}
       >
         <div className={`h-10 w-10 rounded-full ${bg} flex items-center justify-center shrink-0`}>
           <Icon className={`h-5 w-5 ${color}`} />
@@ -106,7 +157,9 @@ function NotifRow({ n, onOpen, onDelete }: { n: Notification; onOpen: () => void
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
             <p className="text-sm font-bold text-foreground truncate">{n.title}</p>
-            <span className="text-[10px] text-muted-foreground shrink-0">{timeAgo(n.created_at)}</span>
+            <span className="text-[10px] text-muted-foreground shrink-0">
+              {timeAgo(n.created_at)}
+            </span>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.body}</p>
         </div>
