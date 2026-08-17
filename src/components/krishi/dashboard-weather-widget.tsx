@@ -144,7 +144,7 @@ export function DashboardWeatherWidget({
       )}
       <Link
         to="/weather"
-        className="block w-full overflow-hidden rounded-[24px] border border-border bg-card shadow-[var(--shadow-card)] transition active:scale-[0.99]"
+        className="home-pressable block w-full overflow-hidden rounded-[24px] border border-border bg-card shadow-[var(--shadow-card)]"
       >
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/40 px-4 py-3">
@@ -214,7 +214,7 @@ export function DashboardWeatherWidget({
           <div
             role="status"
             aria-live="polite"
-            className={`rounded-[22px] border p-3.5 shadow-[var(--shadow-card)] transition sm:p-4 ${presentation.card}`}
+            className={`home-rise-in rounded-[22px] border p-3.5 shadow-[var(--shadow-card)] sm:p-4 ${presentation.card}`}
           >
             <div className="flex items-start gap-3">
               <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${presentation.iconWrap}`}>
