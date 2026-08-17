@@ -43,7 +43,12 @@ export function useNotifications(userId: string | null) {
       .channel(`notifs-${userId}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${userId}`,
+        },
         (payload) => {
           qc.setQueryData<Notification[]>(notificationsKey(userId), (prev) => [
             payload.new as Notification,
@@ -52,7 +57,9 @@ export function useNotifications(userId: string | null) {
         },
       )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [userId, qc]);
 
   const unreadCount = items.filter((n) => !n.is_read).length;
@@ -62,19 +69,36 @@ export function useNotifications(userId: string | null) {
     qc.setQueryData<Notification[]>(notificationsKey(userId), (prev) =>
       (prev ?? []).map((n) => ({ ...n, is_read: true })),
     );
-    await supabase.from("notifications").update({ is_read: true }).eq("user_id", userId).eq("is_read", false);
+    await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("user_id", userId)
+      .eq("is_read", false);
   }, [userId, qc]);
 
-  const remove = useCallback(async (id: string) => {
-    qc.setQueryData<Notification[]>(notificationsKey(userId), (prev) =>
-      (prev ?? []).filter((n) => n.id !== id),
-    );
-    await supabase.from("notifications").delete().eq("id", id);
-  }, [userId, qc]);
+  const markRead = useCallback(
+    async (id: string) => {
+      qc.setQueryData<Notification[]>(notificationsKey(userId), (prev) =>
+        (prev ?? []).map((n) => (n.id === id ? { ...n, is_read: true } : n)),
+      );
+      await supabase.from("notifications").update({ is_read: true }).eq("id", id);
+    },
+    [userId, qc],
+  );
+
+  const remove = useCallback(
+    async (id: string) => {
+      qc.setQueryData<Notification[]>(notificationsKey(userId), (prev) =>
+        (prev ?? []).filter((n) => n.id !== id),
+      );
+      await supabase.from("notifications").delete().eq("id", id);
+    },
+    [userId, qc],
+  );
 
   const refresh = useCallback(() => {
     qc.invalidateQueries({ queryKey: notificationsKey(userId) });
   }, [qc, userId]);
 
-  return { items, loading: isLoading, unreadCount, markAllRead, remove, refresh };
+  return { items, loading: isLoading, unreadCount, markAllRead, markRead, remove, refresh };
 }
