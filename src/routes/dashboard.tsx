@@ -23,6 +23,9 @@ import {
   MessageCircle,
   HelpCircle,
   Sparkles,
+  CircleCheck,
+  CloudRain,
+  ArrowUpRight,
 } from "lucide-react";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useUser } from "@/contexts/user-context";
@@ -98,6 +101,8 @@ function Dashboard() {
       <div className="-mt-8">
         <DashboardWeatherWidget district={user?.district} upazila={user?.upazila} />
       </div>
+
+      <TodayBrief onCreatePost={() => setCreateOpen(true)} />
 
       {/* Crop Advisory urgent tasks */}
       <CropAdvisoryWidget />
@@ -201,14 +206,14 @@ function AiSolutionsSection() {
   return (
     <section className="mt-5">
       <div
-        className="px-4 py-4 rounded-[20px] mx-4"
-        style={{ background: "#F59E0B" }}
+        className="px-4 py-4 rounded-[20px] mx-4 shadow-[0_12px_28px_-18px_rgba(27,67,50,0.8)]"
+        style={{ background: "var(--gradient-brand)" }}
       >
         <button
           onClick={() => navigate({ to: "/ai-bondhu" })}
           className="w-full flex items-center justify-between mb-3 text-white"
         >
-          <h2 className="text-lg font-bold">AI কৃষি সমাধান</h2>
+          <h2 className="text-lg font-bold">AI কৃষি সহায়তা</h2>
           <span className="text-sm font-semibold flex items-center gap-0.5">
             সব দেখুন <ChevronRight className="h-4 w-4" strokeWidth={2.6} />
           </span>
@@ -267,17 +272,60 @@ function QuickActionsSection() {
     <section className="mt-5 px-2">
       <div className="flex gap-2 overflow-x-auto no-scrollbar px-3 pb-2">
         {QUICK_ACTIONS.map((q) => (
-          <a
+          <Link
             key={q.label}
-            href={q.href}
+            to={q.href as never}
             className="shrink-0 w-[78px] flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
           >
             <div className={`h-14 w-14 rounded-full ${q.bg} flex items-center justify-center shadow-sm`}>
               <q.Icon className={`h-6 w-6 ${q.color}`} strokeWidth={2.2} />
             </div>
             <span className="text-[11px] font-semibold text-gray-700 text-center leading-tight">{q.label}</span>
-          </a>
+          </Link>
         ))}
+      </div>
+    </section>
+  );
+}
+
+function TodayBrief({ onCreatePost }: { onCreatePost: () => void }) {
+  const navigate = useNavigate();
+
+  return (
+    <section className="px-4 mt-5">
+      <div className="rounded-[24px] bg-white border border-emerald-100 p-4 shadow-[var(--shadow-card)]">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#52B788]">আজকের ফোকাস</p>
+            <h2 className="mt-1 text-xl font-extrabold text-gray-900">আপনার কৃষি সারাংশ</h2>
+          </div>
+          <span className="inline-flex items-center gap-1 rounded-full bg-[#F0FFF4] px-2.5 py-1 text-[11px] font-bold text-[#2D6A4F]">
+            <CircleCheck className="h-3.5 w-3.5" /> ৩টি কাজ
+          </span>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/weather" })}
+            className="group rounded-2xl bg-sky-50 p-3 text-left transition hover:-translate-y-0.5 hover:shadow-sm active:scale-[0.98]"
+          >
+            <CloudRain className="h-5 w-5 text-sky-600" />
+            <p className="mt-2 text-sm font-bold text-gray-900">বৃষ্টির প্রস্তুতি</p>
+            <p className="mt-0.5 text-[11px] leading-snug text-gray-500">আবহাওয়া দেখে আজকের কাজ ঠিক করুন</p>
+            <ArrowUpRight className="mt-2 h-4 w-4 text-sky-600 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </button>
+          <button
+            type="button"
+            onClick={onCreatePost}
+            className="group rounded-2xl bg-amber-50 p-3 text-left transition hover:-translate-y-0.5 hover:shadow-sm active:scale-[0.98]"
+          >
+            <MessageCircle className="h-5 w-5 text-amber-600" />
+            <p className="mt-2 text-sm font-bold text-gray-900">অভিজ্ঞতা শেয়ার</p>
+            <p className="mt-0.5 text-[11px] leading-snug text-gray-500">আপনার ফসলের খবর কমিউনিটিতে দিন</p>
+            <ArrowUpRight className="mt-2 h-4 w-4 text-amber-600 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </button>
+        </div>
       </div>
     </section>
   );

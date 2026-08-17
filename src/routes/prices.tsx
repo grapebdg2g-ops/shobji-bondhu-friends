@@ -69,6 +69,7 @@ function PricesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const [focusProduct, setFocusProduct] = useState<string | null>(null);
 
   useEffect(() => {
     if (userLoading) return;
@@ -127,9 +128,10 @@ function PricesPage() {
     let r = prices;
     if (upazila !== "all") r = r.filter((p) => p.upazila === upazila);
     if (category !== "সব") r = r.filter((p) => p.category === category);
+    if (focusProduct) r = r.filter((p) => p.product_name === focusProduct);
     if (mutedSet.size > 0) r = r.filter((p) => !mutedSet.has(p.user_id));
     return r;
-  }, [prices, category, upazila, mutedSet]);
+  }, [prices, category, focusProduct, upazila, mutedSet]);
 
   return (
     <main className="min-h-screen bg-background pb-28">
@@ -191,6 +193,8 @@ function PricesPage() {
           </div>
         </div>
       )}
+
+      <PricePulse prices={prices} selected={focusProduct} onSelect={setFocusProduct} />
 
       {/* Filter chips */}
       <div className="px-5 mt-4 -mb-1 overflow-x-auto">
@@ -318,6 +322,81 @@ function PricesPage() {
         />
       )}
     </main>
+  );
+}
+
+function PricePulse({
+  prices,
+  selected,
+  onSelect,
+}: {
+  prices: Price[];
+  selected: string | null;
+  onSelect: (product: string | null) => void;
+}) {
+  const products = useMemo(() => {
+    const groups = new Map<string, Price[]>();
+    prices.forEach((price) => {
+      const current = groups.get(price.product_name) ?? [];
+      groups.set(price.product_name, [...current, price]);
+    });
+    return [...groups.entries()]
+      .map(([name, rows]) => {
+        const latest = rows[0];
+        const values = rows.slice(0, 6).map((row) => row.price).reverse();
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const delta = latest?.previous_price != null ? latest.price - latest.previous_price : 0;
+        return { name, latest, values, min, max, delta };
+      })
+      .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+      .slice(0, 4);
+  }, [prices]);
+
+  if (products.length === 0) return null;
+
+  return (
+    <section className="px-5 mt-4">
+      <div className="rounded-2xl bg-card border border-border p-4 shadow-[var(--shadow-card)]">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">Market pulse</p>
+            <h2 className="text-base font-extrabold text-foreground">দামের গতি</h2>
+          </div>
+          {selected && (
+            <button type="button" onClick={() => onSelect(null)} className="text-xs font-bold text-primary hover:underline">সব দেখুন</button>
+          )}
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {products.map((product) => {
+            const span = Math.max(1, product.max - product.min);
+            const isSelected = selected === product.name;
+            return (
+              <button
+                key={product.name}
+                type="button"
+                onClick={() => onSelect(isSelected ? null : product.name)}
+                className={`rounded-xl p-3 text-left transition hover:-translate-y-0.5 active:scale-[0.98] ${isSelected ? "bg-primary text-primary-foreground ring-2 ring-primary/20" : "bg-muted/60 text-foreground"}`}
+                aria-pressed={isSelected}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate text-xs font-bold">{product.name}</span>
+                  <span className={`text-[10px] font-bold ${isSelected ? "text-primary-foreground/80" : product.delta > 0 ? "text-red-600" : product.delta < 0 ? "text-emerald-700" : "text-muted-foreground"}`}>
+                    {product.delta > 0 ? "↑" : product.delta < 0 ? "↓" : "—"} {toBn(Math.abs(product.delta))}
+                  </span>
+                </div>
+                <div className="mt-2 flex h-8 items-end gap-1">
+                  {product.values.map((value, index) => (
+                    <span key={`${product.name}-${index}`} className={`flex-1 rounded-t-sm ${isSelected ? "bg-white/70" : product.delta > 0 ? "bg-red-400" : "bg-emerald-400"}`} style={{ height: `${Math.max(20, ((value - product.min) / span) * 75 + 20)}%` }} />
+                  ))}
+                </div>
+                <p className={`mt-2 text-[10px] ${isSelected ? "text-primary-foreground/80" : "text-muted-foreground"}`}>সর্বশেষ ৳{toBn(product.latest?.price ?? 0)}</p>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </section>
   );
 }
 

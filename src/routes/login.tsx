@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { Mail, Phone, ChevronRight, UserPlus, LogIn } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Mail, Phone, ChevronRight, UserPlus, LogIn, Eye, EyeOff, KeyRound } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,14 @@ function LoginPage() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [otpCooldown, setOtpCooldown] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (otpCooldown <= 0) return;
+    const timer = window.setInterval(() => setOtpCooldown((value) => Math.max(0, value - 1)), 1000);
+    return () => window.clearInterval(timer);
+  }, [otpCooldown]);
 
   // --- Register states ---
   const [regEmail, setRegEmail] = useState("");
@@ -60,12 +68,25 @@ function LoginPage() {
 
   const handleSendOtp = async () => {
     if (!phone) return toast.error("ফোন নম্বর দিন");
+    if (otpCooldown > 0) return;
     setLoading(true);
     const { error } = await supabase.auth.signInWithOtp({ phone });
     setLoading(false);
     if (error) return toast.error(error.message);
     setOtpSent(true);
+    setOtpCooldown(30);
     toast.success("OTP পাঠানো হয়েছে");
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) return toast.error("আগে আপনার ইমেইল লিখুন");
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/login`,
+    });
+    setLoading(false);
+    if (error) return toast.error("রিসেট লিংক পাঠানো যায়নি");
+    toast.success("পাসওয়ার্ড রিসেট লিংক ইমেইলে পাঠানো হয়েছে");
   };
 
   const handleVerifyOtp = async () => {
@@ -149,9 +170,22 @@ function LoginPage() {
                     </div>
                     <div>
                       <Label htmlFor="login-pwd" className="text-base">পাসওয়ার্ড</Label>
-                      <Input id="login-pwd" type="password" required minLength={6} value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="h-12 text-base mt-1" placeholder="••••••" />
+                      <div className="relative mt-1">
+                        <Input id="login-pwd" type={showPassword ? "text" : "password"} required minLength={6} value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="h-12 text-base pr-12" placeholder="••••••" />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((value) => !value)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-muted-foreground hover:bg-muted"
+                          aria-label={showPassword ? "পাসওয়ার্ড লুকান" : "পাসওয়ার্ড দেখুন"}
+                        >
+                          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                      </div>
+                      <button type="button" onClick={handleForgotPassword} disabled={loading} className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
+                        <KeyRound className="h-3.5 w-3.5" /> পাসওয়ার্ড ভুলে গেছেন?
+                      </button>
                     </div>
                     <Button type="submit" disabled={loading} className="w-full h-14 text-base font-bold gap-2">
                       প্রবেশ করুন <ChevronRight className="h-5 w-5" />
@@ -173,6 +207,9 @@ function LoginPage() {
                         <Input id="login-otp" inputMode="numeric" value={otp}
                           onChange={(e) => setOtp(e.target.value)}
                           className="h-12 text-base mt-1 tracking-widest text-center" placeholder="123456" />
+                        <button type="button" onClick={handleSendOtp} disabled={loading || otpCooldown > 0} className="mt-2 text-xs font-semibold text-primary hover:underline disabled:text-muted-foreground">
+                          {otpCooldown > 0 ? `${otpCooldown} সেকেন্ড পর আবার পাঠান` : "OTP আবার পাঠান"}
+                        </button>
                       </div>
                     )}
                     <Button
