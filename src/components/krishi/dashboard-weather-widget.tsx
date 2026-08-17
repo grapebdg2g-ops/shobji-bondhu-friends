@@ -78,7 +78,7 @@ export function DashboardWeatherWidget({
 
   if (isLoading) {
     return (
-      <section className="px-5 mt-4">
+      <section className="w-full px-4 pt-4 sm:px-5 sm:pt-5">
         <div className="rounded-2xl bg-card border border-border p-4 animate-pulse h-44" />
       </section>
     );
@@ -86,7 +86,7 @@ export function DashboardWeatherWidget({
 
   if (error || !data || !data.forecast) {
     return (
-      <section className="px-5 mt-4">
+      <section className="w-full px-4 pt-4 sm:px-5 sm:pt-5">
         <div className="rounded-2xl bg-card border border-border p-4 text-sm text-muted-foreground">
           আবহাওয়া তথ্য আনা যায়নি।{" "}
           <button onClick={() => refetch()} className="text-primary font-semibold">আবার চেষ্টা</button>
@@ -105,7 +105,7 @@ export function DashboardWeatherWidget({
     : upazila ? `${upazila}, ${district}` : district;
 
   return (
-    <section className="px-5 mt-4 space-y-3">
+    <section className="w-full px-4 pt-4 sm:px-5 sm:pt-5">
       {geoStatus === "prompt" && (
         <button
           onClick={requestGeo}
@@ -117,62 +117,60 @@ export function DashboardWeatherWidget({
       )}
       <Link
         to="/weather"
-        className="block rounded-2xl bg-card border border-border shadow-[var(--shadow-card)] overflow-hidden active:scale-[0.99] transition"
+        className="block w-full overflow-hidden rounded-[24px] border border-border bg-card shadow-[var(--shadow-card)] transition active:scale-[0.99]"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-2.5 bg-muted/40 border-b border-border">
-          <div className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
-            <MapPin className="h-4 w-4 text-primary" />
-            <span>{loc}</span>
-            {usingGps && <span className="text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">GPS</span>}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/40 px-4 py-3">
+          <div className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-foreground">
+            <MapPin className="h-4 w-4 shrink-0 text-primary" />
+            <span className="truncate">{loc}</span>
+            {usingGps && <span className="shrink-0 rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary">GPS</span>}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="ml-auto flex shrink-0 items-center gap-2.5">
             {!usingGps && geoStatus !== "loading" && (
               <button
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); requestGeo(); }}
                 aria-label="লাইভ লোকেশন"
-                className="flex items-center gap-1 text-xs text-primary font-semibold"
+                className="flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold text-primary transition hover:bg-primary/10"
               >
-                <Navigation className="h-3.5 w-3.5" />
-                GPS
+                <Navigation className="h-3.5 w-3.5" /> GPS
               </button>
             )}
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); refetch(); }}
               aria-label="আপডেট"
-              className="flex items-center gap-1 text-xs text-muted-foreground"
+              className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-muted-foreground transition hover:bg-muted"
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} />
-              আপডেট
+              <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} /> আপডেট
             </button>
           </div>
         </div>
 
         {/* Current */}
-        <div className="grid grid-cols-[auto_1fr] gap-4 p-4">
-          <div className="flex items-center justify-center w-24 text-6xl">
+        <div className="grid grid-cols-[5rem_minmax(0,1fr)] gap-3 p-4 sm:grid-cols-[6.5rem_minmax(0,1fr)] sm:gap-4 sm:p-5">
+          <div className="flex items-center justify-center text-5xl sm:text-6xl">
             {weatherEmoji(c.weather_code)}
           </div>
-          <div className="space-y-0.5 text-sm">
-            <div className="text-xs text-muted-foreground">{weatherCodeBn(c.weather_code)}</div>
+          <div className="grid min-w-0 grid-cols-2 gap-x-3 gap-y-1 text-xs sm:grid-cols-2 sm:text-sm">
+            <div className="col-span-2 truncate font-semibold text-muted-foreground">{weatherCodeBn(c.weather_code)}</div>
             <div><span className="text-muted-foreground">তাপমাত্রা:</span> <span className="font-bold">{toBn(Math.round(c.temperature))}°C</span></div>
             <div><span className="text-muted-foreground">আর্দ্রতা:</span> <span className="font-bold">{toBn(Math.round(c.humidity))}%</span></div>
             <div><span className="text-muted-foreground">বাতাস:</span> <span className="font-bold">{toBn(Math.round(c.wind_speed))} km/h</span></div>
-            <div><span className="text-muted-foreground">বৃষ্টির সম্ভাবনা:</span> <span className="font-bold">{toBn(c.precipitation_prob)}%</span></div>
+            <div><span className="text-muted-foreground">বৃষ্টি:</span> <span className="font-bold">{toBn(c.precipitation_prob)}%</span></div>
           </div>
         </div>
 
         {/* 5-day */}
-        <div className="border-t border-border px-2 py-3">
-          <div className="flex gap-2 overflow-x-auto px-2 no-scrollbar">
+        <div className="border-t border-border px-3 py-3 sm:px-4">
+          <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
             {f.daily.slice(0, 5).map((d, i) => {
               const date = new Date(d.date);
               const label = i === 0 ? "আজ" : i === 1 ? "কাল" : BN_DAYS[date.getDay()];
               return (
-                <div key={d.date} className="shrink-0 w-16 text-center rounded-lg bg-muted/30 py-2">
-                  <p className="text-xs font-semibold">{label}</p>
-                  <p className="text-2xl leading-7">{weatherEmoji(d.weather_code)}</p>
-                  <p className="text-xs font-bold">{toBn(Math.round(d.temp_max))}°</p>
+                <div key={d.date} className="min-w-0 rounded-xl bg-muted/30 px-1 py-2 text-center sm:py-2.5">
+                  <p className="truncate text-[10px] font-semibold sm:text-xs">{label}</p>
+                  <p className="text-xl leading-7 sm:text-2xl">{weatherEmoji(d.weather_code)}</p>
+                  <p className="text-[11px] font-bold sm:text-xs">{toBn(Math.round(d.temp_max))}°</p>
                 </div>
               );
             })}
