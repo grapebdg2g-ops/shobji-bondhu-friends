@@ -330,7 +330,7 @@ function TodayBrief({ onCreatePost }: { onCreatePost: () => void }) {
   const navigate = useNavigate();
 
   return (
-    <section className="relative z-10 -mt-7 px-4">
+    <section className="relative z-10 mt-5 px-4 sm:mt-6">
       <div className="rounded-[28px] border border-white/80 bg-white/95 p-4 shadow-[0_18px_42px_-24px_rgba(27,67,50,0.55)] backdrop-blur-xl">
         <div className="flex items-start justify-between gap-3">
           <div>
