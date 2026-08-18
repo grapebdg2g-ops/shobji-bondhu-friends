@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, SlidersHorizontal, ThumbsUp, MessageCircle, Share2, Plus, HelpCircle, Star, CloudRain, ChevronDown, ArrowUp, CheckCircle2, Reply, Trophy, Bookmark, ImagePlus, Sparkles } from "lucide-react";
+import { ArrowLeft, SlidersHorizontal, Plus, HelpCircle, Star, CloudRain, ChevronDown, ArrowUp, CheckCircle2, Trophy, ImagePlus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
@@ -19,6 +19,8 @@ import { MASTER_CROP_LABELS } from "@/lib/crop-options";
 import { EmptyState } from "@/components/krishi/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LazyImage } from "@/components/krishi/lazy-image";
+import { PostSocialActions } from "@/components/krishi/post-social-actions";
+import { readSavedPostIds, writeSavedPostIds } from "@/lib/saved-posts";
 
 const feedSearchSchema = z.object({
   filter: fallback(z.enum(["all", "help", "success"]), "all").default("all"),
@@ -48,21 +50,6 @@ const FILTER_HEADER: Record<"all" | "help" | "success", { title: string; subtitl
   help: { title: "কৃষকদের প্রশ্নোত্তর", subtitle: "প্রশ্ন করুন, উত্তর পান" },
   success: { title: "সফল কৃষকের গল্প", subtitle: "অনুপ্রেরণার উৎস" },
 };
-
-const SAVED_POSTS_KEY = "krishibondhu_saved_posts";
-
-function readSavedPostIds(): string[] {
-  try {
-    const value = localStorage.getItem(SAVED_POSTS_KEY);
-    return value ? JSON.parse(value) : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeSavedPostIds(ids: string[]) {
-  try { localStorage.setItem(SAVED_POSTS_KEY, JSON.stringify(ids.slice(0, 100))); } catch { /* private mode */ }
-}
 
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
@@ -356,7 +343,7 @@ function FeedPage() {
       </section>
 
       {/* Stories row */}
-      <section className="mx-auto -mt-2 mb-4 min-w-0 max-w-3xl px-4">
+      <section className="mx-auto mt-4 mb-4 min-w-0 max-w-3xl px-4">
         <div className="mb-2 flex items-center justify-between px-1">
           <p className="text-xs font-extrabold tracking-tight text-foreground">এখন সক্রিয় কৃষক</p>
           <span className="text-[10px] font-semibold text-muted-foreground">আপনার এলাকার আপডেট</span>
@@ -439,7 +426,7 @@ function FeedPage() {
       )}
 
       {/* Posts */}
-      <section className="home-stagger mx-auto mt-2 min-w-0 max-w-3xl space-y-4 px-4">
+      <section className="home-stagger mx-auto mt-4 min-w-0 max-w-3xl space-y-3 px-4">
         {loading ? (
           <div className="space-y-4">
             {Array.from({ length: 3 }).map((_, i) => <PostSkeleton key={i} />)}
@@ -613,39 +600,18 @@ function PostCard({
         />
       )}
 
-      <div className="flex min-w-0 items-center justify-between gap-2 border-t border-border/60 px-4 py-2 text-xs text-muted-foreground">
-        <div className="flex min-w-0 items-center gap-1.5 truncate">
-          {post.likes_count > 0 ? (
-            <>
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[11px] text-primary-foreground">👍</span>
-              <span className="truncate">{post.likes_count} জনের কাছে উপকারী</span>
-            </>
-          ) : (
-            <span>প্রথমে আপনিই উপকারী বলুন</span>
-          )}
-        </div>
-        <button type="button" onClick={() => setShowComments(true)} className="max-w-[42%] shrink-0 truncate font-semibold hover:text-primary">
-          {post.comments_count > 0 ? `${post.comments_count}টি মন্তব্য` : "মন্তব্য করুন"}
-        </button>
-      </div>
-      <div className="grid min-w-0 grid-cols-4 border-t border-border/60 px-2 py-1.5">
-        <button onClick={onLike} aria-label="পোস্টটি উপকারী হিসেবে চিহ্নিত করুন" className={`home-pressable min-w-0 flex min-h-11 items-center justify-center gap-1 rounded-lg px-1 text-xs font-semibold ${liked ? "text-primary" : "text-muted-foreground"}`}>
-          <ThumbsUp className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />
-          <span className="hidden min-[360px]:inline">উপকারী</span>{post.likes_count > 0 && <span>({post.likes_count})</span>}
-        </button>
-        <button onClick={() => setShowComments((s) => !s)} aria-label="মন্তব্য দেখুন বা লিখুন" className={`home-pressable min-w-0 flex min-h-11 items-center justify-center gap-1 rounded-lg px-1 text-xs font-semibold ${post.type === "help" ? "text-emerald-700" : "text-muted-foreground"}`}>
-          {post.type === "help" ? <Reply className="h-4 w-4" /> : <MessageCircle className="h-4 w-4" />}
-          <span className="hidden min-[360px]:inline">{post.type === "help" ? "উত্তর" : "মন্তব্য"}</span>{post.comments_count > 0 && <span>({post.comments_count})</span>}
-        </button>
-        <button onClick={onSave} aria-label={saved ? "সংরক্ষণ থেকে সরান" : "পোস্ট সংরক্ষণ করুন"} className={`home-pressable min-w-0 flex min-h-11 items-center justify-center gap-1 rounded-lg px-1 text-xs font-semibold ${saved ? "text-amber-600" : "text-muted-foreground"}`}>
-          <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
-          <span className="hidden min-[360px]:inline">সংরক্ষণ</span>
-        </button>
-        <button onClick={onShare} aria-label="পোস্ট শেয়ার করুন" className="home-pressable min-w-0 flex min-h-11 items-center justify-center gap-1 rounded-lg px-1 text-xs font-semibold text-muted-foreground">
-          <Share2 className="h-4 w-4" />
-          <span className="hidden min-[360px]:inline">শেয়ার</span>
-        </button>
-      </div>
+      <PostSocialActions
+        liked={liked}
+        likesCount={post.likes_count}
+        commentsCount={post.comments_count}
+        saved={saved}
+        commentOpen={showComments}
+        commentLabel={post.type === "help" ? "উত্তর" : "মন্তব্য"}
+        onLike={onLike}
+        onComment={() => setShowComments((s) => !s)}
+        onSave={onSave}
+        onShare={onShare}
+      />
 
       {showComments && (
         <div className="px-4 pb-4">
