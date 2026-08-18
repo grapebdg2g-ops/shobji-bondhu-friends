@@ -33,7 +33,8 @@ function timeAgo(iso: string) {
 
 function iconFor(type: string) {
   if (type === "like") return { Icon: Heart, color: "text-rose-500", bg: "bg-rose-50" };
-  if (type === "comment") return { Icon: MessageCircle, color: "text-sky-500", bg: "bg-sky-50" };
+  if (type === "comment" || type === "comment_reply") return { Icon: MessageCircle, color: "text-sky-500", bg: "bg-sky-50" };
+  if (type === "reaction") return { Icon: Heart, color: "text-rose-500", bg: "bg-rose-50" };
   if (type === "price_alert")
     return { Icon: TrendingDown, color: "text-amber-600", bg: "bg-amber-50" };
   if (type === "connection_request")

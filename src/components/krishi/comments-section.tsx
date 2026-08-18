@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Send, ChevronDown } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ChevronDown, Reply, Send } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/user-context";
@@ -10,6 +10,7 @@ type Comment = {
   user_name: string;
   content: string;
   created_at: string;
+  parent_id: string | null;
 };
 
 function timeAgo(iso: string) {
@@ -22,35 +23,48 @@ function timeAgo(iso: string) {
   return `${Math.floor(h / 24)} দিন আগে`;
 }
 
-export function CommentsSection({
-  postId,
-  onCommentAdded,
-}: {
-  postId: string;
-  onCommentAdded: () => void;
-}) {
+export function CommentsSection({ postId, onCommentAdded }: { postId: string; onCommentAdded: () => void }) {
   const { user } = useUser();
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
   const [text, setText] = useState("");
+  const [replyTo, setReplyTo] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
+    let active = true;
     (async () => {
       const { data } = await supabase
         .from("post_comments")
-        .select("id, user_name, content, created_at")
+        .select("id, user_name, content, created_at, parent_id")
         .eq("post_id", postId)
-        .order("created_at", { ascending: false })
-        .limit(50);
-      setComments((data as Comment[]) ?? []);
-      setLoading(false);
+        .order("created_at", { ascending: true })
+        .limit(100);
+      if (active) {
+        setComments((data as Comment[]) ?? []);
+        setLoading(false);
+      }
     })();
+    return () => { active = false; };
   }, [postId]);
 
-  const submit = async () => {
-    const trimmed = sanitize(text);
+  const topLevel = useMemo(() => comments.filter((comment) => !comment.parent_id), [comments]);
+  const repliesByParent = useMemo(() => {
+    const map = new Map<string, Comment[]>();
+    for (const comment of comments) {
+      if (!comment.parent_id) continue;
+      const replies = map.get(comment.parent_id) ?? [];
+      replies.push(comment);
+      map.set(comment.parent_id, replies);
+    }
+    return map;
+  }, [comments]);
+  const visibleTopLevel = showAll ? topLevel : topLevel.slice(0, 3);
+
+  const submit = async (rawText: string, parentId: string | null) => {
+    const trimmed = sanitize(rawText);
     if (!trimmed || sending) return;
     if (!user) { toast.error("মন্তব্য করতে লগইন করুন"); return; }
     if (trimmed.length > 200) { toast.error("মন্তব্য ২০০ অক্ষরের মধ্যে রাখুন"); return; }
@@ -60,82 +74,88 @@ export function CommentsSection({
       user_name: user.name || "আমি",
       content: trimmed,
       created_at: new Date().toISOString(),
+      parent_id: parentId,
     };
-    setComments((c) => [optimistic, ...c]);
-    setText("");
+    setComments((current) => [...current, optimistic]);
+    if (parentId) { setReplyText(""); setReplyTo(null); } else setText("");
+
     const { data, error } = await supabase
       .from("post_comments")
-      .insert({ post_id: postId, user_id: user.id, user_name: user.name || "আমি", content: trimmed })
-      .select("id, user_name, content, created_at")
+      .insert({ post_id: postId, user_id: user.id, user_name: user.name || "আমি", content: trimmed, parent_id: parentId })
+      .select("id, user_name, content, created_at, parent_id")
       .single();
     if (error || !data) {
-      setComments((c) => c.filter((x) => x.id !== optimistic.id));
-      toast.error("মন্তব্য পাঠানো যায়নি");
+      setComments((current) => current.filter((comment) => comment.id !== optimistic.id));
+      toast.error(parentId ? "উত্তর পাঠানো যায়নি" : "মন্তব্য পাঠানো যায়নি");
       setSending(false);
       return;
     }
-    setComments((c) => c.map((x) => (x.id === optimistic.id ? (data as Comment) : x)));
+    setComments((current) => current.map((comment) => comment.id === optimistic.id ? data as Comment : comment));
     await supabase.rpc("increment_comments", { post_id: postId });
     onCommentAdded();
     setSending(false);
   };
 
-  const visible = showAll ? comments : comments.slice(0, 3);
+  const renderComment = (comment: Comment, depth = 0) => {
+    const replies = repliesByParent.get(comment.id) ?? [];
+    return (
+      <div key={comment.id} className={depth > 0 ? "ml-8 mt-2" : "mt-3"}>
+        <div className="flex min-w-0 gap-2">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-bold text-primary">{comment.user_name.charAt(0) || "ক"}</div>
+          <div className="min-w-0 flex-1">
+            <div className="rounded-2xl bg-muted/70 px-3 py-2">
+              <div className="flex items-center justify-between gap-2">
+                <p className="truncate text-xs font-bold text-foreground">{comment.user_name}</p>
+                <span className="shrink-0 text-[10px] text-muted-foreground">{timeAgo(comment.created_at)}</span>
+              </div>
+              <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-foreground">{comment.content}</p>
+            </div>
+            <div className="mt-1 flex items-center gap-3 pl-2">
+              {depth < 2 && (
+                <button type="button" onClick={() => setReplyTo((current) => current === comment.id ? null : comment.id)} className="inline-flex min-h-7 items-center gap-1 text-[11px] font-bold text-muted-foreground hover:text-primary">
+                  <Reply className="h-3.5 w-3.5" /> উত্তর দিন
+                </button>
+              )}
+            </div>
+            {replyTo === comment.id && (
+              <div className="mt-2 flex min-w-0 items-center gap-2">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[10px] font-bold text-primary">{(user?.name || "আ").charAt(0)}</div>
+                <input
+                  autoFocus
+                  value={replyText}
+                  onChange={(event) => setReplyText(event.target.value.slice(0, 200))}
+                  onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) void submit(replyText, comment.id); }}
+                  placeholder={`${comment.user_name}-কে উত্তর দিন...`}
+                  className="h-9 min-w-0 flex-1 rounded-full bg-muted px-3 text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+                <button type="button" onClick={() => void submit(replyText, comment.id)} disabled={!replyText.trim() || sending} aria-label="উত্তর পাঠান" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground disabled:opacity-40"><Send className="h-4 w-4" /></button>
+              </div>
+            )}
+          </div>
+        </div>
+        {replies.map((reply) => renderComment(reply, Math.min(depth + 1, 2)))}
+      </div>
+    );
+  };
 
   return (
-    <div className="border-t border-border pt-3 mt-3 space-y-3">
-      {loading ? (
-        <p className="text-xs text-muted-foreground">লোড হচ্ছে...</p>
-      ) : comments.length === 0 ? (
-        <p className="text-xs text-muted-foreground">কোনো মন্তব্য নেই — প্রথম মন্তব্য করুন</p>
-      ) : (
+    <div className="mt-3 space-y-3 border-t border-border pt-3">
+      {loading ? <p className="text-xs text-muted-foreground">লোড হচ্ছে...</p> : comments.length === 0 ? <p className="text-xs text-muted-foreground">কোনো মন্তব্য নেই — প্রথম মন্তব্য করুন</p> : (
         <>
-          {visible.map((c) => (
-            <div key={c.id} className="flex gap-2">
-              <div className="h-8 w-8 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-bold shrink-0">
-                {c.user_name.charAt(0) || "ক"}
-              </div>
-              <div className="flex-1 bg-muted/60 rounded-xl px-3 py-2">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-xs font-semibold text-foreground truncate">{c.user_name}</p>
-                  <span className="text-[10px] text-muted-foreground">{timeAgo(c.created_at)}</span>
-                </div>
-                <p className="text-sm text-foreground mt-0.5 whitespace-pre-wrap break-words">{c.content}</p>
-              </div>
-            </div>
-          ))}
-          {!showAll && comments.length > 3 && (
-            <button
-              type="button"
-              onClick={() => setShowAll(true)}
-              className="text-xs font-semibold text-primary flex items-center gap-1"
-            >
-              আরো দেখুন <ChevronDown className="h-3 w-3" />
-            </button>
-          )}
+          {visibleTopLevel.map((comment) => renderComment(comment))}
+          {!showAll && topLevel.length > 3 && <button type="button" onClick={() => setShowAll(true)} className="inline-flex min-h-8 items-center gap-1 pl-2 text-xs font-bold text-primary">আরো মন্তব্য দেখুন <ChevronDown className="h-3 w-3" /></button>}
         </>
       )}
-
-      <div className="flex items-center gap-2 pt-1">
-        <div className="h-8 w-8 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-bold shrink-0">
-          {(user?.name || "আ").charAt(0)}
-        </div>
+      <div className="flex min-w-0 items-center gap-2 pt-1">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-bold text-primary">{(user?.name || "আ").charAt(0)}</div>
         <input
           value={text}
-          onChange={(e) => setText(e.target.value.slice(0, 200))}
-          onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
+          onChange={(event) => setText(event.target.value.slice(0, 200))}
+          onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) void submit(text, null); }}
           placeholder="মন্তব্য লিখুন..."
-          className="flex-1 h-9 px-3 rounded-full bg-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+          className="h-9 min-w-0 flex-1 rounded-full bg-muted px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
-        <button
-          type="button"
-          onClick={submit}
-          disabled={!text.trim() || sending}
-          className="h-9 w-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-40 active:scale-95"
-          aria-label="পাঠান"
-        >
-          <Send className="h-4 w-4" />
-        </button>
+        <button type="button" onClick={() => void submit(text, null)} disabled={!text.trim() || sending} aria-label="মন্তব্য পাঠান" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground disabled:opacity-40"><Send className="h-4 w-4" /></button>
       </div>
     </div>
   );

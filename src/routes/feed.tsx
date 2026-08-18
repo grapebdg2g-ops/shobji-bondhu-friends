@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, SlidersHorizontal, Plus, HelpCircle, Star, CloudRain, ChevronDown, ArrowUp, CheckCircle2, Trophy, ImagePlus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { LazyImage } from "@/components/krishi/lazy-image";
 import { PostSocialActions } from "@/components/krishi/post-social-actions";
 import { readSavedPostIds, writeSavedPostIds } from "@/lib/saved-posts";
+import { usePostReactions } from "@/hooks/use-post-reactions";
 
 const feedSearchSchema = z.object({
   filter: fallback(z.enum(["all", "help", "success"]), "all").default("all"),
@@ -64,7 +65,6 @@ function timeAgo(iso: string) {
 function FeedPage() {
   const navigate = useNavigate();
   const { user } = useUser();
-  const qc = useQueryClient();
   const { filter } = Route.useSearch() as { filter: "all" | "help" | "success" };
   const headerMeta = FILTER_HEADER[filter];
 
@@ -159,24 +159,6 @@ function FeedPage() {
     staleTime: 2 * 60_000,
   });
 
-  // Liked posts by current user — keyed by user + visible post ids
-  const postIdsKey = useMemo(() => posts.map((p) => p.id).join(","), [posts]);
-  const { data: likedArr = [] } = useQuery({
-    queryKey: ["feed", "liked", user?.id ?? null, postIdsKey],
-    queryFn: async () => {
-      if (!user || posts.length === 0) return [] as string[];
-      const ids = posts.map((p) => p.id);
-      const { data } = await supabase
-        .from("post_likes")
-        .select("post_id")
-        .eq("user_id", user.id)
-        .in("post_id", ids);
-      return ((data as { post_id: string }[]) ?? []).map((r) => r.post_id);
-    },
-    enabled: !!user && posts.length > 0,
-    staleTime: 60_000,
-  });
-  const likedSet = useMemo(() => new Set(likedArr), [likedArr]);
 
   // Realtime new-post banner
   const [newCount, setNewCount] = useState(0);
@@ -222,39 +204,6 @@ function FeedPage() {
     io.observe(el);
     return () => io.disconnect();
   }, [loadMore]);
-
-  const likedKey = useMemo(
-    () => ["feed", "liked", user?.id ?? null, postIdsKey] as const,
-    [user?.id, postIdsKey],
-  );
-  const setLiked = useCallback(
-    (postId: string, liked: boolean) => {
-      qc.setQueryData<string[]>(likedKey, (prev) => {
-        const set = new Set(prev ?? []);
-        if (liked) set.add(postId); else set.delete(postId);
-        return Array.from(set);
-      });
-    },
-    [qc, likedKey],
-  );
-
-  const toggleLike = useCallback(async (post: Post) => {
-    if (!user) { toast.error("লাইক করতে লগইন করুন"); return; }
-    const liked = likedSet.has(post.id);
-    // optimistic
-    setLiked(post.id, !liked);
-    updateById(post.id, { likes_count: Math.max(0, post.likes_count + (liked ? -1 : 1)) });
-
-    if (liked) {
-      const { error } = await supabase.from("post_likes").delete().eq("post_id", post.id).eq("user_id", user.id);
-      if (error) { setLiked(post.id, true); updateById(post.id, { likes_count: post.likes_count }); return; }
-      await supabase.rpc("decrement_likes", { post_id: post.id });
-    } else {
-      const { error } = await supabase.from("post_likes").insert({ post_id: post.id, user_id: user.id });
-      if (error) { setLiked(post.id, false); updateById(post.id, { likes_count: post.likes_count }); return; }
-      await supabase.rpc("increment_likes", { post_id: post.id });
-    }
-  }, [likedSet, user, updateById, setLiked]);
 
 
   const toggleSave = useCallback((post: Post) => {
@@ -443,9 +392,7 @@ function FeedPage() {
             <PostCard
               key={p.id}
               post={p}
-              liked={likedSet.has(p.id)}
               mode={filter}
-              onLike={() => toggleLike(p)}
               onShare={() => share(p)}
               saved={savedIds.includes(p.id)}
               onSave={() => toggleSave(p)}
@@ -492,20 +439,16 @@ function PostSkeleton() {
 
 function PostCard({
   post,
-  liked,
   mode = "all",
   saved,
-  onLike,
   onShare,
   onSave,
   onCommentAdded,
   onDeleted,
 }: {
   post: Post;
-  liked: boolean;
   mode?: "all" | "help" | "success";
   saved: boolean;
-  onLike: () => void;
   onShare: () => void;
   onSave: () => void;
   onCommentAdded: () => void;
@@ -518,6 +461,12 @@ function PostCard({
   const text = expanded || !long ? post.content : post.content.slice(0, 180) + "...";
   const isAnswered = post.type === "help" && post.comments_count > 0;
   const isSuccessHighlight = mode === "success" && post.type === "success";
+  const { counts: reactionCounts, mine: myReaction, setReaction } = usePostReactions(post.id);
+
+  const handleReaction = async (reaction: Parameters<typeof setReaction>[0]) => {
+    const ok = await setReaction(reaction);
+    if (!ok) toast.error("প্রতিক্রিয়া দিতে লগইন করুন");
+  };
 
   const handleDelete = async () => {
     const { error } = await supabase.from("posts").delete().eq("id", post.id);
@@ -601,13 +550,13 @@ function PostCard({
       )}
 
       <PostSocialActions
-        liked={liked}
-        likesCount={post.likes_count}
+        myReaction={myReaction}
+        reactionCounts={reactionCounts}
         commentsCount={post.comments_count}
         saved={saved}
         commentOpen={showComments}
         commentLabel={post.type === "help" ? "উত্তর" : "মন্তব্য"}
-        onLike={onLike}
+        onReact={(reaction) => void handleReaction(reaction)}
         onComment={() => setShowComments((s) => !s)}
         onSave={onSave}
         onShare={onShare}
