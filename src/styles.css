@@ -198,8 +198,8 @@
 
 @media (hover: hover) and (pointer: fine) {
   .home-pressable:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lift);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px -16px rgba(27, 67, 50, 0.38);
   }
 }
 
