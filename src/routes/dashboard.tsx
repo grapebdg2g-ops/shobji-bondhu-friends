@@ -35,6 +35,7 @@ import { useMutedIds } from "@/hooks/use-muted-users";
 import { supabase } from "@/integrations/supabase/client";
 import type { Post } from "@/hooks/use-feed";
 import { readSavedPostIds, writeSavedPostIds } from "@/lib/saved-posts";
+import { usePostReactions } from "@/hooks/use-post-reactions";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -131,7 +132,7 @@ function Dashboard() {
       <QuickActionsSection />
 
       {/* SECTION 5 — Community Feed */}
-      <CommunityFeedSection userId={user?.id ?? null} userName={user?.name ?? null} onCompose={() => setCreateOpen(true)} />
+      <CommunityFeedSection userName={user?.name ?? null} onCompose={() => setCreateOpen(true)} />
 
       <CreatePostSheet
         open={createOpen}
@@ -385,11 +386,10 @@ function TodayBrief({ onCreatePost }: { onCreatePost: () => void }) {
 
 /* ──────────────────────────── SECTION 5 ──────────────────────────── */
 
-function CommunityFeedSection({ userId, userName, onCompose }: { userId: string | null; userName: string | null; onCompose: () => void }) {
+function CommunityFeedSection({ userName, onCompose }: { userName: string | null; onCompose: () => void }) {
   const { data: mutedIds = [] } = useMutedIds();
   const queryClient = useQueryClient();
   const feedKey = ["dashboard-feed", mutedIds.join(",")];
-  const [likedIds, setLikedIds] = useState<string[]>([]);
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [openComments, setOpenComments] = useState<string | null>(null);
   const { data: posts = [], isLoading } = useQuery({
@@ -402,39 +402,10 @@ function CommunityFeedSection({ userId, userName, onCompose }: { userId: string 
     },
     staleTime: 60_000,
   });
-  const postIdsKey = posts.map((p) => p.id).join(",");
-  const { data: likedFromDb = [] } = useQuery({
-    queryKey: ["dashboard-feed-liked", userId, postIdsKey],
-    enabled: !!userId && posts.length > 0,
-    queryFn: async () => {
-      const { data } = await supabase.from("post_likes").select("post_id").eq("user_id", userId!).in("post_id", posts.map((p) => p.id));
-      return ((data as { post_id: string }[]) ?? []).map((row) => row.post_id);
-    },
-    staleTime: 60_000,
-  });
-
-  useEffect(() => { setLikedIds(likedFromDb); }, [likedFromDb]);
   useEffect(() => { setSavedIds(readSavedPostIds()); }, []);
 
   const updatePost = (postId: string, patch: Partial<Post>) => {
     queryClient.setQueryData<Post[]>(feedKey, (current) => (current ?? []).map((post) => post.id === postId ? { ...post, ...patch } : post));
-  };
-
-  const toggleLike = async (post: Post) => {
-    if (!userId) { toast.error("লাইক করতে লগইন করুন"); return; }
-    const liked = likedIds.includes(post.id);
-    setLikedIds((current) => liked ? current.filter((id) => id !== post.id) : [...current, post.id]);
-    updatePost(post.id, { likes_count: Math.max(0, post.likes_count + (liked ? -1 : 1)) });
-    const { error } = liked
-      ? await supabase.from("post_likes").delete().eq("post_id", post.id).eq("user_id", userId)
-      : await supabase.from("post_likes").insert({ post_id: post.id, user_id: userId });
-    if (error) {
-      setLikedIds((current) => liked ? [...current, post.id] : current.filter((id) => id !== post.id));
-      updatePost(post.id, { likes_count: post.likes_count });
-      toast.error("প্রতিক্রিয়া দেওয়া যায়নি");
-      return;
-    }
-    await supabase.rpc(liked ? "decrement_likes" : "increment_likes", { post_id: post.id });
   };
 
   const toggleSave = (post: Post) => {
@@ -478,10 +449,8 @@ function CommunityFeedSection({ userId, userName, onCompose }: { userId: string 
             <div key={post.id} className="animate-fade-in" style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}>
               <MiniPostCard
                 post={post}
-                liked={likedIds.includes(post.id)}
                 saved={savedIds.includes(post.id)}
                 commentsOpen={openComments === post.id}
-                onLike={() => toggleLike(post)}
                 onSave={() => toggleSave(post)}
                 onShare={() => share(post)}
                 onComment={() => setOpenComments((current) => current === post.id ? null : post.id)}
@@ -498,25 +467,27 @@ function CommunityFeedSection({ userId, userName, onCompose }: { userId: string 
 
 function MiniPostCard({
   post,
-  liked,
   saved,
   commentsOpen,
-  onLike,
   onSave,
   onShare,
   onComment,
   onCommentAdded,
 }: {
   post: Post;
-  liked: boolean;
   saved: boolean;
   commentsOpen: boolean;
-  onLike: () => void;
   onSave: () => void;
   onShare: () => void;
   onComment: () => void;
   onCommentAdded: () => void;
 }) {
+  const { counts: reactionCounts, mine: myReaction, setReaction } = usePostReactions(post.id);
+  const handleReaction = async (reaction: Parameters<typeof setReaction>[0]) => {
+    const ok = await setReaction(reaction);
+    if (!ok) toast.error("প্রতিক্রিয়া দিতে লগইন করুন");
+  };
+
   return (
     <article className="home-pressable min-w-0 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
       <div className="p-4">
@@ -532,12 +503,12 @@ function MiniPostCard({
       </div>
       {post.image_url && <img src={post.image_url} alt="" loading="lazy" className="block aspect-[4/3] w-full bg-gray-100 object-cover" />}
       <PostSocialActions
-        liked={liked}
-        likesCount={post.likes_count}
+        myReaction={myReaction}
+        reactionCounts={reactionCounts}
         commentsCount={post.comments_count}
         saved={saved}
         commentOpen={commentsOpen}
-        onLike={onLike}
+        onReact={(reaction) => void handleReaction(reaction)}
         onComment={onComment}
         onSave={onSave}
         onShare={onShare}
