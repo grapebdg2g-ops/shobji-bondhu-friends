@@ -286,10 +286,10 @@ function AiSolutionsSection() {
 /* ──────────────────────────── SECTION 4 ──────────────────────────── */
 
 const QUICK_ACTIONS = [
-  { href: "/disease-detection", Icon: Bug, label: "রোগ শনাক্ত", desc: "ছবি তুলে পরীক্ষা করুন", bg: "bg-[#E8F7EC]", color: "text-[#2D6A4F]" },
   { href: "/prices", Icon: ShoppingBasket, label: "বাজারদর", desc: "আজকের দাম দেখুন", bg: "bg-[#FFF1E5]", color: "text-[#D96B27]" },
-  { href: "/ai-bondhu/chat", Icon: Sparkles, label: "AI বন্ধু", desc: "ফসল নিয়ে জিজ্ঞেস করুন", bg: "bg-[#F0EBFF]", color: "text-[#7457C7]" },
-  { href: "/crop-planner", Icon: Sprout, label: "ফসল পরিকল্পনা", desc: "চাষের ধাপ সাজান", bg: "bg-[#E7F4FB]", color: "text-[#3186B7]" },
+  { href: "/ai-bondhu/pesticide", Icon: Leaf, label: "কীটনাশক গাইড", desc: "নিরাপদে পোকা দমন করুন", bg: "bg-[#E8F7EC]", color: "text-[#2D6A4F]" },
+  { href: "/ai-bondhu/calculator", Icon: FlaskConical, label: "সার ক্যালকুলেটর", desc: "জমির জন্য সার হিসাব করুন", bg: "bg-[#E7F4FB]", color: "text-[#3186B7]" },
+  { href: "/crop-planner", Icon: Sprout, label: "ফসল পরিকল্পনা", desc: "চাষের ধাপ সাজান", bg: "bg-[#F0EBFF]", color: "text-[#7457C7]" },
 ];
 
 function QuickActionsSection() {
