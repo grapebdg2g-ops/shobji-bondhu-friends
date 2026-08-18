@@ -1,7 +1,28 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, AlertTriangle, Save, Share2, RotateCcw, Printer, Bell, Sparkles } from "lucide-react";
-import { CROPS, SOIL_TYPES, UNIT_LABEL, UNIT_TO_SHOTOK, calculate, type SoilType, type Unit, type CalcResult } from "@/data/fertilizer-guide";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CalendarDays,
+  Check,
+  AlertTriangle,
+  Save,
+  Share2,
+  RotateCcw,
+  Printer,
+  Bell,
+  Sparkles,
+} from "lucide-react";
+import {
+  CROPS,
+  SOIL_TYPES,
+  UNIT_LABEL,
+  UNIT_TO_SHOTOK,
+  calculate,
+  type SoilType,
+  type Unit,
+  type CalcResult,
+} from "@/data/fertilizer-guide";
 import { toBn, fmtBdt } from "@/lib/bn";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -11,7 +32,18 @@ export const Route = createFileRoute("/ai-bondhu/calculator")({
   head: () => ({ meta: [{ title: "সার ক্যালকুলেটর — কৃষিবন্ধু" }] }),
 });
 
-function bn1(n: number) { return toBn(n.toFixed(1).replace(/\.0$/, "")); }
+function bn1(n: number) {
+  return toBn(n.toFixed(1).replace(/\.0$/, ""));
+}
+
+type GrowthStage = "seedling" | "vegetative" | "flowering" | "fruiting";
+
+const GROWTH_STAGES: { id: GrowthStage; label: string; note: string }[] = [
+  { id: "seedling", label: "চারা/বীজতলা", note: "চারা শক্ত হওয়ার সময়" },
+  { id: "vegetative", label: "পাতা ও ডাল বৃদ্ধি", note: "গাছ দ্রুত বাড়ছে" },
+  { id: "flowering", label: "ফুল আসার সময়", note: "ফুল ও কুঁড়ি দেখা যাচ্ছে" },
+  { id: "fruiting", label: "ফল ধরার সময়", note: "ফল বড় হচ্ছে" },
+];
 
 function CalculatorPage() {
   const navigate = useNavigate();
@@ -20,6 +52,7 @@ function CalculatorPage() {
   const [amount, setAmount] = useState("1");
   const [unit, setUnit] = useState<Unit>("bigha");
   const [soil, setSoil] = useState<SoilType>("loam");
+  const [growthStage, setGrowthStage] = useState<GrowthStage>("vegetative");
 
   const shotok = useMemo(() => (parseFloat(amount) || 0) * UNIT_TO_SHOTOK[unit], [amount, unit]);
   const crop = CROPS.find((c) => c.id === cropId);
@@ -28,18 +61,36 @@ function CalculatorPage() {
     [step, cropId, shotok, soil],
   );
 
-  const reset = () => { setStep(1); setCropId(""); setAmount("1"); setUnit("bigha"); setSoil("loam"); };
+  const reset = () => {
+    setStep(1);
+    setCropId("");
+    setAmount("1");
+    setUnit("bigha");
+    setSoil("loam");
+    setGrowthStage("vegetative");
+  };
 
   return (
     <main className="min-h-screen bg-[#F0FFF4] md:max-w-[640px] md:mx-auto pb-10">
-      <header className="px-5 pt-8 pb-10 rounded-b-3xl text-white" style={{ background: "var(--gradient-brand)" }}>
+      <header
+        className="px-5 pt-8 pb-10 rounded-b-3xl text-white"
+        style={{ background: "var(--gradient-brand)" }}
+      >
         <div className="flex items-center justify-between">
-          <button onClick={() => (step === 1 ? navigate({ to: "/ai-bondhu" }) : setStep((step - 1) as 1 | 2))} className="h-9 w-9 rounded-full bg-white/15 flex items-center justify-center">
+          <button
+            onClick={() =>
+              step === 1 ? navigate({ to: "/ai-bondhu" }) : setStep((step - 1) as 1 | 2)
+            }
+            className="h-9 w-9 rounded-full bg-white/15 flex items-center justify-center"
+          >
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div className="flex items-center gap-1.5">
             {[1, 2, 3].map((n) => (
-              <span key={n} className={`h-2 rounded-full transition-all ${step >= n ? "bg-white w-6" : "bg-white/30 w-2"}`} />
+              <span
+                key={n}
+                className={`h-2 rounded-full transition-all ${step >= n ? "bg-white w-6" : "bg-white/30 w-2"}`}
+              />
             ))}
           </div>
           <span className="w-9" />
@@ -47,7 +98,7 @@ function CalculatorPage() {
         <h1 className="mt-5 text-2xl font-bold">সার ক্যালকুলেটর</h1>
         <p className="text-sm text-white/85 mt-1">
           {step === 1 && "ফসল বাছাই করুন"}
-          {step === 2 && "জমি ও মাটির তথ্য দিন"}
+          {step === 2 && "জমি, মাটি ও পর্যায়ের তথ্য দিন"}
           {step === 3 && "সারের সম্পূর্ণ হিসাব"}
         </p>
       </header>
@@ -56,15 +107,28 @@ function CalculatorPage() {
         {step === 1 && <StepCrop cropId={cropId} setCropId={setCropId} onNext={() => setStep(2)} />}
         {step === 2 && (
           <StepLand
-            amount={amount} setAmount={setAmount} unit={unit} setUnit={setUnit}
-            soil={soil} setSoil={setSoil} shotok={shotok}
+            amount={amount}
+            setAmount={setAmount}
+            unit={unit}
+            setUnit={setUnit}
+            soil={soil}
+            setSoil={setSoil}
+            shotok={shotok}
+            growthStage={growthStage}
+            setGrowthStage={setGrowthStage}
             onNext={() => setStep(3)}
           />
         )}
         {step === 3 && result && crop && (
           <StepResult
-            crop={crop} amount={amount} unit={unit} soil={soil} shotok={shotok}
-            result={result} onReset={reset}
+            crop={crop}
+            amount={amount}
+            unit={unit}
+            soil={soil}
+            shotok={shotok}
+            growthStage={growthStage}
+            result={result}
+            onReset={reset}
           />
         )}
       </section>
@@ -73,7 +137,15 @@ function CalculatorPage() {
 }
 
 /* ---------- STEP 1 ---------- */
-function StepCrop({ cropId, setCropId, onNext }: { cropId: string; setCropId: (id: string) => void; onNext: () => void }) {
+function StepCrop({
+  cropId,
+  setCropId,
+  onNext,
+}: {
+  cropId: string;
+  setCropId: (id: string) => void;
+  onNext: () => void;
+}) {
   return (
     <div className="space-y-4">
       <div className="bg-white rounded-2xl p-4 shadow-sm">
@@ -86,7 +158,9 @@ function StepCrop({ cropId, setCropId, onNext }: { cropId: string; setCropId: (i
                 key={c.id}
                 onClick={() => setCropId(c.id)}
                 className={`relative aspect-square rounded-xl border-2 flex flex-col items-center justify-center gap-1 transition ${
-                  active ? "border-emerald-600 bg-emerald-50" : "border-gray-200 bg-gray-50 active:bg-gray-100"
+                  active
+                    ? "border-emerald-600 bg-emerald-50"
+                    : "border-gray-200 bg-gray-50 active:bg-gray-100"
                 }`}
               >
                 {active && (
@@ -95,7 +169,9 @@ function StepCrop({ cropId, setCropId, onNext }: { cropId: string; setCropId: (i
                   </span>
                 )}
                 <span className="text-2xl">{c.emoji}</span>
-                <span className="text-[11px] font-semibold text-gray-800 text-center leading-tight px-1">{c.label}</span>
+                <span className="text-[11px] font-semibold text-gray-800 text-center leading-tight px-1">
+                  {c.label}
+                </span>
               </button>
             );
           })}
@@ -114,16 +190,30 @@ function StepCrop({ cropId, setCropId, onNext }: { cropId: string; setCropId: (i
 
 /* ---------- STEP 2 ---------- */
 function StepLand({
-  amount, setAmount, unit, setUnit, soil, setSoil, shotok, onNext,
+  amount,
+  setAmount,
+  unit,
+  setUnit,
+  soil,
+  setSoil,
+  shotok,
+  growthStage,
+  setGrowthStage,
+  onNext,
 }: {
-  amount: string; setAmount: (v: string) => void;
-  unit: Unit; setUnit: (u: Unit) => void;
-  soil: SoilType; setSoil: (s: SoilType) => void;
-  shotok: number; onNext: () => void;
+  amount: string;
+  setAmount: (v: string) => void;
+  unit: Unit;
+  setUnit: (u: Unit) => void;
+  soil: SoilType;
+  setSoil: (s: SoilType) => void;
+  shotok: number;
+  growthStage: GrowthStage;
+  setGrowthStage: (v: GrowthStage) => void;
+  onNext: () => void;
 }) {
-  const conv = shotok > 0
-    ? `= ${bn1(shotok)} শতক = ${bn1(shotok / 33)} বিঘা = ${bn1(shotok / 100)} একর`
-    : "";
+  const conv =
+    shotok > 0 ? `= ${bn1(shotok)} শতক = ${bn1(shotok / 33)} বিঘা = ${bn1(shotok / 100)} একর` : "";
 
   return (
     <div className="space-y-4">
@@ -131,12 +221,24 @@ function StepLand({
         <h2 className="font-bold text-gray-900">জমির পরিমাণ</h2>
         <div className="flex gap-2">
           <input
-            type="number" inputMode="decimal" min="0" step="0.1"
-            value={amount} onChange={(e) => setAmount(e.target.value)}
+            type="number"
+            inputMode="decimal"
+            min="0"
+            step="0.1"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
             className="flex-1 h-12 px-3 rounded-xl bg-gray-100 text-base font-semibold"
           />
-          <select value={unit} onChange={(e) => setUnit(e.target.value as Unit)} className="h-12 px-3 rounded-xl bg-gray-100 text-sm font-semibold">
-            {(Object.keys(UNIT_LABEL) as Unit[]).map((u) => <option key={u} value={u}>{UNIT_LABEL[u]}</option>)}
+          <select
+            value={unit}
+            onChange={(e) => setUnit(e.target.value as Unit)}
+            className="h-12 px-3 rounded-xl bg-gray-100 text-sm font-semibold"
+          >
+            {(Object.keys(UNIT_LABEL) as Unit[]).map((u) => (
+              <option key={u} value={u}>
+                {UNIT_LABEL[u]}
+              </option>
+            ))}
           </select>
         </div>
         {conv && <p className="text-xs text-emerald-700 font-semibold">{conv}</p>}
@@ -152,7 +254,9 @@ function StepLand({
                 key={s.id}
                 onClick={() => setSoil(s.id)}
                 className={`relative rounded-xl border-2 p-3 text-left transition ${
-                  active ? "border-emerald-600 bg-emerald-50" : "border-gray-200 bg-gray-50 active:bg-gray-100"
+                  active
+                    ? "border-emerald-600 bg-emerald-50"
+                    : "border-gray-200 bg-gray-50 active:bg-gray-100"
                 }`}
               >
                 {active && (
@@ -163,6 +267,31 @@ function StepLand({
                 <div className="text-2xl">{s.emoji}</div>
                 <div className="font-bold text-sm mt-1 text-gray-900">{s.label}</div>
                 <div className="text-[11px] text-gray-500 mt-0.5">{s.note}</div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl p-4 shadow-sm">
+        <div className="flex items-center gap-2 mb-3">
+          <CalendarDays className="h-4 w-4 text-emerald-700" />
+          <h2 className="font-bold text-gray-900">গাছের বর্তমান পর্যায়</h2>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {GROWTH_STAGES.map((stage) => {
+            const active = growthStage === stage.id;
+            return (
+              <button
+                key={stage.id}
+                type="button"
+                onClick={() => setGrowthStage(stage.id)}
+                className={`rounded-xl border-2 p-3 text-left transition ${active ? "border-emerald-600 bg-emerald-50" : "border-gray-200 bg-gray-50 active:bg-gray-100"}`}
+              >
+                <span className="block text-xs font-bold text-gray-900">{stage.label}</span>
+                <span className="mt-1 block text-[10px] leading-snug text-gray-500">
+                  {stage.note}
+                </span>
               </button>
             );
           })}
@@ -182,15 +311,27 @@ function StepLand({
 
 /* ---------- STEP 3 ---------- */
 function StepResult({
-  crop, amount, unit, soil, shotok, result, onReset,
+  crop,
+  amount,
+  unit,
+  soil,
+  shotok,
+  growthStage,
+  result,
+  onReset,
 }: {
-  crop: typeof CROPS[number];
-  amount: string; unit: Unit; soil: SoilType; shotok: number;
+  crop: (typeof CROPS)[number];
+  amount: string;
+  unit: Unit;
+  soil: SoilType;
+  shotok: number;
+  growthStage: GrowthStage;
   result: CalcResult;
   onReset: () => void;
 }) {
   const [saving, setSaving] = useState(false);
   const soilLabel = SOIL_TYPES.find((s) => s.id === soil)!.label;
+  const stage = GROWTH_STAGES.find((s) => s.id === growthStage)!;
   const rows = [
     { key: "urea", name: "ইউরিয়া", kg: result.urea, color: "bg-emerald-500" },
     { key: "tsp", name: "টিএসপি", kg: result.tsp, color: "bg-orange-500" },
@@ -205,7 +346,10 @@ function StepResult({
     try {
       const { data: sess } = await supabase.auth.getSession();
       const uid = sess.session?.user.id;
-      if (!uid) { toast.error("সংরক্ষণ করতে লগইন করুন"); return; }
+      if (!uid) {
+        toast.error("সংরক্ষণ করতে লগইন করুন");
+        return;
+      }
       const { error } = await supabase.from("saved_calculations").insert({
         user_id: uid,
         crop_type: crop.label,
@@ -213,13 +357,15 @@ function StepResult({
         area_unit: unit,
         area_shotok: shotok,
         soil_type: soilLabel,
-        result_json: JSON.parse(JSON.stringify(result)),
+        result_json: JSON.parse(JSON.stringify({ ...result, growthStage })),
       });
       if (error) throw error;
       toast.success("হিসাব সংরক্ষণ হয়েছে");
     } catch (e) {
       toast.error("সংরক্ষণ করা যায়নি");
-    } finally { setSaving(false); }
+    } finally {
+      setSaving(false);
+    }
   }
 
   function buildShareText() {
@@ -230,6 +376,7 @@ function StepResult({
       ``,
       `আনুমানিক খরচ: ${fmtBdt(result.totalCost)}`,
       `মাটি: ${soilLabel}`,
+      `পর্যায়: ${stage.label}`,
       ``,
       `— কৃষিবন্ধু অ্যাপ`,
     ];
@@ -239,7 +386,12 @@ function StepResult({
   async function handleShare() {
     const text = buildShareText();
     if (navigator.share) {
-      try { await navigator.share({ title: "সারের হিসাব", text }); return; } catch { /* user cancelled */ }
+      try {
+        await navigator.share({ title: "সারের হিসাব", text });
+        return;
+      } catch {
+        /* user cancelled */
+      }
     }
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(url, "_blank");
@@ -250,8 +402,12 @@ function StepResult({
       <div className="bg-white rounded-2xl p-4 shadow-sm">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="font-bold text-gray-900 text-lg">{crop.emoji} {crop.label} — {toBn(amount)} {UNIT_LABEL[unit]}</h2>
-            <p className="text-xs text-gray-500 mt-0.5">{bn1(shotok)} শতাংশ • {soilLabel}</p>
+            <h2 className="font-bold text-gray-900 text-lg">
+              {crop.emoji} {crop.label} — {toBn(amount)} {UNIT_LABEL[unit]}
+            </h2>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {bn1(shotok)} শতাংশ • {soilLabel} • {stage.label}
+            </p>
           </div>
           <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap">
             BRRI/BARI ✓
@@ -270,7 +426,10 @@ function StepResult({
                 <span className="font-bold text-gray-900">{bn1(r.kg)} কেজি</span>
               </div>
               <div className="mt-1 h-2 rounded-full bg-gray-100 overflow-hidden">
-                <div className={`h-full ${r.color}`} style={{ width: `${max > 0 ? (r.kg / max) * 100 : 0}%` }} />
+                <div
+                  className={`h-full ${r.color}`}
+                  style={{ width: `${max > 0 ? (r.kg / max) * 100 : 0}%` }}
+                />
               </div>
             </div>
           ))}
@@ -278,16 +437,37 @@ function StepResult({
         <div className="mt-4 pt-3 border-t border-dashed border-gray-200">
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold text-gray-600">আনুমানিক মোট খরচ</span>
-            <span className="text-lg font-extrabold text-emerald-700">{fmtBdt(result.totalCost)}</span>
+            <span className="text-lg font-extrabold text-emerald-700">
+              {fmtBdt(result.totalCost)}
+            </span>
           </div>
           <p className="text-[11px] text-gray-500 mt-0.5">সরকারি নির্ধারিত দামে</p>
+        </div>
+      </div>
+
+      {/* STAGE GUIDANCE */}
+      <div className="bg-sky-50 border border-sky-200 rounded-2xl p-4">
+        <div className="flex items-start gap-2">
+          <CalendarDays className="mt-0.5 h-5 w-5 shrink-0 text-sky-700" />
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wide text-sky-700">
+              এই পর্যায়ের ফোকাস
+            </p>
+            <p className="mt-1 text-sm font-bold text-sky-950">{stage.label}</p>
+            <p className="mt-1 text-xs leading-relaxed text-sky-800">
+              সারের পরিমাণের পাশাপাশি পর্যায় অনুযায়ী ভাগ করে প্রয়োগ করুন এবং প্রতিবার প্রয়োগের
+              আগে জমির আর্দ্রতা দেখুন।
+            </p>
+          </div>
         </div>
       </div>
 
       {/* SOIL ADJUSTMENT */}
       <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5 flex items-center gap-2">
         <span className="text-lg">✓</span>
-        <p className="text-xs font-semibold text-emerald-800">{soilLabel}-এর জন্য মাত্রা সমন্বয় করা হয়েছে</p>
+        <p className="text-xs font-semibold text-emerald-800">
+          {soilLabel}-এর জন্য মাত্রা সমন্বয় করা হয়েছে
+        </p>
       </div>
 
       {/* SCHEDULE */}
@@ -296,12 +476,20 @@ function StepResult({
         <ol className="relative border-l-2 border-emerald-200 ml-3 space-y-5">
           {result.schedule.map((s, i) => (
             <li key={i} className="pl-5">
-              <span className="absolute -left-[11px] h-5 w-5 rounded-full bg-emerald-600 text-white text-[10px] font-bold flex items-center justify-center">{toBn(i + 1)}</span>
-              <p className="font-bold text-sm text-gray-900">{i === 0 ? "🌱 " : "📅 "}{s.when}</p>
+              <span className="absolute -left-[11px] h-5 w-5 rounded-full bg-emerald-600 text-white text-[10px] font-bold flex items-center justify-center">
+                {toBn(i + 1)}
+              </span>
+              <p className="font-bold text-sm text-gray-900">
+                {i === 0 ? "🌱 " : "📅 "}
+                {s.when}
+              </p>
               <p className="text-xs text-gray-600 mt-0.5">{s.detail}</p>
               <div className="mt-1.5 flex flex-wrap gap-1.5">
                 {s.amounts.map((a, j) => (
-                  <span key={j} className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                  <span
+                    key={j}
+                    className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700"
+                  >
                     {a.name} {bn1(a.kg)} কেজি
                   </span>
                 ))}
@@ -326,7 +514,10 @@ function StepResult({
           </div>
           <ul className="space-y-1.5">
             {result.warnings.map((w, i) => (
-              <li key={i} className="text-xs text-amber-900 flex gap-1.5"><span>•</span><span>{w}</span></li>
+              <li key={i} className="text-xs text-amber-900 flex gap-1.5">
+                <span>•</span>
+                <span>{w}</span>
+              </li>
             ))}
           </ul>
         </div>
@@ -334,16 +525,29 @@ function StepResult({
 
       {/* ACTIONS */}
       <div className="grid grid-cols-2 gap-2.5 print:hidden">
-        <button onClick={handleSave} disabled={saving} className="h-11 rounded-xl bg-emerald-600 text-white font-bold flex items-center justify-center gap-2 active:bg-emerald-700 disabled:opacity-60">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="h-11 rounded-xl bg-emerald-600 text-white font-bold flex items-center justify-center gap-2 active:bg-emerald-700 disabled:opacity-60"
+        >
           <Save className="h-4 w-4" /> {saving ? "সংরক্ষণ..." : "সংরক্ষণ"}
         </button>
-        <button onClick={handleShare} className="h-11 rounded-xl bg-white border border-gray-200 text-gray-800 font-bold flex items-center justify-center gap-2 active:bg-gray-50">
+        <button
+          onClick={handleShare}
+          className="h-11 rounded-xl bg-white border border-gray-200 text-gray-800 font-bold flex items-center justify-center gap-2 active:bg-gray-50"
+        >
           <Share2 className="h-4 w-4" /> শেয়ার
         </button>
-        <button onClick={onReset} className="h-11 rounded-xl bg-white border border-gray-200 text-gray-800 font-bold flex items-center justify-center gap-2 active:bg-gray-50">
+        <button
+          onClick={onReset}
+          className="h-11 rounded-xl bg-white border border-gray-200 text-gray-800 font-bold flex items-center justify-center gap-2 active:bg-gray-50"
+        >
           <RotateCcw className="h-4 w-4" /> নতুন হিসাব
         </button>
-        <button onClick={() => window.print()} className="h-11 rounded-xl bg-white border border-gray-200 text-gray-800 font-bold flex items-center justify-center gap-2 active:bg-gray-50">
+        <button
+          onClick={() => window.print()}
+          className="h-11 rounded-xl bg-white border border-gray-200 text-gray-800 font-bold flex items-center justify-center gap-2 active:bg-gray-50"
+        >
           <Printer className="h-4 w-4" /> প্রিন্ট
         </button>
       </div>
