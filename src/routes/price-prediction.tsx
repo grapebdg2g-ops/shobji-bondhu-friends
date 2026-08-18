@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useUser } from "@/contexts/user-context";
 import { DISTRICTS } from "@/lib/bd-data";
 import { getPricePrediction, setPriceAlert } from "@/lib/price-prediction.functions";
+import { POPULAR_CROP_OPTIONS } from "@/lib/crop-options";
 
 const searchSchema = z.object({
   product: z.string().optional(),
@@ -31,12 +32,7 @@ export const Route = createFileRoute("/price-prediction")({
   }),
 });
 
-const POPULAR = [
-  { name: "ধান", icon: "🌾" }, { name: "আলু", icon: "🥔" },
-  { name: "টমেটো", icon: "🍅" }, { name: "পেঁয়াজ", icon: "🧅" },
-  { name: "মরিচ", icon: "🌶️" }, { name: "রসুন", icon: "🧄" },
-  { name: "ভুট্টা", icon: "🌽" }, { name: "বেগুন", icon: "🍆" },
-];
+const POPULAR = POPULAR_CROP_OPTIONS.map((crop) => ({ name: crop.label, icon: crop.icon }));
 
 const BN_DIGITS = ["০","১","২","৩","৪","৫","৬","৭","৮","৯"];
 const toBn = (n: number | string) => String(n).replace(/\d/g, (d) => BN_DIGITS[+d]);

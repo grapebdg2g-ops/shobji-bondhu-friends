@@ -24,24 +24,15 @@ import { toast } from "sonner";
 import { PESTICIDE_GUIDE, type Problem } from "@/data/pesticide-guide";
 import { analyzeDisease, type DiseaseResult } from "@/lib/disease.functions";
 import { toBn } from "@/lib/bn";
+import { AI_CROP_LABELS, COMMUNITY_CROP_LABELS } from "@/lib/crop-options";
 
 export const Route = createFileRoute("/ai-bondhu/pesticide")({
   component: PesticidePage,
   head: () => ({ meta: [{ title: "কীটনাশক গাইড — কৃষিবন্ধু" }] }),
 });
 
-const CROP_FILTERS = ["সব ফসল", "ধান", "টমেটো", "বেগুন", "আলু", "শসা", "লাউ"];
-const ANALYSIS_CROPS = [
-  "ধান",
-  "গম",
-  "আলু",
-  "টমেটো",
-  "বেগুন",
-  "পেঁয়াজ",
-  "ভুট্টা",
-  "সবজি",
-  "অন্যান্য",
-];
+const CROP_FILTERS = COMMUNITY_CROP_LABELS;
+const ANALYSIS_CROPS = AI_CROP_LABELS;
 
 type PhotoAnalysisStage = "idle" | "preview" | "analyzing" | "result" | "error";
 

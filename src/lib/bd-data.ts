@@ -2,11 +2,10 @@ import { getDistricts, getUpazilaCoords } from "@/data/bd-locations";
 
 // Re-export helpers so callers can keep importing from a single module.
 export { getUpazilas, getDistricts, getUpazilaCoords, BD_LOCATIONS } from "@/data/bd-locations";
+export { PROFILE_CROP_LABELS as CROPS } from "@/lib/crop-options";
 
 // Keep `DISTRICTS` export shape for backward compatibility.
 export const DISTRICTS = getDistricts();
-
-export const CROPS = ["ধান","গম","আলু","টমেটো","পেঁয়াজ","রসুন","ভুট্টা","সবজি","অন্যান্য"];
 
 // District → [lat, lng] (approximate centroid, used for Open-Meteo lookups)
 export const DISTRICT_LATLNG: Record<string, [number, number]> = {

@@ -19,6 +19,7 @@ import { BengaliButton } from "@/components/krishi/bengali-button";
 import { cn } from "@/lib/utils";
 import { analyzeDisease, type DiseaseResult } from "@/lib/disease.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { AI_CROP_LABELS } from "@/lib/crop-options";
 
 export const Route = createFileRoute("/disease-detection")({
   component: DiseaseDetectionPage,
@@ -30,7 +31,7 @@ export const Route = createFileRoute("/disease-detection")({
   }),
 });
 
-const CROPS = ["ধান", "গম", "আলু", "টমেটো", "বেগুন", "পেঁয়াজ", "ভুট্টা", "সবজি", "অন্যান্য"];
+const CROPS = AI_CROP_LABELS;
 
 type Stage = "landing" | "preview" | "analyzing" | "result" | "error";
 

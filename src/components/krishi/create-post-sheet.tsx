@@ -7,8 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Post, PostType } from "@/hooks/use-feed";
 import { useUser } from "@/contexts/user-context";
 import { sanitize } from "@/lib/sanitize";
+import { COMMUNITY_CROP_LABELS } from "@/lib/crop-options";
 
-const CROPS = ["ধান", "আলু", "টমেটো", "পেঁয়াজ", "সবজি", "সব ফসল"];
+const CROPS = COMMUNITY_CROP_LABELS;
 
 const TYPE_OPTIONS: { value: PostType; label: string; Icon: typeof FileText; color: string }[] = [
   { value: "general", label: "সাধারণ", Icon: FileText, color: "bg-slate-100 text-slate-700" },

@@ -14,6 +14,7 @@ import { BottomSheet } from "@/components/krishi/bottom-sheet";
 import { CreatePostSheet } from "@/components/krishi/create-post-sheet";
 import { CommentsSection } from "@/components/krishi/comments-section";
 import { DISTRICTS } from "@/lib/bd-data";
+import { MASTER_CROP_LABELS } from "@/lib/crop-options";
 
 import { EmptyState } from "@/components/krishi/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,7 +35,7 @@ export const Route = createFileRoute("/feed")({
   }),
 });
 
-const CROPS = ["ধান", "আলু", "টমেটো", "পেঁয়াজ", "সবজি"];
+const CROPS = MASTER_CROP_LABELS;
 const TYPE_META: Record<PostType, { label: string; badge: string; border: string; icon: typeof HelpCircle | null; iconColor: string }> = {
   general: { label: "সাধারণ", badge: "", border: "border-border bg-card", icon: null, iconColor: "" },
   help: { label: "সাহায্য চাই", badge: "❓ সাহায্য চাই", border: "border-amber-300 bg-amber-50", icon: HelpCircle, iconColor: "text-amber-600" },

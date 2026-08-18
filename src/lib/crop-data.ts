@@ -3,15 +3,9 @@
 // matching, enriched embeddings and master-data enriched prompts.
 // Data is distilled from src/data/master-crop-data.ts.
 
-export const CROP_NAMES = [
-  "ধান", "বোরো ধান", "আমন ধান", "আউশ ধান",
-  "গম", "ভুট্টা", "টমেটো", "ফুলকপি",
-  "বাঁধাকপি", "বেগুন", "মরিচ", "ঢেঁড়স",
-  "শসা", "করলা", "লাউ", "মিষ্টি কুমড়া",
-  "পটল", "শিম", "বরবটি", "আলু",
-  "সরিষা", "চিনাবাদাম", "তিল", "সূর্যমুখী",
-  "আদা", "হলুদ", "পেঁয়াজ", "রসুন",
-] as const;
+import { MASTER_CROP_LABELS } from "@/lib/crop-options";
+
+export const CROP_NAMES = Array.from(new Set(["ধান", ...MASTER_CROP_LABELS]));
 
 export const CROP_DISEASES: Record<string, string[]> = {
   "ধান": ["ব্লাস্ট", "বাদামি গাছফড়িং", "মাজরা পোকা", "টুংরো ভাইরাস", "শীথ ব্লাইট"],

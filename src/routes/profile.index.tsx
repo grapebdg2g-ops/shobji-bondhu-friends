@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import { DISTRICTS, getUpazilas } from "@/lib/bd-data";
+import { PROFILE_CROP_LABELS } from "@/lib/crop-options";
 import { sanitize, sanitizeOptional } from "@/lib/sanitize";
 
 export const Route = createFileRoute("/profile/")({
@@ -32,7 +33,7 @@ export const Route = createFileRoute("/profile/")({
   }),
 });
 
-const CROP_OPTIONS = ["ধান", "গম", "আলু", "টমেটো", "বেগুন", "পেঁয়াজ", "ভুট্টা", "সবজি", "ফল", "অন্যান্য"];
+const CROP_OPTIONS = PROFILE_CROP_LABELS;
 const SUPPORT_PHONE = "01700000000";
 const SUPPORT_EMAIL = "support@krishinet.com";
 
