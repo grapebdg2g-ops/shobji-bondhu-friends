@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, SlidersHorizontal, ThumbsUp, MessageCircle, Share2, Plus, HelpCircle, Star, CloudRain, ChevronDown, ArrowUp, CheckCircle2, Reply, Trophy } from "lucide-react";
+import { ArrowLeft, SlidersHorizontal, ThumbsUp, MessageCircle, Share2, Plus, HelpCircle, Star, CloudRain, ChevronDown, ArrowUp, CheckCircle2, Reply, Trophy, Bookmark, ImagePlus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
@@ -49,6 +49,21 @@ const FILTER_HEADER: Record<"all" | "help" | "success", { title: string; subtitl
   success: { title: "সফল কৃষকের গল্প", subtitle: "অনুপ্রেরণার উৎস" },
 };
 
+const SAVED_POSTS_KEY = "krishibondhu_saved_posts";
+
+function readSavedPostIds(): string[] {
+  try {
+    const value = localStorage.getItem(SAVED_POSTS_KEY);
+    return value ? JSON.parse(value) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeSavedPostIds(ids: string[]) {
+  try { localStorage.setItem(SAVED_POSTS_KEY, JSON.stringify(ids.slice(0, 100))); } catch { /* private mode */ }
+}
+
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
   const m = Math.floor(diff / 60000);
@@ -74,6 +89,9 @@ function FeedPage() {
   });
   const [filterOpen, setFilterOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
+  const [savedIds, setSavedIds] = useState<string[]>([]);
+
+  useEffect(() => { setSavedIds(readSavedPostIds()); }, []);
 
   // Sync URL filter → types lock
   useEffect(() => {
@@ -137,15 +155,15 @@ function FeedPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("posts")
-        .select("user_name, user_district, created_at")
+        .select("user_id, user_name, user_district, created_at")
         .order("created_at", { ascending: false })
         .limit(40);
       const seen = new Set<string>();
-      const unique: { name: string; district: string | null }[] = [];
-      for (const r of (data as { user_name: string; user_district: string | null }[]) ?? []) {
-        if (!seen.has(r.user_name)) {
-          seen.add(r.user_name);
-          unique.push({ name: r.user_name, district: r.user_district });
+      const unique: { id: string; name: string; district: string | null }[] = [];
+      for (const r of (data as { user_id: string; user_name: string; user_district: string | null }[]) ?? []) {
+        if (!seen.has(r.user_id)) {
+          seen.add(r.user_id);
+          unique.push({ id: r.user_id, name: r.user_name, district: r.user_district });
         }
         if (unique.length >= 12) break;
       }
@@ -252,6 +270,16 @@ function FeedPage() {
   }, [likedSet, user, updateById, setLiked]);
 
 
+  const toggleSave = useCallback((post: Post) => {
+    setSavedIds((current) => {
+      const saved = current.includes(post.id);
+      const next = saved ? current.filter((id) => id !== post.id) : [post.id, ...current];
+      writeSavedPostIds(next);
+      toast.success(saved ? "সংরক্ষণ থেকে সরানো হয়েছে" : "পোস্ট সংরক্ষণ হয়েছে");
+      return next;
+    });
+  }, []);
+
   const share = async (p: Post) => {
     const url = typeof window !== "undefined" ? window.location.href : "";
     const text = `${p.user_name} (${p.district ?? ""}): ${p.content}`;
@@ -292,6 +320,41 @@ function FeedPage() {
         </div>
       </header>
 
+      <nav className="relative z-10 mx-auto -mt-4 max-w-3xl px-4" aria-label="ফিডের ধরন">
+        <div className="grid grid-cols-3 gap-1 rounded-2xl border border-border bg-card p-1 shadow-[var(--shadow-card)]">
+          {([
+            { value: "all", label: "সবার পোস্ট", icon: "🌾" },
+            { value: "help", label: "প্রশ্নোত্তর", icon: "❓" },
+            { value: "success", label: "সাফল্যের গল্প", icon: "🌟" },
+          ] as const).map((tab) => (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => navigate({ to: "/feed", search: { filter: tab.value } })}
+              className={`home-pressable min-h-11 rounded-xl px-1 text-xs font-bold transition ${filter === tab.value ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-muted"}`}
+            >
+              <span className="mr-1">{tab.icon}</span>{tab.label}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      <section className="mx-auto mt-3 max-w-3xl px-4">
+        <div className="rounded-2xl border border-border bg-card p-3 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/15 font-bold text-primary">{user?.name?.charAt(0) || "ক"}</div>
+            <button type="button" onClick={() => setCreateOpen(true)} className="flex h-10 flex-1 items-center rounded-full bg-muted px-4 text-left text-sm text-muted-foreground transition hover:bg-muted/80">
+              আজ কী শেয়ার করবেন, {user?.name?.split(" ")[0] || "কৃষক"}?
+            </button>
+          </div>
+          <div className="mt-3 grid grid-cols-3 gap-1 border-t border-border/60 pt-3">
+            <button type="button" onClick={() => setCreateOpen(true)} className="home-pressable flex min-h-10 items-center justify-center gap-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-muted"><ImagePlus className="h-4 w-4 text-emerald-600" /> ছবি</button>
+            <button type="button" onClick={() => { setCreateOpen(true); toast.info("পোস্টের ধরনে ‘সাহায্য চাই’ বেছে নিন"); }} className="home-pressable flex min-h-10 items-center justify-center gap-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-muted"><HelpCircle className="h-4 w-4 text-amber-600" /> প্রশ্ন</button>
+            <button type="button" onClick={() => { setCreateOpen(true); toast.info("পোস্টের ধরনে ‘সাফল্য’ বেছে নিন"); }} className="home-pressable flex min-h-10 items-center justify-center gap-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-muted"><Sparkles className="h-4 w-4 text-sky-600" /> সাফল্য</button>
+          </div>
+        </div>
+      </section>
+
       {/* Stories row */}
       <section className="px-4 -mt-2 mb-4">
         <div className="mb-2 flex items-center justify-between px-1">
@@ -309,17 +372,18 @@ function FeedPage() {
               </div>
               <span className="mt-1 text-[10px] font-semibold text-foreground text-center leading-tight">পোস্ট করুন</span>
             </button>
-            {activeUsers.map((u, i) => (
-              <div key={`${u.name}-${i}`} className="home-pressable flex w-16 min-w-[4rem] shrink-0 flex-col items-center rounded-xl px-1 py-1">
-                <div className="h-14 w-14 rounded-full bg-gradient-to-br from-emerald-200 to-emerald-400 p-[2px]">
+            {activeUsers.map((u) => (
+              <Link key={u.id} to="/u/$userId" params={{ userId: u.id }} className="home-pressable flex w-16 min-w-[4rem] shrink-0 flex-col items-center rounded-xl px-1 py-1">
+                <div className="relative h-14 w-14 rounded-full bg-gradient-to-br from-emerald-200 to-emerald-400 p-[2px]">
                   <div className="h-full w-full rounded-full bg-card flex items-center justify-center text-base font-bold text-primary">
                     {u.name.charAt(0)}
                   </div>
+                  <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-card bg-emerald-500" />
                 </div>
                 <span className="mt-1 w-full truncate text-center text-[10px] text-muted-foreground" title={u.district ?? ""}>
                   {u.name}
                 </span>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -393,10 +457,11 @@ function FeedPage() {
               key={p.id}
               post={p}
               liked={likedSet.has(p.id)}
-              currentUserId={user?.id ?? null}
               mode={filter}
               onLike={() => toggleLike(p)}
               onShare={() => share(p)}
+              saved={savedIds.includes(p.id)}
+              onSave={() => toggleSave(p)}
               onCommentAdded={() => updateById(p.id, { comments_count: p.comments_count + 1 })}
               onDeleted={() => removeById(p.id)}
             />
@@ -441,19 +506,21 @@ function PostSkeleton() {
 function PostCard({
   post,
   liked,
-  currentUserId,
   mode = "all",
+  saved,
   onLike,
   onShare,
+  onSave,
   onCommentAdded,
   onDeleted,
 }: {
   post: Post;
   liked: boolean;
-  currentUserId: string | null;
   mode?: "all" | "help" | "success";
+  saved: boolean;
   onLike: () => void;
   onShare: () => void;
+  onSave: () => void;
   onCommentAdded: () => void;
   onDeleted: () => void;
 }) {
@@ -546,18 +613,22 @@ function PostCard({
         />
       )}
 
-      <div className="px-4 py-2 flex items-center justify-around border-t border-border/60">
-        <button onClick={onLike} className={`home-pressable flex min-h-11 min-w-[5.5rem] items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold ${liked ? "text-primary" : "text-muted-foreground"}`}>
+      <div className="grid grid-cols-4 border-t border-border/60 px-2 py-1.5">
+        <button onClick={onLike} aria-label="পোস্টটি উপকারী হিসেবে চিহ্নিত করুন" className={`home-pressable flex min-h-11 items-center justify-center gap-1 rounded-lg px-1 text-xs font-semibold ${liked ? "text-primary" : "text-muted-foreground"}`}>
           <ThumbsUp className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />
-          <span>উপকারী{post.likes_count > 0 ? ` (${post.likes_count})` : ""}</span>
+          <span className="hidden min-[360px]:inline">উপকারী</span>{post.likes_count > 0 && <span>({post.likes_count})</span>}
         </button>
-        <button onClick={() => setShowComments((s) => !s)} className={`home-pressable flex min-h-11 min-w-[5.5rem] items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold ${post.type === "help" ? "text-emerald-700" : "text-muted-foreground"}`}>
+        <button onClick={() => setShowComments((s) => !s)} aria-label="মন্তব্য দেখুন বা লিখুন" className={`home-pressable flex min-h-11 items-center justify-center gap-1 rounded-lg px-1 text-xs font-semibold ${post.type === "help" ? "text-emerald-700" : "text-muted-foreground"}`}>
           {post.type === "help" ? <Reply className="h-4 w-4" /> : <MessageCircle className="h-4 w-4" />}
-          <span>{post.type === "help" ? "উত্তর দিন" : "মন্তব্য"}{post.comments_count > 0 ? ` (${post.comments_count})` : ""}</span>
+          <span className="hidden min-[360px]:inline">{post.type === "help" ? "উত্তর" : "মন্তব্য"}</span>{post.comments_count > 0 && <span>({post.comments_count})</span>}
         </button>
-        <button onClick={onShare} className="home-pressable flex min-h-11 min-w-[5.5rem] items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold text-muted-foreground">
+        <button onClick={onSave} aria-label={saved ? "সংরক্ষণ থেকে সরান" : "পোস্ট সংরক্ষণ করুন"} className={`home-pressable flex min-h-11 items-center justify-center gap-1 rounded-lg px-1 text-xs font-semibold ${saved ? "text-amber-600" : "text-muted-foreground"}`}>
+          <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
+          <span className="hidden min-[360px]:inline">সংরক্ষণ</span>
+        </button>
+        <button onClick={onShare} aria-label="পোস্ট শেয়ার করুন" className="home-pressable flex min-h-11 items-center justify-center gap-1 rounded-lg px-1 text-xs font-semibold text-muted-foreground">
           <Share2 className="h-4 w-4" />
-          <span>শেয়ার</span>
+          <span className="hidden min-[360px]:inline">শেয়ার</span>
         </button>
       </div>
 
