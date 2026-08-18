@@ -290,7 +290,7 @@ function FeedPage() {
   };
 
   return (
-    <main className="min-h-screen bg-background pb-20">
+    <main className="min-h-screen min-w-0 max-w-full overflow-x-hidden bg-background pb-20">
       {/* Header */}
       <header className="relative overflow-hidden rounded-b-[28px] px-4 pb-6 pt-8 sm:px-6" style={{ background: "var(--gradient-brand)" }}>
         <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[#74C69D]/20 blur-3xl" />
@@ -356,12 +356,12 @@ function FeedPage() {
       </section>
 
       {/* Stories row */}
-      <section className="px-4 -mt-2 mb-4">
+      <section className="mx-auto -mt-2 mb-4 min-w-0 max-w-3xl px-4">
         <div className="mb-2 flex items-center justify-between px-1">
           <p className="text-xs font-extrabold tracking-tight text-foreground">এখন সক্রিয় কৃষক</p>
           <span className="text-[10px] font-semibold text-muted-foreground">আপনার এলাকার আপডেট</span>
         </div>
-        <div className="home-gradient-border overflow-x-auto rounded-2xl border border-border bg-card px-3 py-3 shadow-[var(--shadow-card)]">
+        <div className="home-gradient-border min-w-0 max-w-full overflow-x-auto overscroll-x-contain rounded-2xl border border-border bg-card px-3 py-3 shadow-[var(--shadow-card)]">
           <div className="flex items-start gap-3 w-max">
             <button
               onClick={() => setCreateOpen(true)}
@@ -391,7 +391,7 @@ function FeedPage() {
 
       {/* New posts banner */}
       {newCount > 0 && (
-        <div className="sticky top-2 z-20 px-4">
+        <div className="sticky top-2 z-20 mx-auto max-w-3xl px-4">
           <button
             onClick={() => {
               setNewCount(0);
@@ -408,7 +408,7 @@ function FeedPage() {
 
       {/* Monthly leaderboard for success mode */}
       {filter === "success" && leaderboard.length > 0 && (
-        <section className="px-4 mb-3">
+        <section className="mx-auto mb-3 max-w-3xl px-4">
           <div className="bg-gradient-to-br from-amber-50 to-yellow-100 border-2 border-amber-300 rounded-2xl p-3">
             <div className="flex items-center gap-2 mb-2">
               <Trophy className="h-5 w-5 text-amber-600" />
@@ -439,7 +439,7 @@ function FeedPage() {
       )}
 
       {/* Posts */}
-      <section className="home-stagger mt-2 space-y-4 px-4">
+      <section className="home-stagger mx-auto mt-2 min-w-0 max-w-3xl space-y-4 px-4">
         {loading ? (
           <div className="space-y-4">
             {Array.from({ length: 3 }).map((_, i) => <PostSkeleton key={i} />)}
@@ -543,7 +543,7 @@ function PostCard({
   };
 
   return (
-    <article className={`home-pressable relative overflow-hidden rounded-2xl border-2 ${isSuccessHighlight ? "border-amber-400 bg-gradient-to-br from-amber-50 to-white" : meta.border} shadow-sm`}>
+    <article className={`home-pressable relative min-w-0 overflow-hidden rounded-2xl border-2 ${isSuccessHighlight ? "border-amber-400 bg-gradient-to-br from-amber-50 to-white" : meta.border} shadow-sm`}>
       {isSuccessHighlight && (
         <div className="absolute top-2 right-2 flex items-center gap-1 bg-amber-400 text-white px-2 py-0.5 rounded-full text-[10px] font-bold shadow z-10">
           <Star className="h-3 w-3 fill-current" /> সাফল্যের গল্প
@@ -613,35 +613,35 @@ function PostCard({
         />
       )}
 
-      <div className="flex items-center justify-between border-t border-border/60 px-4 py-2 text-xs text-muted-foreground">
-        <div className="flex items-center gap-1.5">
+      <div className="flex min-w-0 items-center justify-between gap-2 border-t border-border/60 px-4 py-2 text-xs text-muted-foreground">
+        <div className="flex min-w-0 items-center gap-1.5 truncate">
           {post.likes_count > 0 ? (
             <>
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[11px] text-primary-foreground">👍</span>
-              <span>{post.likes_count} জনের কাছে উপকারী</span>
+              <span className="truncate">{post.likes_count} জনের কাছে উপকারী</span>
             </>
           ) : (
             <span>প্রথমে আপনিই উপকারী বলুন</span>
           )}
         </div>
-        <button type="button" onClick={() => setShowComments(true)} className="font-semibold hover:text-primary">
+        <button type="button" onClick={() => setShowComments(true)} className="max-w-[42%] shrink-0 truncate font-semibold hover:text-primary">
           {post.comments_count > 0 ? `${post.comments_count}টি মন্তব্য` : "মন্তব্য করুন"}
         </button>
       </div>
-      <div className="grid grid-cols-4 border-t border-border/60 px-2 py-1.5">
-        <button onClick={onLike} aria-label="পোস্টটি উপকারী হিসেবে চিহ্নিত করুন" className={`home-pressable flex min-h-11 items-center justify-center gap-1 rounded-lg px-1 text-xs font-semibold ${liked ? "text-primary" : "text-muted-foreground"}`}>
+      <div className="grid min-w-0 grid-cols-4 border-t border-border/60 px-2 py-1.5">
+        <button onClick={onLike} aria-label="পোস্টটি উপকারী হিসেবে চিহ্নিত করুন" className={`home-pressable min-w-0 flex min-h-11 items-center justify-center gap-1 rounded-lg px-1 text-xs font-semibold ${liked ? "text-primary" : "text-muted-foreground"}`}>
           <ThumbsUp className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />
           <span className="hidden min-[360px]:inline">উপকারী</span>{post.likes_count > 0 && <span>({post.likes_count})</span>}
         </button>
-        <button onClick={() => setShowComments((s) => !s)} aria-label="মন্তব্য দেখুন বা লিখুন" className={`home-pressable flex min-h-11 items-center justify-center gap-1 rounded-lg px-1 text-xs font-semibold ${post.type === "help" ? "text-emerald-700" : "text-muted-foreground"}`}>
+        <button onClick={() => setShowComments((s) => !s)} aria-label="মন্তব্য দেখুন বা লিখুন" className={`home-pressable min-w-0 flex min-h-11 items-center justify-center gap-1 rounded-lg px-1 text-xs font-semibold ${post.type === "help" ? "text-emerald-700" : "text-muted-foreground"}`}>
           {post.type === "help" ? <Reply className="h-4 w-4" /> : <MessageCircle className="h-4 w-4" />}
           <span className="hidden min-[360px]:inline">{post.type === "help" ? "উত্তর" : "মন্তব্য"}</span>{post.comments_count > 0 && <span>({post.comments_count})</span>}
         </button>
-        <button onClick={onSave} aria-label={saved ? "সংরক্ষণ থেকে সরান" : "পোস্ট সংরক্ষণ করুন"} className={`home-pressable flex min-h-11 items-center justify-center gap-1 rounded-lg px-1 text-xs font-semibold ${saved ? "text-amber-600" : "text-muted-foreground"}`}>
+        <button onClick={onSave} aria-label={saved ? "সংরক্ষণ থেকে সরান" : "পোস্ট সংরক্ষণ করুন"} className={`home-pressable min-w-0 flex min-h-11 items-center justify-center gap-1 rounded-lg px-1 text-xs font-semibold ${saved ? "text-amber-600" : "text-muted-foreground"}`}>
           <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
           <span className="hidden min-[360px]:inline">সংরক্ষণ</span>
         </button>
-        <button onClick={onShare} aria-label="পোস্ট শেয়ার করুন" className="home-pressable flex min-h-11 items-center justify-center gap-1 rounded-lg px-1 text-xs font-semibold text-muted-foreground">
+        <button onClick={onShare} aria-label="পোস্ট শেয়ার করুন" className="home-pressable min-w-0 flex min-h-11 items-center justify-center gap-1 rounded-lg px-1 text-xs font-semibold text-muted-foreground">
           <Share2 className="h-4 w-4" />
           <span className="hidden min-[360px]:inline">শেয়ার</span>
         </button>
