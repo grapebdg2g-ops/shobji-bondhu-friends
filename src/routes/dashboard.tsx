@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Bell,
   MapPin,
@@ -15,23 +15,26 @@ import {
   Bug,
   Sprout,
   Camera,
-  ThumbsUp,
   MessageCircle,
   Sparkles,
   CircleCheck,
   CloudRain,
   ArrowUpRight,
 } from "lucide-react";
+import { toast } from "sonner";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useUser } from "@/contexts/user-context";
 import { WeatherAlertBanner } from "@/components/krishi/weather-alert-banner";
 import { DashboardWeatherWidget } from "@/components/krishi/dashboard-weather-widget";
 import { useSidebar } from "@/components/krishi/app-sidebar";
 import { CreatePostSheet } from "@/components/krishi/create-post-sheet";
+import { CommentsSection } from "@/components/krishi/comments-section";
+import { PostSocialActions } from "@/components/krishi/post-social-actions";
 import { CropAdvisoryWidget } from "@/components/krishi/crop-advisory-widget";
 import { useMutedIds } from "@/hooks/use-muted-users";
 import { supabase } from "@/integrations/supabase/client";
 import type { Post } from "@/hooks/use-feed";
+import { readSavedPostIds, writeSavedPostIds } from "@/lib/saved-posts";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -128,7 +131,7 @@ function Dashboard() {
       <QuickActionsSection />
 
       {/* SECTION 5 — Community Feed */}
-      <CommunityFeedSection userName={user?.name ?? null} onCompose={() => setCreateOpen(true)} />
+      <CommunityFeedSection userId={user?.id ?? null} userName={user?.name ?? null} onCompose={() => setCreateOpen(true)} />
 
       <CreatePostSheet
         open={createOpen}
@@ -382,104 +385,165 @@ function TodayBrief({ onCreatePost }: { onCreatePost: () => void }) {
 
 /* ──────────────────────────── SECTION 5 ──────────────────────────── */
 
-function CommunityFeedSection({ userName, onCompose }: { userName: string | null; onCompose: () => void }) {
+function CommunityFeedSection({ userId, userName, onCompose }: { userId: string | null; userName: string | null; onCompose: () => void }) {
   const { data: mutedIds = [] } = useMutedIds();
+  const queryClient = useQueryClient();
+  const feedKey = ["dashboard-feed", mutedIds.join(",")];
+  const [likedIds, setLikedIds] = useState<string[]>([]);
+  const [savedIds, setSavedIds] = useState<string[]>([]);
+  const [openComments, setOpenComments] = useState<string | null>(null);
   const { data: posts = [], isLoading } = useQuery({
-    queryKey: ["dashboard-feed", mutedIds.join(",")],
+    queryKey: feedKey,
     queryFn: async () => {
       let q = supabase.from("posts").select("*").order("created_at", { ascending: false }).limit(5);
-      if (mutedIds.length > 0) {
-        q = q.not("user_id", "in", `(${mutedIds.join(",")})`);
-      }
+      if (mutedIds.length > 0) q = q.not("user_id", "in", `(${mutedIds.join(",")})`);
       const { data } = await q;
       return (data as Post[]) ?? [];
     },
     staleTime: 60_000,
   });
+  const postIdsKey = posts.map((p) => p.id).join(",");
+  const { data: likedFromDb = [] } = useQuery({
+    queryKey: ["dashboard-feed-liked", userId, postIdsKey],
+    enabled: !!userId && posts.length > 0,
+    queryFn: async () => {
+      const { data } = await supabase.from("post_likes").select("post_id").eq("user_id", userId!).in("post_id", posts.map((p) => p.id));
+      return ((data as { post_id: string }[]) ?? []).map((row) => row.post_id);
+    },
+    staleTime: 60_000,
+  });
+
+  useEffect(() => { setLikedIds(likedFromDb); }, [likedFromDb]);
+  useEffect(() => { setSavedIds(readSavedPostIds()); }, []);
+
+  const updatePost = (postId: string, patch: Partial<Post>) => {
+    queryClient.setQueryData<Post[]>(feedKey, (current) => (current ?? []).map((post) => post.id === postId ? { ...post, ...patch } : post));
+  };
+
+  const toggleLike = async (post: Post) => {
+    if (!userId) { toast.error("লাইক করতে লগইন করুন"); return; }
+    const liked = likedIds.includes(post.id);
+    setLikedIds((current) => liked ? current.filter((id) => id !== post.id) : [...current, post.id]);
+    updatePost(post.id, { likes_count: Math.max(0, post.likes_count + (liked ? -1 : 1)) });
+    const { error } = liked
+      ? await supabase.from("post_likes").delete().eq("post_id", post.id).eq("user_id", userId)
+      : await supabase.from("post_likes").insert({ post_id: post.id, user_id: userId });
+    if (error) {
+      setLikedIds((current) => liked ? [...current, post.id] : current.filter((id) => id !== post.id));
+      updatePost(post.id, { likes_count: post.likes_count });
+      toast.error("প্রতিক্রিয়া দেওয়া যায়নি");
+      return;
+    }
+    await supabase.rpc(liked ? "decrement_likes" : "increment_likes", { post_id: post.id });
+  };
+
+  const toggleSave = (post: Post) => {
+    setSavedIds((current) => {
+      const saved = current.includes(post.id);
+      const next = saved ? current.filter((id) => id !== post.id) : [post.id, ...current];
+      writeSavedPostIds(next);
+      toast.success(saved ? "সংরক্ষণ থেকে সরানো হয়েছে" : "পোস্ট সংরক্ষণ হয়েছে");
+      return next;
+    });
+  };
+
+  const share = async (post: Post) => {
+    const text = `${post.user_name} (${post.district ?? ""}): ${post.content}`;
+    try {
+      if (navigator.share) await navigator.share({ title: "কৃষিবন্ধু পোস্ট", text, url: window.location.href });
+      else { await navigator.clipboard.writeText(`${text}\n${window.location.href}`); toast.success("পোস্টের লিংক কপি হয়েছে"); }
+    } catch { /* user cancelled */ }
+  };
 
   return (
-    <section className="mt-6 px-4 pb-6">
-      <h2 className="text-lg font-bold text-gray-900 mb-3 px-1">কমিউনিটি আপডেট</h2>
-
-      {/* Composer */}
-      <button
-        onClick={onCompose}
-        className="home-pressable w-full rounded-2xl border border-gray-100 bg-white p-3 shadow-sm"
-      >
-        <div className="h-10 w-10 rounded-full bg-[#2D6A4F] text-white font-bold flex items-center justify-center shrink-0">
-          {userName?.[0] ?? "ক"}
+    <section className="mx-auto mt-6 max-w-[760px] px-4 pb-8">
+      <div className="mb-3 flex items-end justify-between px-1">
+        <div>
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#52B788]">আপনার কমিউনিটি</p>
+          <h2 className="mt-1 text-lg font-black tracking-tight text-gray-900">কমিউনিটি আপডেট</h2>
         </div>
-        <span className="flex-1 text-left text-sm text-gray-500">পোস্ট করুন...</span>
-        <div className="h-9 w-9 rounded-full bg-[#F0FFF4] flex items-center justify-center text-[#2D6A4F]">
-          <Camera className="h-4 w-4" />
-        </div>
-      </button>
-
-      {/* Posts */}
-      <div className="mt-4 space-y-3">
-        {isLoading ? (
-          Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-40 rounded-2xl bg-white border border-gray-100 animate-pulse" />
-          ))
-        ) : posts.length === 0 ? (
-          <div className="rounded-2xl bg-white border border-gray-100 p-6 text-center text-sm text-gray-500">
-            এখনো কোনো পোস্ট নেই — প্রথম পোস্টটি আপনিই করুন!
-          </div>
-        ) : (
-          posts.map((p, i) => (
-            <div
-              key={p.id}
-              className="animate-fade-in"
-              style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}
-            >
-              <MiniPostCard post={p} />
-            </div>
-          ))
-        )}
+        <Link to="/feed" className="text-xs font-bold text-[#2D6A4F]">সব পোস্ট</Link>
       </div>
 
-      <Link
-        to="/feed"
-        className="home-pressable mt-4 inline-flex h-12 w-full items-center justify-center gap-1 rounded-2xl border border-[#2D6A4F]/20 bg-white text-sm font-bold text-[#2D6A4F]"
-      >
-        আরো পোস্ট দেখুন
-        <ChevronRight className="h-4 w-4" strokeWidth={2.6} />
-      </Link>
+      <button type="button" onClick={onCompose} className="home-pressable flex w-full items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3 text-left shadow-sm">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#2D6A4F] font-bold text-white">{userName?.[0] ?? "ক"}</div>
+        <span className="min-w-0 flex-1 truncate text-sm text-gray-500">আজ কী শেয়ার করবেন?</span>
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F0FFF4] text-[#2D6A4F]"><Camera className="h-4 w-4" /></div>
+      </button>
+
+      <div className="mt-4 space-y-3">
+        {isLoading ? Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-40 rounded-2xl border border-gray-100 bg-white animate-pulse" />)
+          : posts.length === 0 ? <div className="rounded-2xl border border-gray-100 bg-white p-6 text-center text-sm text-gray-500">এখনো কোনো পোস্ট নেই — প্রথম পোস্টটি আপনিই করুন!</div>
+          : posts.map((post, i) => (
+            <div key={post.id} className="animate-fade-in" style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}>
+              <MiniPostCard
+                post={post}
+                liked={likedIds.includes(post.id)}
+                saved={savedIds.includes(post.id)}
+                commentsOpen={openComments === post.id}
+                onLike={() => toggleLike(post)}
+                onSave={() => toggleSave(post)}
+                onShare={() => share(post)}
+                onComment={() => setOpenComments((current) => current === post.id ? null : post.id)}
+                onCommentAdded={() => updatePost(post.id, { comments_count: post.comments_count + 1 })}
+              />
+            </div>
+          ))}
+      </div>
+
+      <Link to="/feed" className="home-pressable mt-4 inline-flex h-12 w-full items-center justify-center gap-1 rounded-2xl border border-[#2D6A4F]/20 bg-white text-sm font-bold text-[#2D6A4F]">আরো পোস্ট দেখুন <ChevronRight className="h-4 w-4" strokeWidth={2.6} /></Link>
     </section>
   );
 }
 
-function MiniPostCard({ post }: { post: Post }) {
+function MiniPostCard({
+  post,
+  liked,
+  saved,
+  commentsOpen,
+  onLike,
+  onSave,
+  onShare,
+  onComment,
+  onCommentAdded,
+}: {
+  post: Post;
+  liked: boolean;
+  saved: boolean;
+  commentsOpen: boolean;
+  onLike: () => void;
+  onSave: () => void;
+  onShare: () => void;
+  onComment: () => void;
+  onCommentAdded: () => void;
+}) {
   return (
-    <Link
-      to="/feed"
-      className="home-pressable block overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
-    >
+    <article className="home-pressable min-w-0 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
       <div className="p-4">
-        <div className="flex items-start gap-3">
-          <div className="h-10 w-10 rounded-full bg-[#2D6A4F]/15 text-[#2D6A4F] flex items-center justify-center font-bold shrink-0">
-            {post.user_name?.[0] ?? "ক"}
+        <div className="flex min-w-0 items-start gap-3">
+          <Link to="/u/$userId" params={{ userId: post.user_id }} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#2D6A4F]/15 font-bold text-[#2D6A4F]">{post.user_name?.[0] ?? "ক"}</Link>
+          <div className="min-w-0 flex-1">
+            <Link to="/u/$userId" params={{ userId: post.user_id }} className="block truncate text-sm font-semibold text-gray-900 hover:underline">{post.user_name}</Link>
+            <p className="truncate text-[11px] text-gray-500">{post.upazila ? `${post.upazila}, ${post.district ?? "—"}` : (post.district ?? "—")}</p>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm text-gray-900 truncate">{post.user_name}</p>
-            <p className="text-[11px] text-gray-500">
-              {post.upazila ? `${post.upazila}, ${post.district ?? "—"}` : (post.district ?? "—")}
-            </p>
-          </div>
+          <span className="shrink-0 text-[10px] text-gray-400">কমিউনিটি</span>
         </div>
-        <p className="mt-3 text-sm text-gray-800 line-clamp-3 leading-relaxed">{post.content}</p>
+        <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed text-gray-800 line-clamp-3">{post.content}</p>
       </div>
-      {post.image_url && (
-        <img src={post.image_url} alt="" loading="lazy" className="w-full aspect-[4/3] object-cover bg-gray-100" />
-      )}
-      <div className="px-4 py-2 flex items-center gap-4 border-t border-gray-100 text-xs text-gray-500">
-        <span className="flex items-center gap-1">
-          <ThumbsUp className="h-3.5 w-3.5" /> {post.likes_count}
-        </span>
-        <span className="flex items-center gap-1">
-          <MessageCircle className="h-3.5 w-3.5" /> {post.comments_count}
-        </span>
-      </div>
-    </Link>
+      {post.image_url && <img src={post.image_url} alt="" loading="lazy" className="block aspect-[4/3] w-full bg-gray-100 object-cover" />}
+      <PostSocialActions
+        liked={liked}
+        likesCount={post.likes_count}
+        commentsCount={post.comments_count}
+        saved={saved}
+        commentOpen={commentsOpen}
+        onLike={onLike}
+        onComment={onComment}
+        onSave={onSave}
+        onShare={onShare}
+      />
+      {commentsOpen && <div className="px-4 pb-4"><CommentsSection postId={post.id} onCommentAdded={onCommentAdded} /></div>}
+      <Link to="/feed" className="block border-t border-gray-100 px-4 py-2.5 text-center text-xs font-bold text-[#2D6A4F]">পোস্টটি খুলে আরও দেখুন</Link>
+    </article>
   );
 }
