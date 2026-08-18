@@ -15,6 +15,7 @@ export type DiseaseResult = {
   treatments: string[];
   prevention: string[];
   cost: { name: string; price: string }[];
+  confidence?: number;
   detected: boolean;
   reason?: string;
 };
@@ -31,6 +32,7 @@ const SYSTEM_PROMPT = `তুমি একজন অভিজ্ঞ বাংল
   "treatments": ["চিকিৎসা ১", "চিকিৎসা ২", "চিকিৎসা ৩"],
   "prevention": ["প্রতিরোধ ১", "প্রতিরোধ ২", "প্রতিরোধ ৩"],
   "cost": [{"name": "ঔষধের নাম", "price": "৳ মূল্য"}],
+  "confidence": 0-100,
   "reason": "যদি detected=false হয় তবে কারণ"
 }
 
@@ -118,6 +120,10 @@ export const analyzeDisease = createServerFn({ method: "POST" })
       treatments: Array.isArray(parsed.treatments) ? parsed.treatments : [],
       prevention: Array.isArray(parsed.prevention) ? parsed.prevention : [],
       cost: Array.isArray(parsed.cost) ? parsed.cost : [],
+      confidence:
+        typeof parsed.confidence === "number"
+          ? Math.max(0, Math.min(100, parsed.confidence))
+          : undefined,
       reason: parsed.reason,
     };
   });
