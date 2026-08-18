@@ -4,7 +4,7 @@ import imageCompression from "browser-image-compression";
 import { toast } from "sonner";
 import {
   ArrowLeft, Camera, Edit3, Trash2, Power, Pencil, LogOut,
-  Bell, Globe, Info, Star, HelpCircle, ChevronRight, MapPin, Plus, BellOff,
+  Bell, Globe, Info, Star, HelpCircle, ChevronRight, MapPin, Plus, BellOff, Settings,
 } from "lucide-react";
 import { MutedUsersSheet } from "@/components/krishi/muted-users-sheet";
 import { DiseaseHistoryView } from "@/components/krishi/disease-history-view";
@@ -66,6 +66,7 @@ function ProfilePage() {
   const [full, setFull] = useState<ProfileFull | null>(null);
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [tab, setTab] = useState<"posts" | "exchanges" | "prices" | "diseases">("posts");
   const [uploading, setUploading] = useState(false);
@@ -158,13 +159,23 @@ function ProfilePage() {
   return (
     <main className="min-h-screen bg-background pb-24">
       <header className="px-4 pt-6 pb-10 rounded-b-3xl relative" style={{ background: "var(--gradient-brand)" }}>
-        <button
-          onClick={() => navigate({ to: "/dashboard" })}
-          aria-label="ফিরে যান"
-          className="h-10 w-10 rounded-full bg-white/15 flex items-center justify-center ring-2 ring-white/20"
-        >
-          <ArrowLeft className="h-5 w-5 text-white" />
-        </button>
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => navigate({ to: "/dashboard" })}
+            aria-label="ফিরে যান"
+            className="home-pressable h-10 w-10 rounded-full bg-white/15 flex items-center justify-center ring-2 ring-white/20"
+          >
+            <ArrowLeft className="h-5 w-5 text-white" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setSettingsOpen(true)}
+            aria-label="সেটিংস খুলুন"
+            className="home-pressable h-10 w-10 rounded-full bg-white/15 flex items-center justify-center ring-2 ring-white/20"
+          >
+            <Settings className="h-5 w-5 text-white" />
+          </button>
+        </div>
 
         <div className="mt-3 flex flex-col items-center">
           <div className="relative">
@@ -276,10 +287,7 @@ function ProfilePage() {
         </div>
       </section>
 
-      <section className="px-4 mt-8">
-        <h2 className="text-sm font-bold text-muted-foreground mb-2 px-1">সেটিংস</h2>
-        <SettingsList onLogout={() => setLogoutOpen(true)} />
-      </section>
+      <SettingsList open={settingsOpen} onClose={() => setSettingsOpen(false)} onLogout={() => setLogoutOpen(true)} />
 
       <EditProfileSheet
         open={editOpen}
@@ -730,7 +738,7 @@ function MyPricesTab({ userId, onChange }: { userId: string; onChange: (d: numbe
   );
 }
 
-function SettingsList({ onLogout }: { onLogout: () => void }) {
+function SettingsList({ open, onClose, onLogout }: { open: boolean; onClose: () => void; onLogout: () => void }) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -754,24 +762,27 @@ function SettingsList({ onLogout }: { onLogout: () => void }) {
 
   return (
     <>
-      <div className="rounded-2xl bg-card border border-border overflow-hidden">
-        <SettingRow icon={Bell} label="নোটিফিকেশন সেটিংস" onClick={() => setNotifOpen(true)} />
-        <SettingRow icon={BellOff} label="মিউট করা ব্যবহারকারীরা" onClick={() => setMutedOpen(true)} />
-        <SettingRow icon={Globe} label="ভাষা" value="বাংলা" onClick={() => setLangOpen(true)} />
-        <SettingRow icon={Info} label="অ্যাপ সম্পর্কে" onClick={() => setAboutOpen(true)} />
-        <SettingRow icon={Star} label="অ্যাপ রেট করুন" onClick={rate} />
-        <SettingRow icon={HelpCircle} label="সাহায্য ও সাপোর্ট" onClick={() => setHelpOpen(true)} last />
-      </div>
+      <BottomSheet open={open} onClose={onClose} title="সেটিংস">
+        <div className="space-y-3">
+          <div className="rounded-2xl bg-card border border-border overflow-hidden">
+            <SettingRow icon={Bell} label="নোটিফিকেশন সেটিংস" onClick={() => setNotifOpen(true)} />
+            <SettingRow icon={BellOff} label="মিউট করা ব্যবহারকারীরা" onClick={() => setMutedOpen(true)} />
+            <SettingRow icon={Globe} label="ভাষা" value="বাংলা" onClick={() => setLangOpen(true)} />
+            <SettingRow icon={Info} label="অ্যাপ সম্পর্কে" onClick={() => setAboutOpen(true)} />
+            <SettingRow icon={Star} label="অ্যাপ রেট করুন" onClick={rate} />
+            <SettingRow icon={HelpCircle} label="সাহায্য ও সাপোর্ট" onClick={() => setHelpOpen(true)} last />
+          </div>
+          <button
+            type="button"
+            onClick={onLogout}
+            className="w-full h-12 rounded-xl bg-destructive/10 text-destructive font-bold flex items-center justify-center gap-2 active:scale-[0.99]"
+          >
+            <LogOut className="h-4 w-4" /> লগআউট
+          </button>
+        </div>
+      </BottomSheet>
 
       <MutedUsersSheet open={mutedOpen} onClose={() => setMutedOpen(false)} />
-
-      <button
-        type="button"
-        onClick={onLogout}
-        className="mt-6 w-full h-12 rounded-xl bg-destructive/10 text-destructive font-bold flex items-center justify-center gap-2 active:scale-[0.99]"
-      >
-        <LogOut className="h-4 w-4" /> লগআউট
-      </button>
 
       <BottomSheet open={notifOpen} onClose={() => setNotifOpen(false)} title="নোটিফিকেশন সেটিংস">
         <div className="space-y-3">
@@ -841,7 +852,7 @@ function SettingRow({
     <button
       type="button"
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-4 py-3.5 active:bg-muted ${last ? "" : "border-b border-border"}`}
+      className={`home-pressable w-full flex items-center gap-3 px-4 py-3.5 transition hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${last ? "" : "border-b border-border"}`}
     >
       <Icon className="h-5 w-5 text-primary shrink-0" />
       <span className="flex-1 text-left text-sm font-semibold text-foreground">{label}</span>

@@ -613,6 +613,21 @@ function PostCard({
         />
       )}
 
+      <div className="flex items-center justify-between border-t border-border/60 px-4 py-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-1.5">
+          {post.likes_count > 0 ? (
+            <>
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[11px] text-primary-foreground">👍</span>
+              <span>{post.likes_count} জনের কাছে উপকারী</span>
+            </>
+          ) : (
+            <span>প্রথমে আপনিই উপকারী বলুন</span>
+          )}
+        </div>
+        <button type="button" onClick={() => setShowComments(true)} className="font-semibold hover:text-primary">
+          {post.comments_count > 0 ? `${post.comments_count}টি মন্তব্য` : "মন্তব্য করুন"}
+        </button>
+      </div>
       <div className="grid grid-cols-4 border-t border-border/60 px-2 py-1.5">
         <button onClick={onLike} aria-label="পোস্টটি উপকারী হিসেবে চিহ্নিত করুন" className={`home-pressable flex min-h-11 items-center justify-center gap-1 rounded-lg px-1 text-xs font-semibold ${liked ? "text-primary" : "text-muted-foreground"}`}>
           <ThumbsUp className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />
