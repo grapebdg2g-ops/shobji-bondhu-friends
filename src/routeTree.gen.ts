@@ -59,6 +59,7 @@ import { Route as AiBondhuChatSessionIdRouteImport } from './routes/ai-bondhu.ch
 import { Route as ApiPublicHooksWeatherAlertsRouteImport } from './routes/api/public/hooks/weather-alerts'
 import { Route as ApiPublicHooksSendScheduledBroadcastsRouteImport } from './routes/api/public/hooks/send-scheduled-broadcasts'
 import { Route as ApiPublicHooksFetchGovtPricesRouteImport } from './routes/api/public/hooks/fetch-govt-prices'
+import { Route as ApiPublicHooksCropRemindersRouteImport } from './routes/api/public/hooks/crop-reminders'
 import { Route as ApiPublicHooksCheckPredictionAccuracyRouteImport } from './routes/api/public/hooks/check-prediction-accuracy'
 
 const WeatherRoute = WeatherRouteImport.update({
@@ -314,6 +315,12 @@ const ApiPublicHooksFetchGovtPricesRoute =
     path: '/api/public/hooks/fetch-govt-prices',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksCropRemindersRoute =
+  ApiPublicHooksCropRemindersRouteImport.update({
+    id: '/api/public/hooks/crop-reminders',
+    path: '/api/public/hooks/crop-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksCheckPredictionAccuracyRoute =
   ApiPublicHooksCheckPredictionAccuracyRouteImport.update({
     id: '/api/public/hooks/check-prediction-accuracy',
@@ -370,6 +377,7 @@ export interface FileRoutesByFullPath {
   '/crop-guide/plan/$planId': typeof CropGuidePlanPlanIdRoute
   '/ai-bondhu/chat/': typeof AiBondhuChatIndexRoute
   '/api/public/hooks/check-prediction-accuracy': typeof ApiPublicHooksCheckPredictionAccuracyRoute
+  '/api/public/hooks/crop-reminders': typeof ApiPublicHooksCropRemindersRoute
   '/api/public/hooks/fetch-govt-prices': typeof ApiPublicHooksFetchGovtPricesRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -421,6 +429,7 @@ export interface FileRoutesByTo {
   '/crop-guide/plan/$planId': typeof CropGuidePlanPlanIdRoute
   '/ai-bondhu/chat': typeof AiBondhuChatIndexRoute
   '/api/public/hooks/check-prediction-accuracy': typeof ApiPublicHooksCheckPredictionAccuracyRoute
+  '/api/public/hooks/crop-reminders': typeof ApiPublicHooksCropRemindersRoute
   '/api/public/hooks/fetch-govt-prices': typeof ApiPublicHooksFetchGovtPricesRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -475,6 +484,7 @@ export interface FileRoutesById {
   '/crop-guide/plan/$planId': typeof CropGuidePlanPlanIdRoute
   '/ai-bondhu/chat/': typeof AiBondhuChatIndexRoute
   '/api/public/hooks/check-prediction-accuracy': typeof ApiPublicHooksCheckPredictionAccuracyRoute
+  '/api/public/hooks/crop-reminders': typeof ApiPublicHooksCropRemindersRoute
   '/api/public/hooks/fetch-govt-prices': typeof ApiPublicHooksFetchGovtPricesRoute
   '/api/public/hooks/send-scheduled-broadcasts': typeof ApiPublicHooksSendScheduledBroadcastsRoute
   '/api/public/hooks/weather-alerts': typeof ApiPublicHooksWeatherAlertsRoute
@@ -530,6 +540,7 @@ export interface FileRouteTypes {
     | '/crop-guide/plan/$planId'
     | '/ai-bondhu/chat/'
     | '/api/public/hooks/check-prediction-accuracy'
+    | '/api/public/hooks/crop-reminders'
     | '/api/public/hooks/fetch-govt-prices'
     | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
@@ -581,6 +592,7 @@ export interface FileRouteTypes {
     | '/crop-guide/plan/$planId'
     | '/ai-bondhu/chat'
     | '/api/public/hooks/check-prediction-accuracy'
+    | '/api/public/hooks/crop-reminders'
     | '/api/public/hooks/fetch-govt-prices'
     | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
@@ -634,6 +646,7 @@ export interface FileRouteTypes {
     | '/crop-guide/plan/$planId'
     | '/ai-bondhu/chat/'
     | '/api/public/hooks/check-prediction-accuracy'
+    | '/api/public/hooks/crop-reminders'
     | '/api/public/hooks/fetch-govt-prices'
     | '/api/public/hooks/send-scheduled-broadcasts'
     | '/api/public/hooks/weather-alerts'
@@ -672,6 +685,7 @@ export interface RootRouteChildren {
   AiBondhuChatSessionIdRoute: typeof AiBondhuChatSessionIdRoute
   AiBondhuChatIndexRoute: typeof AiBondhuChatIndexRoute
   ApiPublicHooksCheckPredictionAccuracyRoute: typeof ApiPublicHooksCheckPredictionAccuracyRoute
+  ApiPublicHooksCropRemindersRoute: typeof ApiPublicHooksCropRemindersRoute
   ApiPublicHooksFetchGovtPricesRoute: typeof ApiPublicHooksFetchGovtPricesRoute
   ApiPublicHooksSendScheduledBroadcastsRoute: typeof ApiPublicHooksSendScheduledBroadcastsRoute
   ApiPublicHooksWeatherAlertsRoute: typeof ApiPublicHooksWeatherAlertsRoute
@@ -1029,6 +1043,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksFetchGovtPricesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/crop-reminders': {
+      id: '/api/public/hooks/crop-reminders'
+      path: '/api/public/hooks/crop-reminders'
+      fullPath: '/api/public/hooks/crop-reminders'
+      preLoaderRoute: typeof ApiPublicHooksCropRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/check-prediction-accuracy': {
       id: '/api/public/hooks/check-prediction-accuracy'
       path: '/api/public/hooks/check-prediction-accuracy'
@@ -1143,6 +1164,7 @@ const rootRouteChildren: RootRouteChildren = {
   AiBondhuChatIndexRoute: AiBondhuChatIndexRoute,
   ApiPublicHooksCheckPredictionAccuracyRoute:
     ApiPublicHooksCheckPredictionAccuracyRoute,
+  ApiPublicHooksCropRemindersRoute: ApiPublicHooksCropRemindersRoute,
   ApiPublicHooksFetchGovtPricesRoute: ApiPublicHooksFetchGovtPricesRoute,
   ApiPublicHooksSendScheduledBroadcastsRoute:
     ApiPublicHooksSendScheduledBroadcastsRoute,

@@ -4,6 +4,7 @@ import { CalendarDays, Check, ChevronRight, ClipboardList, Leaf, Plus, Bell, Not
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/user-context";
+import { NotificationToggle } from "@/components/krishi/notification-toggle";
 import { MASTER_CROP_LABELS } from "@/lib/crop-options";
 import { FARMING_STAGES, type FarmingTask } from "@/data/farming-guide";
 import { daysSince } from "@/lib/bn-date";
@@ -205,6 +206,7 @@ function CropDiaryPage() {
           ))}
         </div>
       </nav>
+      <div className="mx-auto max-w-3xl px-4"><NotificationToggle /></div>
 
       <section className="mx-auto max-w-3xl space-y-4 px-4 pt-5">
         {tab === "today" && <TodayPlan tasks={todayTasks} completions={completions} completed={completedTodayTasks} dueReminders={dueReminders} latestEntry={latestEntry} onToggle={toggleTask} onOpenReminder={() => { setTab("reminders"); setReminderOpen(true); }} />}
