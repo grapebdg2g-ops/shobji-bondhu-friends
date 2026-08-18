@@ -24,6 +24,7 @@ import {
   type CalcResult,
 } from "@/data/fertilizer-guide";
 import { toBn, fmtBdt } from "@/lib/bn";
+import { CALCULATOR_CROP_OPTIONS } from "@/lib/crop-options";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -149,18 +150,24 @@ function StepCrop({
   return (
     <div className="space-y-4">
       <div className="bg-white rounded-2xl p-4 shadow-sm">
-        <h2 className="font-bold text-gray-900 mb-3">কোন ফসলের সার হিসাব করবেন?</h2>
+        <h2 className="font-bold text-gray-900 mb-1">কোন ফসলের সার হিসাব করবেন?</h2>
+        <p className="mb-3 text-[11px] leading-relaxed text-gray-500">ফসলের তালিকা master crop data থেকে এসেছে। যেসব ফসলের formula এখনও প্রস্তুত নয়, সেগুলো শীঘ্রই যোগ করা হবে।</p>
         <div className="grid grid-cols-3 gap-2.5">
-          {CROPS.map((c) => {
-            const active = cropId === c.id;
+          {CALCULATOR_CROP_OPTIONS.map((c) => {
+            const supported = Boolean(c.calculatorId);
+            const active = cropId === c.calculatorId;
             return (
               <button
                 key={c.id}
-                onClick={() => setCropId(c.id)}
+                type="button"
+                disabled={!supported}
+                onClick={() => c.calculatorId && setCropId(c.calculatorId)}
                 className={`relative aspect-square rounded-xl border-2 flex flex-col items-center justify-center gap-1 transition ${
                   active
                     ? "border-emerald-600 bg-emerald-50"
-                    : "border-gray-200 bg-gray-50 active:bg-gray-100"
+                    : supported
+                      ? "border-gray-200 bg-gray-50 active:bg-gray-100"
+                      : "border-gray-100 bg-gray-50/70 opacity-60"
                 }`}
               >
                 {active && (
@@ -168,10 +175,9 @@ function StepCrop({
                     <Check className="h-3 w-3 text-white" />
                   </span>
                 )}
-                <span className="text-2xl">{c.emoji}</span>
-                <span className="text-[11px] font-semibold text-gray-800 text-center leading-tight px-1">
-                  {c.label}
-                </span>
+                <span className="text-2xl">{c.icon}</span>
+                <span className="px-1 text-center text-[11px] font-semibold leading-tight text-gray-800">{c.label}</span>
+                {!supported && <span className="text-[9px] font-semibold text-gray-400">শীঘ্রই</span>}
               </button>
             );
           })}

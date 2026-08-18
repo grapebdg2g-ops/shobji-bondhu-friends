@@ -8,6 +8,7 @@ import {
   type OrganicFertilizerKey,
 } from "@/data/organic-fertilizer-guide";
 import { UNIT_LABEL, UNIT_TO_SHOTOK, type Unit } from "@/data/fertilizer-guide";
+import { MASTER_CROP_LABELS } from "@/lib/crop-options";
 import { toBn } from "@/lib/bn";
 
 export const Route = createFileRoute("/organic-fertilizer")({
@@ -429,9 +430,16 @@ function Calculator({ activeKey }: { activeKey: OrganicFertilizerKey }) {
   const redKey = REDUCTION_KEYS[activeKey];
   const rates = ORGANIC_APPLICATION_RATES[calcKey];
   const item = ORGANIC_FERTILIZER_GUIDE[activeKey] as any;
-  const crops = Object.keys(rates);
+  const crops = MASTER_CROP_LABELS;
+  const availableCrops = new Set(Object.keys(rates));
+  const getRateKey = (name: string) => {
+    if (availableCrops.has(name)) return name;
+    if (name.includes("ধান") && availableCrops.has("ধান")) return "ধান";
+    if ((name === "লাউ" || name === "মিষ্টি কুমড়া") && availableCrops.has("লাউ/কুমড়া")) return "লাউ/কুমড়া";
+    return null;
+  };
 
-  const [crop, setCrop] = useState<string>(crops[0]);
+  const [crop, setCrop] = useState<string>(() => crops.find((name) => getRateKey(name)) ?? crops[0]);
   const [areaInput, setAreaInput] = useState<string>("1");
   const [unit, setUnit] = useState<Unit>("bigha");
 
@@ -439,7 +447,8 @@ function Calculator({ activeKey }: { activeKey: OrganicFertilizerKey }) {
   const shotok = area * UNIT_TO_SHOTOK[unit];
   const bigha = shotok / 33;
 
-  const ratePerBigha = (rates as any)[crop] as number;
+  const rateKey = getRateKey(crop);
+  const ratePerBigha = rateKey ? ((rates as Record<string, number>)[rateKey] ?? 0) : 0;
   const totalKg = useMemo(() => Math.round(ratePerBigha * bigha), [ratePerBigha, bigha]);
 
   const reduction = redKey ? CHEMICAL_REDUCTION[redKey] : null;
@@ -475,7 +484,7 @@ function Calculator({ activeKey }: { activeKey: OrganicFertilizerKey }) {
             className="mt-1 w-full h-11 rounded-xl border border-gray-200 px-3 bg-white text-sm"
           >
             {crops.map((c) => (
-              <option key={c} value={c}>{c}</option>
+              <option key={c} value={c} disabled={!getRateKey(c)}>{c}{getRateKey(c) ? "" : " — শীঘ্রই"}</option>
             ))}
           </select>
         </div>
@@ -507,7 +516,7 @@ function Calculator({ activeKey }: { activeKey: OrganicFertilizerKey }) {
           )}
         </div>
 
-        {area > 0 && (
+        {area > 0 && ratePerBigha > 0 && (
           <div className="mt-2 bg-emerald-50 border border-emerald-200 rounded-2xl p-4 space-y-3">
             <div className="font-bold text-emerald-900">
               {crop} — {toBn(area)} {UNIT_LABEL[unit]}-এর জন্য
@@ -537,6 +546,11 @@ function Calculator({ activeKey }: { activeKey: OrganicFertilizerKey }) {
                 </div>
               </>
             )}
+          </div>
+        )}
+        {area > 0 && ratePerBigha <= 0 && (
+          <div className="mt-2 rounded-2xl border border-sky-200 bg-sky-50 p-3 text-xs leading-relaxed text-sky-900">
+            এই crop-এর জৈব সারের rate এখনও যোগ করা হয়নি। master crop catalog-এ cropটি আছে; rate যুক্ত হলে calculator-এ স্বয়ংক্রিয়ভাবে সক্রিয় হবে।
           </div>
         )}
       </div>
