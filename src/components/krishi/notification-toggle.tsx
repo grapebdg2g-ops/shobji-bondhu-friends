@@ -21,7 +21,7 @@ export function NotificationToggle() {
     return (
       <div className="mt-4 rounded-xl border border-yellow-300 bg-yellow-50 p-4">
         <p className="text-sm text-yellow-900 leading-relaxed">
-          ⚠️ আপনার ফোনে push notification সাপোর্ট নেই। SMS সতর্কতা শীঘ্রই আসছে।
+          ⚠️ আপনার ফোনে push notification সাপোর্ট নেই। In-app রিমাইন্ডার অবশ্যই দেখা যাবে।
         </p>
       </div>
     );
@@ -42,7 +42,7 @@ export function NotificationToggle() {
     return (
       <div className="mt-4 rounded-xl border border-[#22C55E] bg-[#DCFCE7] p-3 flex items-center justify-between gap-3">
         <span className="text-sm font-semibold text-foreground flex items-center gap-2">
-          <Bell className="h-4 w-4" /> ✅ সতর্কতা চালু আছে
+          <Bell className="h-4 w-4" /> ✅ কৃষি ও আবহাওয়া সতর্কতা চালু আছে
         </span>
         <button
           disabled={busy}
@@ -70,7 +70,7 @@ export function NotificationToggle() {
       className="mt-4 w-full rounded-xl border-2 border-primary bg-card text-primary font-bold py-3 flex items-center justify-center gap-2 hover:bg-primary/5 disabled:opacity-60"
     >
       {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Bell className="h-5 w-5" />}
-      🔔 আবহাওয়া সতর্কতা চালু করুন
+      🔔 কৃষি ও আবহাওয়া সতর্কতা চালু করুন
     </button>
   );
 }

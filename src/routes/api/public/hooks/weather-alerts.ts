@@ -1,29 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import webpush from "web-push";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { configureVapid, sendWebPush } from "@/lib/push.server";
 import { getDistrictUpazilaLatLng } from "@/lib/bd-data";
 import { fetchForecast, evaluateAlert, type WeatherAlert } from "@/lib/weather.server";
 
 const MAX_PER_USER_PER_DAY = 3;
-
-async function sendPush(subscription: { endpoint: string; p256dh: string; auth: string }, payload: object) {
-  try {
-    await webpush.sendNotification(
-      {
-        endpoint: subscription.endpoint,
-        keys: { p256dh: subscription.p256dh, auth: subscription.auth },
-      },
-      JSON.stringify(payload),
-    );
-    return { ok: true };
-  } catch (err: any) {
-    // 404/410 = gone — delete the subscription
-    if (err?.statusCode === 404 || err?.statusCode === 410) {
-      await supabaseAdmin.from("push_subscriptions").delete().eq("endpoint", subscription.endpoint);
-    }
-    return { ok: false, error: String(err?.message ?? err) };
-  }
-}
 
 async function processLocation(district: string, upazila: string | null) {
   const [lat, lng] = getDistrictUpazilaLatLng(district, upazila);
@@ -69,7 +50,7 @@ async function processLocation(district: string, upazila: string | null) {
     .like("type", "weather_%")
     .gte("created_at", todayStartUtc.toISOString());
   const countByUser = new Map<string, number>();
-  (recentCounts ?? []).forEach((r: any) => {
+  (recentCounts ?? []).forEach((r: { user_id: string }) => {
     countByUser.set(r.user_id, (countByUser.get(r.user_id) ?? 0) + 1);
   });
 
@@ -98,7 +79,7 @@ async function processLocation(district: string, upazila: string | null) {
   };
   const sends = subs
     .filter((s) => allowedUserIds.includes(s.user_id))
-    .map((s) => sendPush(s, pushPayload));
+    .map((s) => sendWebPush(s, pushPayload));
   const results = await Promise.all(sends);
   const delivered = results.filter((r) => r.ok).length;
 
@@ -109,16 +90,12 @@ export const Route = createFileRoute("/api/public/hooks/weather-alerts")({
   server: {
     handlers: {
       POST: async () => {
-        const vapidPub = process.env.VAPID_PUBLIC_KEY;
-        const vapidPriv = process.env.VAPID_PRIVATE_KEY;
-        const vapidSub = process.env.VAPID_SUBJECT;
-        if (!vapidPub || !vapidPriv || !vapidSub) {
+        if (!configureVapid()) {
           return Response.json(
             { ok: false, error: "VAPID keys not configured" },
             { status: 500 },
           );
         }
-        webpush.setVapidDetails(vapidSub, vapidPub, vapidPriv);
 
         // Get distinct (district, upazila) pairs with subscribers
         const { data: rows, error } = await supabaseAdmin
@@ -138,7 +115,7 @@ export const Route = createFileRoute("/api/public/hooks/weather-alerts")({
           pairs.push({ district: r.district, upazila: r.upazila ?? null });
         }
 
-        const results: any[] = [];
+        const results: Array<Record<string, unknown>> = [];
         for (const p of pairs) {
           // Sequential to avoid hammering Open-Meteo
           results.push(await processLocation(p.district, p.upazila));

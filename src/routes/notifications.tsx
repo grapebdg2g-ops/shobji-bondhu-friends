@@ -9,6 +9,7 @@ import {
   Trash2,
   TrendingDown,
   UserPlus,
+  CalendarDays,
 } from "lucide-react";
 import { useUser } from "@/contexts/user-context";
 import { useNotifications, type Notification } from "@/hooks/use-notifications";
@@ -39,6 +40,8 @@ function iconFor(type: string) {
     return { Icon: UserPlus, color: "text-emerald-600", bg: "bg-emerald-50" };
   if (type === "connection_response")
     return { Icon: Check, color: "text-primary", bg: "bg-primary/10" };
+  if (type === "crop_reminder")
+    return { Icon: CalendarDays, color: "text-emerald-600", bg: "bg-emerald-50" };
   return { Icon: Bell, color: "text-primary", bg: "bg-primary/10" };
 }
 
@@ -54,6 +57,7 @@ function NotificationsPage() {
     if (n.ref_type === "connection") navigate({ to: "/connections" });
     else if (n.ref_type === "post") navigate({ to: "/feed" });
     else if (n.ref_type === "price") navigate({ to: "/prices" });
+    else if (n.ref_type === "crop_reminder") navigate({ to: "/crop-diary" });
   };
 
   return (
