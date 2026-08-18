@@ -48,7 +48,7 @@ export function CropAdvisoryWidget() {
         <h2 className="text-base font-bold text-gray-900 inline-flex items-center gap-1.5">
           <ClipboardList className="h-5 w-5 text-emerald-600" /> আজকের ফসল পরামর্শ
         </h2>
-        <Link to="/crop-guide" className="text-emerald-600 text-sm font-semibold">সব দেখুন</Link>
+        <div className="flex items-center gap-3"><Link to="/crop-diary" className="text-emerald-600 text-sm font-semibold">ডায়েরি</Link><Link to="/crop-guide" className="text-emerald-600 text-sm font-semibold">সব দেখুন</Link></div>
       </div>
       <div className="space-y-2">
         {items.map(({ plan, task, stageName }) => {

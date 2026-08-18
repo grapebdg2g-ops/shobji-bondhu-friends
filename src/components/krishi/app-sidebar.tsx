@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import {
   Home, TrendingUp, Repeat2, Bug, Newspaper,
-  CloudSun, Bell, User, LogOut, Phone, X, Shield, UserCog,
+  CloudSun, Bell, User, LogOut, Phone, X, Shield, UserCog, CalendarDays,
 } from "lucide-react";
 import { useUser } from "@/contexts/user-context";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -14,7 +14,7 @@ const BRAND = "#2D6A4F";
 type Item = {
   label: string;
   to:
-    | "/dashboard" | "/prices" | "/exchange" | "/disease-detection" | "/feed"
+    | "/dashboard" | "/prices" | "/exchange" | "/disease-detection" | "/feed" | "/crop-diary"
     | "/weather" | "/notifications" | "/profile" | "/moderation" | "/admin";
   icon: typeof Home;
   badge?: number;
@@ -78,6 +78,7 @@ export function AppSidebar({
     { label: "বিনিময়", to: "/exchange", icon: Repeat2 },
     { label: "রোগ শনাক্ত", to: "/disease-detection", icon: Bug },
     { label: "সংবাদ ফিড", to: "/feed", icon: Newspaper },
+    { label: "ফসল ডায়েরি", to: "/crop-diary", icon: CalendarDays },
   ];
   const secondary: Item[] = [
     { label: "আবহাওয়া", to: "/weather", icon: CloudSun },
