@@ -176,6 +176,100 @@ export type Database = {
         }
         Relationships: []
       }
+      crop_diary_entries: {
+        Row: {
+          created_at: string
+          crop_type: string
+          entry_date: string
+          id: string
+          notes: string
+          plan_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          crop_type: string
+          entry_date?: string
+          id?: string
+          notes: string
+          plan_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          crop_type?: string
+          entry_date?: string
+          id?: string
+          notes?: string
+          plan_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crop_diary_entries_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "user_crop_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crop_reminders: {
+        Row: {
+          created_at: string
+          crop_type: string
+          id: string
+          is_active: boolean
+          is_done: boolean
+          last_notified_date: string | null
+          note: string | null
+          plan_id: string | null
+          reminder_date: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          crop_type: string
+          id?: string
+          is_active?: boolean
+          is_done?: boolean
+          last_notified_date?: string | null
+          note?: string | null
+          plan_id?: string | null
+          reminder_date: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          crop_type?: string
+          id?: string
+          is_active?: boolean
+          is_done?: boolean
+          last_notified_date?: string | null
+          note?: string | null
+          plan_id?: string | null
+          reminder_date?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crop_reminders_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "user_crop_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crop_task_completions: {
         Row: {
           completed_at: string
