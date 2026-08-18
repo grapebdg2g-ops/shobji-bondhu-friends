@@ -24,6 +24,7 @@ import { Route as DiseaseDetectionRouteImport } from './routes/disease-detection
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CropPlannerRouteImport } from './routes/crop-planner'
 import { Route as CropGuideRouteImport } from './routes/crop-guide'
+import { Route as CropDiaryRouteImport } from './routes/crop-diary'
 import { Route as ConnectionsRouteImport } from './routes/connections'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -133,6 +134,11 @@ const CropPlannerRoute = CropPlannerRouteImport.update({
 const CropGuideRoute = CropGuideRouteImport.update({
   id: '/crop-guide',
   path: '/crop-guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CropDiaryRoute = CropDiaryRouteImport.update({
+  id: '/crop-diary',
+  path: '/crop-diary',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConnectionsRoute = ConnectionsRouteImport.update({
@@ -319,6 +325,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/connections': typeof ConnectionsRoute
+  '/crop-diary': typeof CropDiaryRoute
   '/crop-guide': typeof CropGuideRouteWithChildren
   '/crop-planner': typeof CropPlannerRouteWithChildren
   '/dashboard': typeof DashboardRoute
@@ -370,6 +377,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/connections': typeof ConnectionsRoute
+  '/crop-diary': typeof CropDiaryRoute
   '/crop-planner': typeof CropPlannerRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/disease-detection': typeof DiseaseDetectionRoute
@@ -422,6 +430,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/connections': typeof ConnectionsRoute
+  '/crop-diary': typeof CropDiaryRoute
   '/crop-guide': typeof CropGuideRouteWithChildren
   '/crop-planner': typeof CropPlannerRouteWithChildren
   '/dashboard': typeof DashboardRoute
@@ -476,6 +485,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/connections'
+    | '/crop-diary'
     | '/crop-guide'
     | '/crop-planner'
     | '/dashboard'
@@ -527,6 +537,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/connections'
+    | '/crop-diary'
     | '/crop-planner'
     | '/dashboard'
     | '/disease-detection'
@@ -578,6 +589,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/connections'
+    | '/crop-diary'
     | '/crop-guide'
     | '/crop-planner'
     | '/dashboard'
@@ -631,6 +643,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   ConnectionsRoute: typeof ConnectionsRoute
+  CropDiaryRoute: typeof CropDiaryRoute
   CropGuideRoute: typeof CropGuideRouteWithChildren
   CropPlannerRoute: typeof CropPlannerRouteWithChildren
   DashboardRoute: typeof DashboardRoute
@@ -769,6 +782,13 @@ declare module '@tanstack/react-router' {
       path: '/crop-guide'
       fullPath: '/crop-guide'
       preLoaderRoute: typeof CropGuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/crop-diary': {
+      id: '/crop-diary'
+      path: '/crop-diary'
+      fullPath: '/crop-diary'
+      preLoaderRoute: typeof CropDiaryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/connections': {
@@ -1093,6 +1113,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   ConnectionsRoute: ConnectionsRoute,
+  CropDiaryRoute: CropDiaryRoute,
   CropGuideRoute: CropGuideRouteWithChildren,
   CropPlannerRoute: CropPlannerRouteWithChildren,
   DashboardRoute: DashboardRoute,

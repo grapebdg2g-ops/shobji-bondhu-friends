@@ -333,22 +333,25 @@ function TodayBrief({ onCreatePost }: { onCreatePost: () => void }) {
     <section className="relative z-10 mt-5 px-4 sm:mt-6">
       <div className="home-gradient-border rounded-[28px] border border-white/80 bg-white/95 p-4 shadow-[0_18px_42px_-24px_rgba(27,67,50,0.55)] backdrop-blur-xl">
         <div className="flex items-start justify-between gap-3">
-          <div>
+          <div className="min-w-0">
             <p className="text-[11px] font-extrabold uppercase tracking-[0.15em] text-[#52B788]">আজকের ফোকাস</p>
             <h2 className="mt-1 text-xl font-black tracking-tight text-gray-900">আপনার কৃষি সারাংশ</h2>
           </div>
-          <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-[#F0FFF4] text-[#2D6A4F]">
+          <div className="flex shrink-0 items-center gap-2">
+            <button type="button" onClick={() => navigate({ to: "/crop-diary" })} className="home-pressable inline-flex min-h-9 items-center gap-1 rounded-full bg-[#E8F7EC] px-2.5 text-[11px] font-bold text-[#2D6A4F]"><CalendarDays className="h-3.5 w-3.5" /> প্ল্যান</button>
+            <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-[#F0FFF4] text-[#2D6A4F]">
             <svg aria-label="আজকের কাজের অগ্রগতি" role="img" viewBox="0 0 36 36" className="absolute inset-0 h-full w-full -rotate-90">
               <path d="M18 3a15 15 0 1 1 0 30a15 15 0 1 1 0-30" fill="none" stroke="currentColor" strokeOpacity=".12" strokeWidth="3" />
               <path d="M18 3a15 15 0 1 1 0 30a15 15 0 1 1 0-30" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="72 100" className="home-ring-draw" />
             </svg>
-            <span className="text-[10px] font-black">২/৩</span>
+              <span className="text-[10px] font-black">আজ</span>
+            </div>
           </div>
         </div>
 
         <div className="mt-3 flex items-center gap-2 rounded-2xl bg-[#F6FBF7] px-3 py-2.5">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#D8F3DC] text-[#2D6A4F]"><CircleCheck className="h-4 w-4" /></span>
-          <p className="text-xs font-semibold leading-relaxed text-gray-600">আজকের ৩টি কাজের মধ্যে ২টি আপনার জন্য প্রস্তুত।</p>
+          <p className="text-xs font-semibold leading-relaxed text-gray-600">আপনার crop plan থেকে আজকের কাজ সাজানো হয়েছে। প্ল্যানে গিয়ে কাজ সম্পন্ন চিহ্ন দিন।</p>
           <ArrowUpRight className="ml-auto h-4 w-4 shrink-0 text-[#2D6A4F]" />
         </div>
 
