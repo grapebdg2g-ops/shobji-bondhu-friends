@@ -1,0 +1,65 @@
+import { useQuery } from "@tanstack/react-query";
+import { Users } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { FarmerCard, type FarmerProfile } from "@/components/krishi/farmer-card";
+import { Skeleton } from "@/components/ui/skeleton";
+
+export function ConnectedFarmersList({
+  profileId,
+  currentUserId,
+}: {
+  profileId: string;
+  currentUserId?: string;
+}) {
+  const query = useQuery({
+    queryKey: ["public-connected-farmers", profileId],
+    enabled: !!profileId,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc(
+        "get_public_connected_farmers" as never,
+        { target_user_id: profileId } as never,
+      );
+      if (error) throw error;
+      return (data as FarmerProfile[]) ?? [];
+    },
+  });
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-4">
+      <div className="flex items-center gap-2">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <Users className="h-4 w-4" />
+        </span>
+        <div>
+          <h3 className="text-sm font-extrabold text-foreground">সংযুক্ত কৃষক</h3>
+          <p className="text-[11px] text-muted-foreground">বন্ধু তালিকা</p>
+        </div>
+        {query.data && (
+          <span className="ml-auto rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-extrabold text-primary">
+            {query.data.length} জন
+          </span>
+        )}
+      </div>
+      <div className="mt-3 space-y-2">
+        {query.isLoading ? (
+          <>
+            <Skeleton className="h-16 w-full rounded-xl" />
+            <Skeleton className="h-16 w-full rounded-xl" />
+          </>
+        ) : query.error ? (
+          <p className="rounded-xl bg-muted px-3 py-4 text-center text-xs font-semibold text-muted-foreground">
+            বন্ধু তালিকা এখন দেখা যাচ্ছে না
+          </p>
+        ) : query.data?.length ? (
+          query.data.map((farmer) => (
+            <FarmerCard key={farmer.id} profile={farmer} currentUserId={currentUserId} compact />
+          ))
+        ) : (
+          <p className="rounded-xl bg-primary/5 px-3 py-4 text-center text-xs font-semibold text-muted-foreground">
+            এখনো কোনো সংযুক্ত কৃষক নেই
+          </p>
+        )}
+      </div>
+    </section>
+  );
+}

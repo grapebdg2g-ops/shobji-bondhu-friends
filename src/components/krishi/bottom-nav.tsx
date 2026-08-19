@@ -9,6 +9,7 @@ import {
   MessageSquareText,
   TrendingUp,
   UserRoundPlus,
+  Users,
 } from "lucide-react";
 
 type Tab = {
@@ -31,7 +32,8 @@ const QUICK_ACTIONS = [
   { to: "/disease-detection", label: "রোগ শনাক্ত", Icon: ScanSearch },
   { to: "/ai-bondhu/chat", label: "AI বন্ধুকে জিজ্ঞেস করুন", Icon: MessageSquareText },
   { to: "/feed", label: "কমিউনিটিতে যান", Icon: Newspaper },
-  { to: "/connections", label: "কৃষক খুঁজুন", Icon: UserRoundPlus },
+  { to: "/farmers", label: "সকল কৃষক", Icon: Users },
+  { to: "/connections", label: "সংযোগ অনুরোধ", Icon: UserRoundPlus },
 ] as const;
 
 export function BottomNav() {
