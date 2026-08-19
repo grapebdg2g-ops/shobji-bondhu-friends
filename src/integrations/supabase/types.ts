@@ -1225,6 +1225,10 @@ export type Database = {
       }
       cleanup_ai_chat_cache: { Args: never; Returns: undefined }
       decrement_likes: { Args: { post_id: string }; Returns: undefined }
+      get_connected_farmer_phone: {
+        Args: { target_user_id: string }
+        Returns: string
+      }
       get_connection_state: {
         Args: { target_user_id: string }
         Returns: string
@@ -1240,6 +1244,20 @@ export type Database = {
           min_price: number
           price_date: string
           source: string
+        }[]
+      }
+      get_public_connected_farmers: {
+        Args: { target_user_id: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          crops: string[]
+          district: string
+          id: string
+          is_verified: boolean
+          name: string
+          role: string
+          upazila: string
         }[]
       }
       get_public_user_roles: {
