@@ -11,6 +11,7 @@ import { DiseaseHistoryView } from "@/components/krishi/disease-history-view";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/user-context";
 import { BottomSheet } from "@/components/krishi/bottom-sheet";
+import { CreatePostSheet } from "@/components/krishi/create-post-sheet";
 import { EmptyState } from "@/components/krishi/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LazyImage } from "@/components/krishi/lazy-image";
@@ -70,6 +71,8 @@ function ProfilePage() {
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [tab, setTab] = useState<"posts" | "exchanges" | "prices" | "diseases">("posts");
   const [uploading, setUploading] = useState(false);
+  const [createPostOpen, setCreatePostOpen] = useState(false);
+  const [postsRefreshKey, setPostsRefreshKey] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -144,6 +147,11 @@ function ProfilePage() {
     navigate({ to: "/login" });
   };
 
+  const handlePostCreated = () => {
+    setPostsRefreshKey((value) => value + 1);
+    setFull((current) => current ? { ...current, posts_count: current.posts_count + 1 } : current);
+  };
+
   if (loading || !full) {
     return (
       <main className="min-h-screen bg-background p-4 space-y-4">
@@ -200,6 +208,21 @@ function ProfilePage() {
         </div>
       </header>
 
+      <section className="mx-auto mt-3 max-w-3xl border-y border-[#DADDE1] bg-white px-4 py-3 sm:rounded-xl sm:border sm:px-6">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E7F3FF] text-lg font-black text-[#1877F2]">
+            {full.avatar_url ? <LazyImage src={full.avatar_url} alt="" wrapperClassName="h-full w-full" /> : initials(full.name)}
+          </div>
+          <button type="button" onClick={() => setCreatePostOpen(true)} className="flex h-10 min-w-0 flex-1 items-center rounded-full bg-[#F0F2F5] px-4 text-left text-sm text-[#65676B] transition hover:bg-[#E4E6EB]">
+            {full.name || "কৃষক"}, আপনি কী ভাবছেন?
+          </button>
+        </div>
+        <div className="mt-3 flex border-t border-[#E4E6EB] pt-3">
+          <button type="button" onClick={() => setCreatePostOpen(true)} className="flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-xs font-extrabold text-[#18A058] transition hover:bg-[#F0F2F5]"><Camera className="h-4 w-4" /> ছবি/ভিডিও</button>
+          <button type="button" onClick={() => setCreatePostOpen(true)} className="flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-xs font-extrabold text-[#1877F2] transition hover:bg-[#F0F2F5]"><Edit3 className="h-4 w-4" /> পোস্ট লিখুন</button>
+        </div>
+      </section>
+
       <section className="mx-auto mt-3 max-w-3xl border-y border-[#DADDE1] bg-white px-4 pt-1 sm:rounded-xl sm:border sm:px-6">
         <div className="flex gap-1 overflow-x-auto">
           {([
@@ -221,6 +244,7 @@ function ProfilePage() {
         <div className="mt-4">
           {tab === "posts" && (
             <MyPostsTab
+              key={postsRefreshKey}
               userId={full.id}
               onChange={(delta) => setFull((p) => (p ? { ...p, posts_count: Math.max(0, p.posts_count + delta) } : p))}
             />
@@ -240,6 +264,8 @@ function ProfilePage() {
           {tab === "diseases" && <DiseaseHistoryView userId={full.id} />}
         </div>
       </section>
+
+      <CreatePostSheet open={createPostOpen} onClose={() => setCreatePostOpen(false)} onCreated={handlePostCreated} />
 
       <SettingsList open={settingsOpen} onClose={() => setSettingsOpen(false)} onLogout={() => setLogoutOpen(true)} />
 
