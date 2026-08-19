@@ -151,7 +151,11 @@ function StepCrop({
     <div className="space-y-4">
       <div className="bg-white rounded-2xl p-4 shadow-sm">
         <h2 className="font-bold text-gray-900 mb-1">কোন ফসলের সার হিসাব করবেন?</h2>
-        <p className="mb-3 text-[11px] leading-relaxed text-gray-500">ফসলের তালিকা master crop data থেকে এসেছে। যেসব ফসলের formula এখনও প্রস্তুত নয়, সেগুলো শীঘ্রই যোগ করা হবে।</p>
+        <p className="mb-3 text-[11px] leading-relaxed text-gray-500">
+          ফসলের তালিকা master crop data থেকে এসেছে। যেসব ফসলের official BARC/BARI/BRRI dose mapping
+          এখনো সম্পূর্ণ নয়, সেগুলোকে প্রাথমিক হিসাব হিসেবে দেখানো হবে—চূড়ান্ত প্রয়োগের আগে মাটি
+          পরীক্ষা করুন।
+        </p>
         <div className="grid grid-cols-3 gap-2.5">
           {CALCULATOR_CROP_OPTIONS.map((c) => {
             const supported = Boolean(c.calculatorId);
@@ -176,8 +180,12 @@ function StepCrop({
                   </span>
                 )}
                 <span className="text-2xl">{c.icon}</span>
-                <span className="px-1 text-center text-[11px] font-semibold leading-tight text-gray-800">{c.label}</span>
-                {!supported && <span className="text-[9px] font-semibold text-gray-400">শীঘ্রই</span>}
+                <span className="px-1 text-center text-[11px] font-semibold leading-tight text-gray-800">
+                  {c.label}
+                </span>
+                {!supported && (
+                  <span className="text-[9px] font-semibold text-gray-400">শীঘ্রই</span>
+                )}
               </button>
             );
           })}
@@ -251,7 +259,11 @@ function StepLand({
       </div>
 
       <div className="bg-white rounded-2xl p-4 shadow-sm">
-        <h2 className="font-bold text-gray-900 mb-3">মাটির ধরন</h2>
+        <h2 className="font-bold text-gray-900 mb-1">মাটির ধরন (তথ্য হিসেবে)</h2>
+        <p className="mb-3 text-[11px] leading-relaxed text-gray-500">
+          মাটি নির্বাচনটি হিসাবের context হিসেবে রাখা হচ্ছে। FRG-2024 অনুযায়ী final dose-এর জন্য
+          soil test report দরকার।
+        </p>
         <div className="grid grid-cols-2 gap-2.5">
           {SOIL_TYPES.map((s) => {
             const active = soil === s.id;
@@ -383,6 +395,8 @@ function StepResult({
       `আনুমানিক খরচ: ${fmtBdt(result.totalCost)}`,
       `মাটি: ${soilLabel}`,
       `পর্যায়: ${stage.label}`,
+      `উৎস: ${crop.sourceTitle}`,
+      `মাটি পরীক্ষা করে চূড়ান্ত dose নির্ধারণ করুন`,
       ``,
       `— কৃষিবন্ধু অ্যাপ`,
     ];
@@ -415,9 +429,41 @@ function StepResult({
               {bn1(shotok)} শতাংশ • {soilLabel} • {stage.label}
             </p>
           </div>
-          <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap">
-            BRRI/BARI ✓
+          <span
+            className={`text-[10px] font-bold px-2 py-1 rounded-full whitespace-nowrap ${crop.verified ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-800"}`}
+          >
+            {crop.verified ? "BARC ২০২৪ ✓" : "প্রাথমিক হিসাব"}
           </span>
+        </div>
+      </div>
+
+      <div
+        className={`rounded-2xl border p-4 ${crop.verified ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}
+      >
+        <div className="flex items-start gap-2">
+          <AlertTriangle
+            className={`mt-0.5 h-4 w-4 shrink-0 ${crop.verified ? "text-emerald-700" : "text-amber-700"}`}
+          />
+          <div className="min-w-0">
+            <p
+              className={`text-xs font-bold ${crop.verified ? "text-emerald-900" : "text-amber-900"}`}
+            >
+              {crop.sourceTitle}
+            </p>
+            <p
+              className={`mt-1 text-[11px] leading-relaxed ${crop.verified ? "text-emerald-800" : "text-amber-900"}`}
+            >
+              {crop.sourceNote}
+            </p>
+            <a
+              href={crop.sourceUrl}
+              target="_blank"
+              rel="noreferrer"
+              className={`mt-2 inline-flex text-[11px] font-extrabold underline ${crop.verified ? "text-emerald-800" : "text-amber-900"}`}
+            >
+              official source দেখুন ↗
+            </a>
+          </div>
         </div>
       </div>
 
@@ -447,9 +493,28 @@ function StepResult({
               {fmtBdt(result.totalCost)}
             </span>
           </div>
-          <p className="text-[11px] text-gray-500 mt-0.5">সরকারি নির্ধারিত দামে</p>
+          <p className="text-[11px] text-gray-500 mt-0.5">
+            সরকারি নির্ধারিত দামে; জৈব/অন্যান্য supplemental input-এর দাম এতে ধরা নেই
+          </p>
         </div>
       </div>
+
+      {result.supplemental.length > 0 && (
+        <div className="rounded-2xl border border-lime-200 bg-lime-50 p-4">
+          <h3 className="font-bold text-lime-950">অতিরিক্ত উপকরণ — official protocol</h3>
+          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+            {result.supplemental.map((item) => (
+              <div key={item.name} className="rounded-xl bg-white/70 px-3 py-2">
+                <p className="text-xs font-bold text-lime-950">{item.name}</p>
+                <p className="mt-1 text-sm font-extrabold text-lime-900">{bn1(item.kg)} কেজি</p>
+                {item.note && (
+                  <p className="mt-0.5 text-[10px] leading-snug text-lime-800">{item.note}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* STAGE GUIDANCE */}
       <div className="bg-sky-50 border border-sky-200 rounded-2xl p-4">
@@ -468,11 +533,12 @@ function StepResult({
         </div>
       </div>
 
-      {/* SOIL ADJUSTMENT */}
-      <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5 flex items-center gap-2">
-        <span className="text-lg">✓</span>
-        <p className="text-xs font-semibold text-emerald-800">
-          {soilLabel}-এর জন্য মাত্রা সমন্বয় করা হয়েছে
+      {/* SOIL NOTE */}
+      <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5">
+        <span className="text-lg">🧪</span>
+        <p className="text-xs font-semibold leading-relaxed text-amber-900">
+          নির্বাচিত মাটি: {soilLabel}। FRG-2024 অনুযায়ী final dose মাটি পরীক্ষা ও এলাকার উপর নির্ভর
+          করে; এই হিসাব soil-test report-এর বিকল্প নয়।
         </p>
       </div>
 
