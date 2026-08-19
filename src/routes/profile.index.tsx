@@ -22,6 +22,7 @@ import { Switch } from "@/components/ui/switch";
 import { DISTRICTS, getUpazilas } from "@/lib/bd-data";
 import { PROFILE_CROP_LABELS } from "@/lib/crop-options";
 import { sanitize, sanitizeOptional } from "@/lib/sanitize";
+import { ConnectedFarmersList } from "@/components/krishi/connected-farmers-list";
 
 export const Route = createFileRoute("/profile/")({
   component: ProfilePage,
@@ -244,6 +245,10 @@ function ProfilePage() {
             {full.bio}
           </p>
         )}
+
+        <div className="mt-4">
+          <ConnectedFarmersList profileId={full.id} currentUserId={full.id} />
+        </div>
       </section>
 
       <section className="px-4 mt-6">

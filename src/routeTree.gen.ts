@@ -19,6 +19,7 @@ import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as ModerationRouteImport } from './routes/moderation'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FeedRouteImport } from './routes/feed'
+import { Route as FarmersRouteImport } from './routes/farmers'
 import { Route as ExchangeRouteImport } from './routes/exchange'
 import { Route as DiseaseDetectionRouteImport } from './routes/disease-detection'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -110,6 +111,11 @@ const LoginRoute = LoginRouteImport.update({
 const FeedRoute = FeedRouteImport.update({
   id: '/feed',
   path: '/feed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FarmersRoute = FarmersRouteImport.update({
+  id: '/farmers',
+  path: '/farmers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExchangeRoute = ExchangeRouteImport.update({
@@ -338,6 +344,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/disease-detection': typeof DiseaseDetectionRoute
   '/exchange': typeof ExchangeRoute
+  '/farmers': typeof FarmersRoute
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
   '/moderation': typeof ModerationRoute
@@ -390,6 +397,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/disease-detection': typeof DiseaseDetectionRoute
   '/exchange': typeof ExchangeRoute
+  '/farmers': typeof FarmersRoute
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
   '/moderation': typeof ModerationRoute
@@ -445,6 +453,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/disease-detection': typeof DiseaseDetectionRoute
   '/exchange': typeof ExchangeRoute
+  '/farmers': typeof FarmersRoute
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
   '/moderation': typeof ModerationRoute
@@ -501,6 +510,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/disease-detection'
     | '/exchange'
+    | '/farmers'
     | '/feed'
     | '/login'
     | '/moderation'
@@ -553,6 +563,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/disease-detection'
     | '/exchange'
+    | '/farmers'
     | '/feed'
     | '/login'
     | '/moderation'
@@ -607,6 +618,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/disease-detection'
     | '/exchange'
+    | '/farmers'
     | '/feed'
     | '/login'
     | '/moderation'
@@ -662,6 +674,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   DiseaseDetectionRoute: typeof DiseaseDetectionRoute
   ExchangeRoute: typeof ExchangeRoute
+  FarmersRoute: typeof FarmersRoute
   FeedRoute: typeof FeedRoute
   LoginRoute: typeof LoginRoute
   ModerationRoute: typeof ModerationRoute
@@ -761,6 +774,13 @@ declare module '@tanstack/react-router' {
       path: '/feed'
       fullPath: '/feed'
       preLoaderRoute: typeof FeedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/farmers': {
+      id: '/farmers'
+      path: '/farmers'
+      fullPath: '/farmers'
+      preLoaderRoute: typeof FarmersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/exchange': {
@@ -1140,6 +1160,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   DiseaseDetectionRoute: DiseaseDetectionRoute,
   ExchangeRoute: ExchangeRoute,
+  FarmersRoute: FarmersRoute,
   FeedRoute: FeedRoute,
   LoginRoute: LoginRoute,
   ModerationRoute: ModerationRoute,

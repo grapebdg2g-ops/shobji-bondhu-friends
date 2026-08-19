@@ -6,6 +6,7 @@ import { ContentMenu } from "@/components/krishi/content-menu";
 import { useConnectionState } from "@/hooks/use-connections";
 import { useUser } from "@/contexts/user-context";
 import { EmptyState } from "@/components/krishi/empty-state";
+import { ConnectedFarmersList } from "@/components/krishi/connected-farmers-list";
 
 type Profile = {
   id: string;
@@ -158,6 +159,8 @@ function PublicProfilePage() {
               </div>
             </div>
           )}
+
+          <ConnectedFarmersList profileId={profile.id} currentUserId={user?.id} />
 
           <Link
             to="/feed"
