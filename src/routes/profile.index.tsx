@@ -157,111 +157,51 @@ function ProfilePage() {
   const roleLabel = full.role === "expert" ? "বিশেষজ্ঞ" : "কৃষক";
 
   return (
-    <main className="min-h-screen bg-background pb-24">
-      <header className="px-4 pt-6 pb-10 rounded-b-3xl relative" style={{ background: "var(--gradient-brand)" }}>
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => navigate({ to: "/dashboard" })}
-            aria-label="ফিরে যান"
-            className="home-pressable h-10 w-10 rounded-full bg-white/15 flex items-center justify-center ring-2 ring-white/20"
-          >
-            <ArrowLeft className="h-5 w-5 text-white" />
+    <main className="min-h-screen bg-[#F0F2F5] pb-24">
+      <header className="bg-white">
+        <div className="relative h-32 overflow-hidden bg-gradient-to-r from-[#2D6A4F] via-[#40916C] to-[#74C69D] sm:h-44">
+          <div className="pointer-events-none absolute -right-8 -top-16 h-48 w-48 rounded-full bg-white/15 blur-2xl" />
+          <div className="pointer-events-none absolute -bottom-20 left-1/3 h-40 w-40 rounded-full bg-[#F4A261]/20 blur-2xl" />
+          <button onClick={() => navigate({ to: "/dashboard" })} aria-label="ফিরে যান" className="absolute left-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur transition hover:bg-black/30">
+            <ArrowLeft className="h-5 w-5" />
           </button>
-          <button
-            type="button"
-            onClick={() => setSettingsOpen(true)}
-            aria-label="সেটিংস খুলুন"
-            className="home-pressable h-10 w-10 rounded-full bg-white/15 flex items-center justify-center ring-2 ring-white/20"
-          >
-            <Settings className="h-5 w-5 text-white" />
+          <button type="button" onClick={() => setSettingsOpen(true)} aria-label="সেটিংস খুলুন" className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur transition hover:bg-black/30">
+            <Settings className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="mt-3 flex flex-col items-center">
-          <div className="relative">
-            <div className="h-24 w-24 rounded-full bg-white/20 ring-4 ring-white/40 overflow-hidden flex items-center justify-center">
-              {full.avatar_url ? (
-                <LazyImage src={full.avatar_url} alt={full.name} wrapperClassName="h-full w-full rounded-full" priority />
-              ) : (
-                <span className="text-4xl font-bold text-white">{initials(full.name)}</span>
-              )}
-              {uploading && (
-                <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs">আপলোড...</span>
-                </div>
-              )}
+        <div className="relative mx-auto max-w-3xl px-4 pb-4 sm:px-6">
+          <div className="-mt-12 flex items-end justify-between gap-3 sm:-mt-16">
+            <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-white bg-[#E7F3FF] text-4xl font-black text-[#1877F2] shadow-md sm:h-32 sm:w-32">
+              {full.avatar_url ? <LazyImage src={full.avatar_url} alt={full.name} wrapperClassName="h-full w-full rounded-full" priority /> : <div className="flex h-full w-full items-center justify-center">{initials(full.name)}</div>}
+              {uploading && <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/45 text-xs font-bold text-white">আপলোড...</div>}
+              <button type="button" onClick={() => fileRef.current?.click()} aria-label="ছবি পরিবর্তন" className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#E4E6EB] text-[#1C1E21] shadow-sm transition hover:bg-[#D8DADF]"><Camera className="h-4 w-4" /></button>
+              <input ref={fileRef} type="file" accept="image/jpeg,image/png" className="hidden" onChange={onPickAvatar} />
             </div>
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              aria-label="ছবি পরিবর্তন"
-              className="absolute bottom-0 right-0 h-9 w-9 rounded-full bg-primary text-primary-foreground border-2 border-white shadow flex items-center justify-center active:scale-95"
-            >
-              <Camera className="h-4 w-4" />
-            </button>
-            <input ref={fileRef} type="file" accept="image/jpeg,image/png" className="hidden" onChange={onPickAvatar} />
+            <div className="flex gap-2 pb-1">
+              <Link to="/friends" className="flex h-10 items-center gap-1.5 rounded-lg bg-[#1877F2] px-3 text-xs font-extrabold text-white shadow-sm transition hover:bg-[#166FE5]"><Users className="h-4 w-4" /> বন্ধু</Link>
+              <button type="button" onClick={() => setEditOpen(true)} className="flex h-10 items-center gap-1.5 rounded-lg bg-[#E4E6EB] px-3 text-xs font-extrabold text-[#1C1E21] transition hover:bg-[#D8DADF]"><Edit3 className="h-4 w-4" /> সম্পাদনা</button>
+            </div>
           </div>
 
-          <h1 className="mt-3 text-2xl font-bold text-white text-center">{full.name || "কৃষক"}</h1>
-          <div className="flex items-center gap-1 mt-1 text-white/85 text-sm">
-            <MapPin className="h-3.5 w-3.5" />
-            <span>
-              {full.district || "—"}
-              {full.upazila ? `, ${full.upazila}` : ""}
-            </span>
+          <h1 className="mt-3 text-2xl font-black tracking-tight text-[#1C1E21]">{full.name || "কৃষক"}</h1>
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[#65676B]">
+            <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{full.district || "বাংলাদেশ"}{full.upazila ? `, ${full.upazila}` : ""}</span>
+            <span className="rounded-full bg-[#E7F3FF] px-2 py-0.5 text-xs font-bold text-[#1877F2]">{roleLabel}</span>
           </div>
-          <span className="mt-2 inline-flex px-3 py-0.5 rounded-full bg-white/20 text-white text-xs font-semibold ring-1 ring-white/30">
-            {roleLabel}
-          </span>
+          {full.bio && <p className="mt-3 max-w-xl text-sm leading-relaxed text-[#65676B]">{full.bio}</p>}
+
+          <div className="mt-4 grid grid-cols-4 divide-x divide-[#DADDE1] rounded-xl border border-[#E4E6EB] bg-[#F7F8FA] py-2 text-center">
+            <ProfileMetric value={counts.posts} label="পোস্ট" />
+            <ProfileMetric value={counts.exchanges} label="বিনিময়" />
+            <ProfileMetric value={counts.prices} label="দাম" />
+            <Link to="/friends" className="group"><ProfileMetric value="→" label="বন্ধু" accent /></Link>
+          </div>
         </div>
       </header>
 
-      <section className="px-4 mt-4">
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { label: "পোস্ট", count: counts.posts, sub: "সংখ্যা" },
-            { label: "বিনিময়", count: counts.exchanges, sub: "সংখ্যা" },
-            { label: "দাম", count: counts.prices, sub: "আপডেট" },
-          ].map((s) => (
-            <div key={s.label} className="bg-card rounded-2xl shadow-sm border border-border py-3 text-center">
-              <p className="text-xs font-semibold text-muted-foreground">{s.label}</p>
-              <p className="text-2xl font-bold text-foreground leading-tight mt-1">{s.count}</p>
-              <p className="text-[10px] text-muted-foreground">{s.sub}</p>
-            </div>
-          ))}
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setEditOpen(true)}
-          className="mt-4 w-full h-11 rounded-xl border-2 border-primary text-primary font-bold flex items-center justify-center gap-2 active:scale-[0.99]"
-        >
-          <Edit3 className="h-4 w-4" /> প্রোফাইল সম্পাদনা
-        </button>
-
-        {full.bio && (
-          <p className="mt-3 text-sm text-foreground bg-muted/50 rounded-xl px-3 py-2 whitespace-pre-wrap">
-            {full.bio}
-          </p>
-        )}
-
-        <Link
-          to="/friends"
-          className="home-pressable mt-4 flex items-center gap-3 rounded-2xl border border-[#E4E6EB] bg-white p-3 text-left shadow-sm transition hover:bg-[#F0F2F5]"
-        >
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E7F3FF] text-[#1877F2]">
-            <Users className="h-5 w-5" />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-sm font-extrabold text-[#1C1E21]">বন্ধু তালিকা</span>
-            <span className="mt-0.5 block text-xs text-[#65676B]">আপনার সংযুক্ত কৃষকদের দেখুন ও সাজান</span>
-          </span>
-          <ChevronRight className="h-5 w-5 shrink-0 text-[#65676B]" />
-        </Link>
-      </section>
-
-      <section className="px-4 mt-6">
-        <div className="flex gap-1 bg-muted rounded-xl p-1 overflow-x-auto">
+      <section className="mx-auto mt-3 max-w-3xl border-y border-[#DADDE1] bg-white px-4 pt-1 sm:rounded-xl sm:border sm:px-6">
+        <div className="flex gap-1 overflow-x-auto">
           {([
             ["posts", "আমার পোস্ট"],
             ["exchanges", "বিনিময়"],
@@ -271,7 +211,7 @@ function ProfilePage() {
             <button
               key={k}
               onClick={() => setTab(k)}
-              className={`flex-1 min-w-fit px-2 h-9 rounded-lg text-xs font-bold transition whitespace-nowrap ${tab === k ? "bg-card text-primary shadow-sm" : "text-muted-foreground"}`}
+              className={`min-w-fit flex-1 border-b-2 px-2 py-3 text-xs font-extrabold transition whitespace-nowrap ${tab === k ? "border-[#1877F2] text-[#1877F2]" : "border-transparent text-[#65676B] hover:bg-[#F0F2F5]"}`}
             >
               {label}
             </button>
@@ -325,6 +265,15 @@ function ProfilePage() {
         </AlertDialogContent>
       </AlertDialog>
     </main>
+  );
+}
+
+function ProfileMetric({ value, label, accent = false }: { value: number | string; label: string; accent?: boolean }) {
+  return (
+    <span className="flex min-w-0 flex-col items-center justify-center px-1">
+      <span className={`text-lg font-black leading-tight ${accent ? "text-[#1877F2]" : "text-[#1C1E21]"}`}>{value}</span>
+      <span className="mt-0.5 truncate text-[10px] font-bold text-[#65676B]">{label}</span>
+    </span>
   );
 }
 
