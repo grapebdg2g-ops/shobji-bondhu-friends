@@ -18,6 +18,7 @@ import { Route as OfflineRouteImport } from './routes/offline'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as ModerationRouteImport } from './routes/moderation'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as FriendsRouteImport } from './routes/friends'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as FarmersRouteImport } from './routes/farmers'
 import { Route as ExchangeRouteImport } from './routes/exchange'
@@ -106,6 +107,11 @@ const ModerationRoute = ModerationRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FriendsRoute = FriendsRouteImport.update({
+  id: '/friends',
+  path: '/friends',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FeedRoute = FeedRouteImport.update({
@@ -346,6 +352,7 @@ export interface FileRoutesByFullPath {
   '/exchange': typeof ExchangeRoute
   '/farmers': typeof FarmersRoute
   '/feed': typeof FeedRoute
+  '/friends': typeof FriendsRoute
   '/login': typeof LoginRoute
   '/moderation': typeof ModerationRoute
   '/notifications': typeof NotificationsRoute
@@ -399,6 +406,7 @@ export interface FileRoutesByTo {
   '/exchange': typeof ExchangeRoute
   '/farmers': typeof FarmersRoute
   '/feed': typeof FeedRoute
+  '/friends': typeof FriendsRoute
   '/login': typeof LoginRoute
   '/moderation': typeof ModerationRoute
   '/notifications': typeof NotificationsRoute
@@ -455,6 +463,7 @@ export interface FileRoutesById {
   '/exchange': typeof ExchangeRoute
   '/farmers': typeof FarmersRoute
   '/feed': typeof FeedRoute
+  '/friends': typeof FriendsRoute
   '/login': typeof LoginRoute
   '/moderation': typeof ModerationRoute
   '/notifications': typeof NotificationsRoute
@@ -512,6 +521,7 @@ export interface FileRouteTypes {
     | '/exchange'
     | '/farmers'
     | '/feed'
+    | '/friends'
     | '/login'
     | '/moderation'
     | '/notifications'
@@ -565,6 +575,7 @@ export interface FileRouteTypes {
     | '/exchange'
     | '/farmers'
     | '/feed'
+    | '/friends'
     | '/login'
     | '/moderation'
     | '/notifications'
@@ -620,6 +631,7 @@ export interface FileRouteTypes {
     | '/exchange'
     | '/farmers'
     | '/feed'
+    | '/friends'
     | '/login'
     | '/moderation'
     | '/notifications'
@@ -676,6 +688,7 @@ export interface RootRouteChildren {
   ExchangeRoute: typeof ExchangeRoute
   FarmersRoute: typeof FarmersRoute
   FeedRoute: typeof FeedRoute
+  FriendsRoute: typeof FriendsRoute
   LoginRoute: typeof LoginRoute
   ModerationRoute: typeof ModerationRoute
   NotificationsRoute: typeof NotificationsRoute
@@ -767,6 +780,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/friends': {
+      id: '/friends'
+      path: '/friends'
+      fullPath: '/friends'
+      preLoaderRoute: typeof FriendsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/feed': {
@@ -1162,6 +1182,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExchangeRoute: ExchangeRoute,
   FarmersRoute: FarmersRoute,
   FeedRoute: FeedRoute,
+  FriendsRoute: FriendsRoute,
   LoginRoute: LoginRoute,
   ModerationRoute: ModerationRoute,
   NotificationsRoute: NotificationsRoute,

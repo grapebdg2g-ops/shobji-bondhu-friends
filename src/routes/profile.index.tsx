@@ -4,7 +4,7 @@ import imageCompression from "browser-image-compression";
 import { toast } from "sonner";
 import {
   ArrowLeft, Camera, Edit3, Trash2, Power, Pencil, LogOut,
-  Bell, Globe, Info, Star, HelpCircle, ChevronRight, MapPin, Plus, BellOff, Settings,
+  Bell, Globe, Info, Star, HelpCircle, ChevronRight, MapPin, Plus, BellOff, Settings, Users,
 } from "lucide-react";
 import { MutedUsersSheet } from "@/components/krishi/muted-users-sheet";
 import { DiseaseHistoryView } from "@/components/krishi/disease-history-view";
@@ -292,7 +292,7 @@ function ProfilePage() {
         </div>
       </section>
 
-      <SettingsList open={settingsOpen} onClose={() => setSettingsOpen(false)} onLogout={() => setLogoutOpen(true)} />
+      <SettingsList open={settingsOpen} onClose={() => setSettingsOpen(false)} onLogout={() => setLogoutOpen(true)} onFriends={() => navigate({ to: "/friends" })} />
 
       <EditProfileSheet
         open={editOpen}
@@ -743,7 +743,7 @@ function MyPricesTab({ userId, onChange }: { userId: string; onChange: (d: numbe
   );
 }
 
-function SettingsList({ open, onClose, onLogout }: { open: boolean; onClose: () => void; onLogout: () => void }) {
+function SettingsList({ open, onClose, onLogout, onFriends }: { open: boolean; onClose: () => void; onLogout: () => void; onFriends: () => void }) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -770,6 +770,7 @@ function SettingsList({ open, onClose, onLogout }: { open: boolean; onClose: () 
       <BottomSheet open={open} onClose={onClose} title="সেটিংস">
         <div className="space-y-3">
           <div className="rounded-2xl bg-card border border-border overflow-hidden">
+            <SettingRow icon={Users} label="বন্ধু তালিকা" onClick={onFriends} />
             <SettingRow icon={Bell} label="নোটিফিকেশন সেটিংস" onClick={() => setNotifOpen(true)} />
             <SettingRow icon={BellOff} label="মিউট করা ব্যবহারকারীরা" onClick={() => setMutedOpen(true)} />
             <SettingRow icon={Globe} label="ভাষা" value="বাংলা" onClick={() => setLangOpen(true)} />
