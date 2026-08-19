@@ -10,6 +10,10 @@ export type PostReaction = {
   reaction_type: ReactionType;
 };
 
+export type ReactionWriteResult =
+  | { ok: true }
+  | { ok: false; reason: "unauthenticated" | "storage" };
+
 type ReactionState = {
   counts: Record<ReactionType, number>;
   mine: ReactionType | null;
@@ -25,6 +29,15 @@ const emptyCounts = (): Record<ReactionType, number> => ({
   angry: 0,
 });
 
+const isMissingReactionTable = (error: { code?: string; message?: string } | null) => {
+  const message = error?.message ?? "";
+  return (
+    error?.code === "42P01" ||
+    error?.code === "PGRST205" ||
+    (/post_reactions/i.test(message) && /(relation|table|schema cache|not found)/i.test(message))
+  );
+};
+
 export function usePostReactions(postId: string) {
   const { user: profileUser } = useUser();
   const queryClient = useQueryClient();
@@ -36,10 +49,15 @@ export function usePostReactions(postId: string) {
     supabase.auth.getSession().then(({ data }) => {
       if (active) setAuthUserId(data.session?.user.id ?? null);
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       if (active) setAuthUserId(session?.user.id ?? null);
     });
-    return () => { active = false; subscription.unsubscribe(); };
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const currentUserId = authUserId ?? profileUser?.id ?? null;
@@ -50,8 +68,19 @@ export function usePostReactions(postId: string) {
         .from("post_reactions")
         .select("post_id, user_id, reaction_type")
         .eq("post_id", postId);
-      if (error) throw new Error(error.message);
-      return (data as PostReaction[]) ?? [];
+      if (!error) return (data as PostReaction[]) ?? [];
+      if (!isMissingReactionTable(error)) throw new Error(error.message);
+
+      // Backward-compatible fallback while the new migration is being applied.
+      const { data: legacyLikes, error: legacyError } = await supabase
+        .from("post_likes")
+        .select("post_id, user_id")
+        .eq("post_id", postId);
+      if (legacyError) throw new Error(legacyError.message);
+      return ((legacyLikes as { post_id: string; user_id: string }[]) ?? []).map((like) => ({
+        ...like,
+        reaction_type: "like" as const,
+      }));
     },
     staleTime: 30_000,
   });
@@ -66,29 +95,47 @@ export function usePostReactions(postId: string) {
     return { counts, mine };
   }, [currentUserId, rows]);
 
-  const setReaction = useCallback(async (reaction: ReactionType | null) => {
-    const { data: sessionData } = await supabase.auth.getUser();
-    const userId = sessionData.user?.id ?? currentUserId;
-    if (!userId) return false;
+  const setReaction = useCallback(
+    async (reaction: ReactionType | null): Promise<ReactionWriteResult> => {
+      const { data: sessionData } = await supabase.auth.getUser();
+      const userId = sessionData.user?.id ?? currentUserId;
+      if (!userId) return { ok: false, reason: "unauthenticated" };
 
-    const previous = queryClient.getQueryData<PostReaction[]>(queryKey) ?? [];
-    const optimistic = previous.filter((row) => row.user_id !== userId);
-    if (reaction) optimistic.push({ post_id: postId, user_id: userId, reaction_type: reaction });
-    queryClient.setQueryData(queryKey, optimistic);
+      const previous = queryClient.getQueryData<PostReaction[]>(queryKey) ?? [];
+      const optimistic = previous.filter((row) => row.user_id !== userId);
+      if (reaction) optimistic.push({ post_id: postId, user_id: userId, reaction_type: reaction });
+      queryClient.setQueryData(queryKey, optimistic);
 
-    const result = reaction
-      ? await supabase.from("post_reactions").upsert(
-        { post_id: postId, user_id: userId, reaction_type: reaction },
-        { onConflict: "post_id,user_id" },
-      )
-      : await supabase.from("post_reactions").delete().eq("post_id", postId).eq("user_id", userId);
+      const result = reaction
+        ? await supabase
+            .from("post_reactions")
+            .upsert(
+              { post_id: postId, user_id: userId, reaction_type: reaction },
+              { onConflict: "post_id,user_id" },
+            )
+        : await supabase
+            .from("post_reactions")
+            .delete()
+            .eq("post_id", postId)
+            .eq("user_id", userId);
 
-    if (result.error) {
+      if (!result.error) return { ok: true };
+
+      // Keep the primary Like action usable with the existing post_likes table.
+      if (isMissingReactionTable(result.error) && (reaction === "like" || reaction === null)) {
+        const legacyResult = reaction
+          ? await supabase
+              .from("post_likes")
+              .upsert({ post_id: postId, user_id: userId }, { onConflict: "post_id,user_id" })
+          : await supabase.from("post_likes").delete().eq("post_id", postId).eq("user_id", userId);
+        if (!legacyResult.error) return { ok: true };
+      }
+
       queryClient.setQueryData(queryKey, previous);
-      return false;
-    }
-    return true;
-  }, [currentUserId, postId, queryClient, queryKey]);
+      return { ok: false, reason: "storage" };
+    },
+    [currentUserId, postId, queryClient, queryKey],
+  );
 
   return { ...state, isLoading, setReaction };
 }
