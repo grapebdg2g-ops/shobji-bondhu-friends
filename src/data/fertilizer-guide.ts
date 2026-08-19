@@ -9,6 +9,8 @@ export const BARI_FRG_2024_NOTICE_URL =
   "https://bari.gov.bd/pages/notices/6922e2c0dbfbab28ce081cb5";
 export const BRINJAL_BARC_2024_PROTOCOL_URL =
   "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-barc/2024/12/d029ab0fd1304a108df54a008133e02f.pdf";
+export const BOTTLE_GOURD_BARC_2024_PROTOCOL_URL =
+  "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-barc/2024/12/29bfab5e2e2645068816e65b6786b9b2.pdf";
 
 const HECTARE_TO_SHOTOK = 1 / 247;
 
@@ -27,6 +29,7 @@ export type ScheduleItem = {
   detail: string; // what to apply
   fertilizers: ("urea" | "tsp" | "mop" | "gypsum" | "zinc")[]; // which to include
   ureaShare?: number; // 0..1 portion of total urea for this dose
+  mopShare?: number; // 0..1 portion of total MOP for this dose
 };
 
 export type SupplementalDose = {
@@ -234,6 +237,7 @@ export const CROPS: CropDose[] = [
         daysOffset: 0,
         detail: "সমস্ত জৈবসার, TSP, জিপসাম, জিংক ও ১/৪ এমওপি মাটিতে মেশান",
         fertilizers: ["tsp", "gypsum", "zinc", "mop"],
+        mopShare: 1 / 4,
       },
       {
         when: "চারা রোপণের পর",
@@ -241,6 +245,7 @@ export const CROPS: CropDose[] = [
         detail: "ইউরিয়া ও বাকি এমওপি উপরিপ্রয়োগ করুন",
         fertilizers: ["urea", "mop"],
         ureaShare: 1,
+        mopShare: 3 / 4,
       },
     ],
     warnings: [
@@ -300,15 +305,69 @@ export const CROPS: CropDose[] = [
   {
     id: "gourd",
     emoji: "🎃",
-    label: "লাউ/কুমড়া",
-    urea: 2.0,
-    tsp: 1.6,
-    mop: 1.4,
-    gypsum: 0.8,
-    zinc: 0.15,
-    schedule: splitUrea3(VEG_WARN),
-    warnings: VEG_WARN,
-    ...UNVERIFIED_CROP_META,
+    label: "লাউ",
+    // BARC GAP protocol: Urea 160, TSP 180, MOP 120, gypsum 120, zinc sulfate 10 kg/hectare.
+    urea: 160 * HECTARE_TO_SHOTOK,
+    tsp: 180 * HECTARE_TO_SHOTOK,
+    mop: 120 * HECTARE_TO_SHOTOK,
+    gypsum: 120 * HECTARE_TO_SHOTOK,
+    zinc: 10 * HECTARE_TO_SHOTOK,
+    schedule: [
+      {
+        when: "রোপণের ৭ দিন আগে",
+        daysOffset: 0,
+        detail: "সমস্ত জৈবসার, TSP, জিপসাম, জিংক, ম্যাগনেসিয়াম ও ১/৪ এমওপি মাটিতে/পিটে মেশান",
+        fertilizers: ["tsp", "gypsum", "zinc", "mop"],
+        mopShare: 1 / 4,
+      },
+      {
+        when: "চারা রোপণের ১৫–২০ দিন পর",
+        daysOffset: 18,
+        detail: "ইউরিয়া ও এমওপির ১ম উপরিপ্রয়োগ",
+        fertilizers: ["urea", "mop"],
+        ureaShare: 1 / 4,
+        mopShare: 1 / 4,
+      },
+      {
+        when: "চারা রোপণের ৫০–৫৫ দিন পর",
+        daysOffset: 53,
+        detail: "ইউরিয়া ও এমওপির ২য় উপরিপ্রয়োগ",
+        fertilizers: ["urea", "mop"],
+        ureaShare: 1 / 4,
+        mopShare: 1 / 4,
+      },
+      {
+        when: "চারা রোপণের ৯০–১০০ দিন পর",
+        daysOffset: 95,
+        detail: "ইউরিয়া ও এমওপির ৩য় উপরিপ্রয়োগ",
+        fertilizers: ["urea", "mop"],
+        ureaShare: 1 / 4,
+        mopShare: 1 / 4,
+      },
+      {
+        when: "চারা রোপণের ১২০–১৩০ দিন পর",
+        daysOffset: 125,
+        detail: "ইউরিয়ার শেষ কিস্তি উপরিপ্রয়োগ",
+        fertilizers: ["urea"],
+        ureaShare: 1 / 4,
+      },
+    ],
+    warnings: [
+      ...VEG_WARN,
+      "এই dose লাউ-এর জন্য; কুমড়ার জন্য আলাদা BARC table না পাওয়া পর্যন্ত একই dose ব্যবহার করবেন না",
+      "BARC protocol অনুযায়ী মাটি বিশ্লেষণের ফলের ভিত্তিতে final dose সমন্বয় করুন",
+    ],
+    verified: true,
+    sourceTitle: "বাংলাদেশ GAP প্রোটোকল: লাউ — BARC (FRG-2024 reference)",
+    sourceUrl: BOTTLE_GOURD_BARC_2024_PROTOCOL_URL,
+    sourceNote:
+      "Official protocol-এর hectare table থেকে হিসাব করা হয়েছে: ইউরিয়া ১৬০, টিএসপি ১৮০, এমওপি ১২০, জিপসাম ১২০ ও জিংক সালফেট ১০ কেজি/হেক্টর। একই table-এ গোবর/কম্পোস্ট ১০ টন, ভার্মি-কম্পোস্ট ৫ টন, বোরিক এসিড ৮ ও ম্যাগনেসিয়াম অক্সাইড ১২ কেজি/হেক্টর উল্লেখ আছে। চূড়ান্ত dose মাটি পরীক্ষাভিত্তিক।",
+    supplemental: [
+      { name: "গোবর/কম্পোস্ট", kgPerHectare: 10000, note: "লাউ protocol table" },
+      { name: "ভার্মি-কম্পোস্ট", kgPerHectare: 5000 },
+      { name: "বোরিক এসিড", kgPerHectare: 8 },
+      { name: "ম্যাগনেসিয়াম অক্সাইড", kgPerHectare: 12 },
+    ],
   },
   {
     id: "mustard",
@@ -386,7 +445,12 @@ export function calculate(cropId: string, shotok: number, _soil: SoilType): Calc
     const amounts: { name: string; kg: number }[] = [];
     for (const k of s.fertilizers) {
       const base = total[k];
-      const kg = k === "urea" && s.ureaShare ? base * s.ureaShare : base;
+      const kg =
+        k === "urea" && s.ureaShare
+          ? base * s.ureaShare
+          : k === "mop" && s.mopShare
+            ? base * s.mopShare
+            : base;
       amounts.push({ name: FERT_LABEL[k], kg });
     }
     return { when: s.when, daysOffset: s.daysOffset, detail: s.detail, amounts };
