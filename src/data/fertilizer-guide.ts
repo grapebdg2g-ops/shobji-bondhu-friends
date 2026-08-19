@@ -11,6 +11,8 @@ export const BRINJAL_BARC_2024_PROTOCOL_URL =
   "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-barc/2024/12/d029ab0fd1304a108df54a008133e02f.pdf";
 export const BOTTLE_GOURD_BARC_2024_PROTOCOL_URL =
   "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-barc/2024/12/29bfab5e2e2645068816e65b6786b9b2.pdf";
+export const BARI_HORTICULTURE_FERTILIZER_URL =
+  "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bari/2024/12/796206b849164678957e3d06ac7c5905.pdf";
 
 const HECTARE_TO_SHOTOK = 1 / 247;
 
@@ -212,14 +214,45 @@ export const CROPS: CropDose[] = [
     id: "tomato",
     emoji: "🍅",
     label: "টমেটো",
-    urea: 2.8,
-    tsp: 2.4,
-    mop: 2.0,
-    gypsum: 1.0,
-    zinc: 0.2,
-    schedule: splitUrea3(VEG_WARN),
-    warnings: VEG_WARN,
-    ...UNVERIFIED_CROP_META,
+    // BARI summer tomato table midpoint: urea briquette 275–300, TSP 200–225,
+    // MOP 160–180, gypsum 100–120 and zinc sulfate 8–10 kg/hectare.
+    urea: 287.5 * HECTARE_TO_SHOTOK,
+    tsp: 212.5 * HECTARE_TO_SHOTOK,
+    mop: 170 * HECTARE_TO_SHOTOK,
+    gypsum: 110 * HECTARE_TO_SHOTOK,
+    zinc: 9 * HECTARE_TO_SHOTOK,
+    schedule: [
+      {
+        when: "চারা রোপণের ১০–১৫ দিন আগে",
+        daysOffset: 0,
+        detail: "গোবর, TSP, জিপসাম, জিংক, বোরিক এসিড ও ১/২ এমওপি মাটিতে মেশান",
+        fertilizers: ["tsp", "gypsum", "zinc", "mop"],
+        mopShare: 1 / 2,
+      },
+      {
+        when: "চারা রোপণের ১০–১৫ দিন পর",
+        daysOffset: 12,
+        detail: "গুটি ইউরিয়া এবং বাকি ১/২ এমওপি গাছের গোড়া থেকে দূরে প্রয়োগ করুন",
+        fertilizers: ["urea", "mop"],
+        ureaShare: 1,
+        mopShare: 1 / 2,
+      },
+    ],
+    warnings: [
+      ...VEG_WARN,
+      "এটি BARI-এর গ্রীষ্মকালীন টমেটো প্রযুক্তির recommendation; শীতকালীন টমেটোতে dose আলাদা হতে পারে",
+      "গুটি ইউরিয়া না পেলে দানাদার ইউরিয়ার conversion স্থানীয় কৃষি কর্মকর্তার পরামর্শে করুন",
+      "BARI table-এর range থেকে calculator midpoint দেখাচ্ছে: মাটি পরীক্ষার ফলের ভিত্তিতে final dose সমন্বয় করুন",
+    ],
+    verified: true,
+    sourceTitle: "BARI Integrated Fertilizer and Water Management Technology — গ্রীষ্মকালীন টমেটো",
+    sourceUrl: BARI_HORTICULTURE_FERTILIZER_URL,
+    sourceNote:
+      "BARI 2019 booklet-এর Table 10 range থেকে midpoint হিসাব করা হয়েছে: গুটি ইউরিয়া ২৭৫–৩০০, TSP ২০০–২২৫, MOP ১৬০–১৮০, জিপসাম ১০০–১২০, জিংক সালফেট ৮–১০ এবং বোরিক এসিড ১০–১২ কেজি/হেক্টর। midpoint-এ গোবর ৬ টন/হেক্টর ধরা হয়েছে; source-এর range ও crop/season context অবশ্যই দেখুন।",
+    supplemental: [
+      { name: "পচা গোবর", kgPerHectare: 6000, note: "BARI source range ৫–৭ টন/হেক্টর" },
+      { name: "বোরিক এসিড", kgPerHectare: 11, note: "BARI source range ১০–১২ কেজি/হেক্টর" },
+    ],
   },
   {
     id: "brinjal",
