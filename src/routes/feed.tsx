@@ -464,8 +464,10 @@ function PostCard({
   const { counts: reactionCounts, mine: myReaction, setReaction } = usePostReactions(post.id);
 
   const handleReaction = async (reaction: Parameters<typeof setReaction>[0]) => {
-    const ok = await setReaction(reaction);
-    if (!ok) toast.error("প্রতিক্রিয়া দিতে লগইন করুন");
+    const result = await setReaction(reaction);
+    if (!result.ok) {
+      toast.error(result.reason === "unauthenticated" ? "প্রতিক্রিয়া দিতে লগইন করুন" : "প্রতিক্রিয়া সংরক্ষণ করা যায়নি");
+    }
   };
 
   const handleDelete = async () => {
