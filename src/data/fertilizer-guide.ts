@@ -13,6 +13,8 @@ export const BOTTLE_GOURD_BARC_2024_PROTOCOL_URL =
   "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-barc/2024/12/29bfab5e2e2645068816e65b6786b9b2.pdf";
 export const BARI_HORTICULTURE_FERTILIZER_URL =
   "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bari/2024/12/796206b849164678957e3d06ac7c5905.pdf";
+export const BARC_RATES_REPORT_URL =
+  "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-barc/2024/12/ab4fbedaaba14de49140017deaf626d4.pdf";
 
 const HECTARE_TO_SHOTOK = 1 / 247;
 
@@ -300,14 +302,33 @@ export const CROPS: CropDose[] = [
     id: "onion",
     emoji: "🧅",
     label: "পেঁয়াজ",
-    urea: 2.4,
-    tsp: 1.8,
-    mop: 1.8,
-    gypsum: 1.0,
-    zinc: 0.15,
-    schedule: splitUrea2(),
-    warnings: VEG_WARN,
-    ...UNVERIFIED_CROP_META,
+    // BARC RATES report, BARI Piaz-6: Urea 240–260, TSP 260, MOP 150 kg/ha.
+    urea: 250 * HECTARE_TO_SHOTOK,
+    tsp: 260 * HECTARE_TO_SHOTOK,
+    mop: 150 * HECTARE_TO_SHOTOK,
+    gypsum: 0,
+    zinc: 0,
+    schedule: [
+      {
+        when: "মৌসুমের মোট dose",
+        daysOffset: 0,
+        detail:
+          "BARC RATES report-এর মোট dose মাটি পরীক্ষা ও স্থানীয় কৃষি কর্মকর্তার পরামর্শে কিস্তিতে ভাগ করে প্রয়োগ করুন; একসাথে সব দেবেন না",
+        fertilizers: ["urea", "tsp", "mop"],
+        ureaShare: 1,
+      },
+    ],
+    warnings: [
+      ...VEG_WARN,
+      "এই recommendation BARI Piaz-6 ও BARC RATES field demonstration-এর জন্য; অন্য জাত বা AEZ-এ dose বদলাতে পারে",
+      "Report-এ জিপসাম/জিংক dose দেওয়া নেই—মাটি পরীক্ষার ফল ছাড়া নিজে থেকে যোগ করবেন না",
+    ],
+    verified: true,
+    sourceTitle: "BARC RATES Annual Report — BARI Piaz-6 পেঁয়াজ",
+    sourceUrl: BARC_RATES_REPORT_URL,
+    sourceNote:
+      "Official BARC report-এর BARI Piaz-6 section: ইউরিয়া ২৪০–২৬০, টিএসপি ২৬০, এমওপি ১৫০ এবং গোবর ৫,০০০ কেজি/হেক্টর। Calculator ইউরিয়ার range midpoint ২৫০ কেজি/হেক্টর ব্যবহার করছে।",
+    supplemental: [{ name: "গোবর সার", kgPerHectare: 5000, note: "BARC RATES report" }],
   },
   {
     id: "garlic",
@@ -406,14 +427,37 @@ export const CROPS: CropDose[] = [
     id: "mustard",
     emoji: "🌻",
     label: "সরিষা",
-    urea: 1.6,
-    tsp: 1.2,
-    mop: 0.8,
-    gypsum: 0.8,
-    zinc: 0.1,
-    schedule: splitUrea2(),
-    warnings: VEG_WARN,
-    ...UNVERIFIED_CROP_META,
+    // BARC RATES report, BARI Sharisha-18: Urea 250, TSP 170, MOP 85,
+    // gypsum 150, zinc sulfate 5, boric acid 10 kg/ha.
+    urea: 250 * HECTARE_TO_SHOTOK,
+    tsp: 170 * HECTARE_TO_SHOTOK,
+    mop: 85 * HECTARE_TO_SHOTOK,
+    gypsum: 150 * HECTARE_TO_SHOTOK,
+    zinc: 5 * HECTARE_TO_SHOTOK,
+    schedule: [
+      {
+        when: "মৌসুমের মোট dose",
+        daysOffset: 0,
+        detail:
+          "BARC RATES report-এর মোট dose মাটি পরীক্ষা ও সরিষার local crop calendar অনুযায়ী ভাগ করে প্রয়োগ করুন",
+        fertilizers: ["urea", "tsp", "mop", "gypsum", "zinc"],
+        ureaShare: 1,
+      },
+    ],
+    warnings: [
+      ...VEG_WARN,
+      "এই recommendation BARI Sharisha-18 variety ও BARC RATES field demonstration-এর জন্য; অন্য জাত বা AEZ-এ dose বদলাতে পারে",
+      "Report-এ বোরিক এসিড ১০ কেজি/হেক্টরও আছে; মাটি পরীক্ষা ছাড়া micronutrient যোগ করবেন না",
+    ],
+    verified: true,
+    sourceTitle: "BARC RATES Annual Report — BARI Sharisha-18 সরিষা",
+    sourceUrl: BARC_RATES_REPORT_URL,
+    sourceNote:
+      "Official BARC report-এর BARI Sharisha-18 section: ইউরিয়া ২৫০, টিএসপি ১৭০, এমওপি ৮৫, জিপসাম ১৫০, জিংক সালফেট ৫, বোরিক এসিড ১০ এবং গোবর ৫,০০০ কেজি/হেক্টর।",
+    supplemental: [
+      { name: "বোরিক এসিড", kgPerHectare: 10, note: "BARC RATES report" },
+      { name: "গোবর সার", kgPerHectare: 5000, note: "BARC RATES report" },
+    ],
   },
 ];
 
