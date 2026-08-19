@@ -13,6 +13,10 @@ CREATE TABLE IF NOT EXISTS public.post_reactions (
 CREATE INDEX IF NOT EXISTS post_reactions_post_idx ON public.post_reactions (post_id, reaction_type);
 CREATE INDEX IF NOT EXISTS post_reactions_user_idx ON public.post_reactions (user_id, post_id);
 
+GRANT SELECT ON public.post_reactions TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.post_reactions TO authenticated;
+GRANT ALL ON public.post_reactions TO service_role;
+
 ALTER TABLE public.post_reactions ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Anyone can read reactions" ON public.post_reactions;
