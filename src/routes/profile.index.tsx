@@ -22,7 +22,6 @@ import { Switch } from "@/components/ui/switch";
 import { DISTRICTS, getUpazilas } from "@/lib/bd-data";
 import { PROFILE_CROP_LABELS } from "@/lib/crop-options";
 import { sanitize, sanitizeOptional } from "@/lib/sanitize";
-import { ConnectedFarmersList } from "@/components/krishi/connected-farmers-list";
 
 export const Route = createFileRoute("/profile/")({
   component: ProfilePage,
@@ -246,9 +245,19 @@ function ProfilePage() {
           </p>
         )}
 
-        <div className="mt-4">
-          <ConnectedFarmersList profileId={full.id} currentUserId={full.id} />
-        </div>
+        <Link
+          to="/friends"
+          className="home-pressable mt-4 flex items-center gap-3 rounded-2xl border border-[#E4E6EB] bg-white p-3 text-left shadow-sm transition hover:bg-[#F0F2F5]"
+        >
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E7F3FF] text-[#1877F2]">
+            <Users className="h-5 w-5" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-extrabold text-[#1C1E21]">বন্ধু তালিকা</span>
+            <span className="mt-0.5 block text-xs text-[#65676B]">আপনার সংযুক্ত কৃষকদের দেখুন ও সাজান</span>
+          </span>
+          <ChevronRight className="h-5 w-5 shrink-0 text-[#65676B]" />
+        </Link>
       </section>
 
       <section className="px-4 mt-6">
@@ -292,7 +301,7 @@ function ProfilePage() {
         </div>
       </section>
 
-      <SettingsList open={settingsOpen} onClose={() => setSettingsOpen(false)} onLogout={() => setLogoutOpen(true)} onFriends={() => navigate({ to: "/friends" })} />
+      <SettingsList open={settingsOpen} onClose={() => setSettingsOpen(false)} onLogout={() => setLogoutOpen(true)} />
 
       <EditProfileSheet
         open={editOpen}
@@ -743,7 +752,7 @@ function MyPricesTab({ userId, onChange }: { userId: string; onChange: (d: numbe
   );
 }
 
-function SettingsList({ open, onClose, onLogout, onFriends }: { open: boolean; onClose: () => void; onLogout: () => void; onFriends: () => void }) {
+function SettingsList({ open, onClose, onLogout }: { open: boolean; onClose: () => void; onLogout: () => void }) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -770,7 +779,6 @@ function SettingsList({ open, onClose, onLogout, onFriends }: { open: boolean; o
       <BottomSheet open={open} onClose={onClose} title="সেটিংস">
         <div className="space-y-3">
           <div className="rounded-2xl bg-card border border-border overflow-hidden">
-            <SettingRow icon={Users} label="বন্ধু তালিকা" onClick={onFriends} />
             <SettingRow icon={Bell} label="নোটিফিকেশন সেটিংস" onClick={() => setNotifOpen(true)} />
             <SettingRow icon={BellOff} label="মিউট করা ব্যবহারকারীরা" onClick={() => setMutedOpen(true)} />
             <SettingRow icon={Globe} label="ভাষা" value="বাংলা" onClick={() => setLangOpen(true)} />
