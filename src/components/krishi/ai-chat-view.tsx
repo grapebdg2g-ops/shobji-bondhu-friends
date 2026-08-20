@@ -552,7 +552,7 @@ export function AiChatView({ sessionId: initialSessionId }: { sessionId?: string
         </div>
 
         <div
-          className="fixed bottom-16 md:bottom-0 left-0 right-0 md:left-auto md:right-0 bg-white border-t border-gray-200 z-20 md:ml-64"
+          className="fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] md:bottom-0 left-0 right-0 md:left-auto md:right-0 bg-white border-t border-gray-200 z-20 md:ml-64"
           style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
         >
           {suggestions.length > 0 && !loading && (
