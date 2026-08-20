@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/user-context";
 import { useConnectionState, type ConnectionRow } from "@/hooks/use-connections";
 import { LazyImage } from "@/components/krishi/lazy-image";
+import { DirectMessagePopup } from "@/components/krishi/direct-message-popup";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/connections")({
@@ -138,11 +139,13 @@ function ConnectionsPage() {
 }
 
 function PersonCard({ profile, connection, requestMode = false }: { profile: Profile; connection?: ConnectionRow; requestMode?: boolean }) {
+  const [messageOpen, setMessageOpen] = useState(false);
   const { state, busy, request, respond } = useConnectionState(profile.id);
   const effectiveState = connection?.status === "accepted" ? "accepted" : requestMode ? "incoming_pending" : state;
 
   return (
-    <article className="home-pressable flex items-center gap-3 rounded-[22px] border border-border bg-card p-3 shadow-[var(--shadow-card)]">
+    <>
+      <article className="home-pressable flex items-center gap-3 rounded-[22px] border border-border bg-card p-3 shadow-[var(--shadow-card)]">
       <Link to="/u/$userId" params={{ userId: profile.id }} className="flex min-w-0 flex-1 items-center gap-3">
         <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-primary/10 text-primary ring-2 ring-primary/10">
           {profile.avatar_url ? <LazyImage src={profile.avatar_url} alt={profile.name} wrapperClassName="h-full w-full" /> : <div className="flex h-full w-full items-center justify-center text-xl font-black">{profile.name?.charAt(0) || "ক"}</div>}
@@ -165,13 +168,20 @@ function PersonCard({ profile, connection, requestMode = false }: { profile: Pro
           <button type="button" disabled={busy} onClick={() => void respond("declined")} aria-label="প্রত্যাখ্যান করুন" className="home-pressable flex h-10 w-10 items-center justify-center rounded-xl bg-destructive/10 text-destructive disabled:opacity-50"><X className="h-4 w-4" /></button>
         </div>
       ) : effectiveState === "accepted" ? (
-        <Link to="/messages/$userId" params={{ userId: profile.id }} aria-label={`${profile.name} কে মেসেজ করুন`} className="home-pressable flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E7F3FF] text-[#1877F2]"><MessageCircle className="h-4 w-4" /></Link>
+        <button type="button" onClick={() => setMessageOpen(true)} aria-label={`${profile.name} কে মেসেজ করুন`} className="home-pressable flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E7F3FF] text-[#1877F2]"><MessageCircle className="h-4 w-4" /></button>
       ) : effectiveState === "outgoing_pending" ? (
         <span className="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-extrabold text-amber-700">অপেক্ষায়</span>
       ) : (
         <button type="button" disabled={busy} onClick={() => void request()} className="home-pressable flex h-10 shrink-0 items-center gap-1 rounded-xl bg-primary px-3 text-xs font-extrabold text-primary-foreground disabled:opacity-50"><UserPlus className="h-3.5 w-3.5" /> সংযোগ</button>
       )}
     </article>
+      <DirectMessagePopup
+        recipient={profile}
+        open={messageOpen}
+        onClose={() => setMessageOpen(false)}
+        canMessage={effectiveState === "accepted"}
+      />
+    </>
   );
 }
 
