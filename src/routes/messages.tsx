@@ -19,7 +19,7 @@ function formatThreadTime(value: string) {
 
 function MessagesPage() {
   const navigate = useNavigate();
-  const { threads, loading, unreadCount } = useDirectThreads();
+  const { threads, loading, unreadCount, error, refresh } = useDirectThreads();
   const [query, setQuery] = useState("");
   const filtered = useMemo(() => {
     const value = query.trim().toLocaleLowerCase("bn-BD");
@@ -66,7 +66,26 @@ function MessagesPage() {
       </section>
 
       <section className="mx-auto mt-3 max-w-2xl overflow-hidden rounded-2xl border border-[#E4E6EB] bg-white shadow-sm">
-        {loading ? (
+        {error ? (
+          <div className="px-6 py-14 text-center">
+            <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-600">
+              <MessageCircle className="h-6 w-6" />
+            </span>
+            <h2 className="mt-4 text-base font-black text-[#1C1E21]">
+              মেসেজ সেবা এখন লোড হচ্ছে না
+            </h2>
+            <p className="mt-1 text-sm leading-relaxed text-[#65676B]">
+              সংযোগ বা সার্ভার সেটআপে সমস্যা হয়েছে। একটু পরে আবার চেষ্টা করুন।
+            </p>
+            <button
+              type="button"
+              onClick={() => void refresh()}
+              className="mt-4 rounded-full bg-[#1877F2] px-4 py-2.5 text-sm font-bold text-white"
+            >
+              আবার চেষ্টা করুন
+            </button>
+          </div>
+        ) : loading ? (
           <div className="space-y-3 p-4">
             {[1, 2, 3].map((item) => (
               <div key={item} className="h-16 animate-pulse rounded-xl bg-[#F0F2F5]" />
