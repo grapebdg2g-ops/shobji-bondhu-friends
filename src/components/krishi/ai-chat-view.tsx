@@ -103,9 +103,48 @@ export function AiChatView({ sessionId: initialSessionId }: { sessionId?: string
   const [renameValue, setRenameValue] = useState("");
 
   const [warning, setWarning] = useState<null | { action: () => void }>(null);
-  const endRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const stickToBottomRef = useRef(true);
+  const previousMessageCountRef = useRef(messages.length);
 
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, loading]);
+  const handleViewportScroll = useCallback(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    stickToBottomRef.current = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 120;
+  }, []);
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    const messageCountChanged = messages.length !== previousMessageCountRef.current;
+    const lastMessage = messages[messages.length - 1];
+    const userAddedMessage = messageCountChanged && lastMessage?.role === "user";
+    previousMessageCountRef.current = messages.length;
+    if (!viewport || (!stickToBottomRef.current && !userAddedMessage)) return;
+
+    const frame = requestAnimationFrame(() => {
+      viewport.scrollTop = viewport.scrollHeight;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [messages.length, loading]);
+
+  useEffect(() => {
+    const visualViewport = window.visualViewport;
+    if (!visualViewport) return;
+    let frame: number | null = null;
+    const handleKeyboardResize = () => {
+      if (!stickToBottomRef.current || frame !== null) return;
+      frame = requestAnimationFrame(() => {
+        frame = null;
+        const viewport = viewportRef.current;
+        if (viewport) viewport.scrollTop = viewport.scrollHeight;
+      });
+    };
+    visualViewport.addEventListener("resize", handleKeyboardResize);
+    return () => {
+      visualViewport.removeEventListener("resize", handleKeyboardResize);
+      if (frame !== null) cancelAnimationFrame(frame);
+    };
+  }, []);
 
   // Load sidebar list
   const loadSessions = useCallback(async () => {
@@ -506,7 +545,11 @@ export function AiChatView({ sessionId: initialSessionId }: { sessionId?: string
           )}
         </header>
 
-        <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-3 sm:py-4 space-y-2.5 sm:space-y-3 pb-56 md:pb-40">
+        <div
+          ref={viewportRef}
+          onScroll={handleViewportScroll}
+          className="flex-1 min-h-0 overscroll-contain overflow-y-auto px-3 sm:px-4 py-3 sm:py-4 space-y-2.5 sm:space-y-3 pb-56 md:pb-40"
+        >
           {messages.map((m, i) => (
             <div key={i} className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
               <div
@@ -548,7 +591,6 @@ export function AiChatView({ sessionId: initialSessionId }: { sessionId?: string
               </div>
             </div>
           )}
-          <div ref={endRef} />
         </div>
 
         <div
