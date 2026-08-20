@@ -176,33 +176,6 @@ export type Database = {
         }
         Relationships: []
       }
-      direct_messages: {
-        Row: {
-          body: string
-          created_at: string
-          id: string
-          read_at: string | null
-          recipient_id: string
-          sender_id: string
-        }
-        Insert: {
-          body: string
-          created_at?: string
-          id?: string
-          read_at?: string | null
-          recipient_id: string
-          sender_id: string
-        }
-        Update: {
-          body?: string
-          created_at?: string
-          id?: string
-          read_at?: string | null
-          recipient_id?: string
-          sender_id?: string
-        }
-        Relationships: []
-      }
       crop_diary_entries: {
         Row: {
           created_at: string
@@ -1256,18 +1229,6 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: string
       }
-      get_direct_threads: {
-        Args: never
-        Returns: {
-          last_body: string
-          last_message_at: string
-          peer_avatar_url: string
-          peer_district: string
-          peer_id: string
-          peer_name: string
-          unread_count: number
-        }[]
-      }
       get_connection_state: {
         Args: { target_user_id: string }
         Returns: string
@@ -1314,30 +1275,12 @@ export type Database = {
         Returns: boolean
       }
       increment_cache_hit: { Args: { _id: string }; Returns: undefined }
-      mark_direct_messages_read: { Args: { peer_user_id: string }; Returns: number }
       increment_comments: { Args: { post_id: string }; Returns: undefined }
       increment_likes: { Args: { post_id: string }; Returns: undefined }
       is_active_user: { Args: { _user_id: string }; Returns: boolean }
       record_cache_feedback: {
         Args: { _helpful: boolean; _id: string }
         Returns: undefined
-      }
-      send_direct_message: {
-        Args: { message_body: string; target_user_id: string }
-        Returns: {
-          body: string
-          created_at: string
-          id: string
-          read_at: string | null
-          recipient_id: string
-          sender_id: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "direct_messages"
-          isOneToOne: true
-          isSetofReturn: false
-        }
       }
       request_connection: {
         Args: { target_user_id: string }
