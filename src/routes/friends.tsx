@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/user-context";
 import { type FarmerProfile } from "@/components/krishi/farmer-card";
 import { LazyImage } from "@/components/krishi/lazy-image";
+import { DirectMessagePopup } from "@/components/krishi/direct-message-popup";
 import { type ConnectionRow } from "@/hooks/use-connections";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -206,9 +207,10 @@ function FacebookFriendRow({
 }) {
   const navigate = useNavigate();
   const [contactBusy, setContactBusy] = useState(false);
+  const [messageOpen, setMessageOpen] = useState(false);
   const contact = async (kind: "message" | "call") => {
     if (kind === "message") {
-      navigate({ to: "/messages/$userId", params: { userId: profile.id } });
+      setMessageOpen(true);
       return;
     }
     setContactBusy(true);
@@ -225,7 +227,8 @@ function FacebookFriendRow({
   };
 
   return (
-    <div className="flex items-center gap-3 px-1 py-3 sm:px-2">
+    <>
+      <div className="flex items-center gap-3 px-1 py-3 sm:px-2">
       <Link
         to="/u/$userId"
         params={{ userId: profile.id }}
@@ -277,7 +280,14 @@ function FacebookFriendRow({
           <Phone className="h-4 w-4" />
         </button>
       </div>
-    </div>
+      </div>
+      <DirectMessagePopup
+        recipient={profile}
+        open={messageOpen}
+        onClose={() => setMessageOpen(false)}
+        canMessage
+      />
+    </>
   );
 }
 

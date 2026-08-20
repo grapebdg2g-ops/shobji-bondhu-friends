@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { BadgeCheck, Check, Clock3, MapPin, MessageCircle, Phone, UserPlus, X } from "lucide-react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -9,6 +9,7 @@ import {
   type ConnectionRow,
 } from "@/hooks/use-connections";
 import { LazyImage } from "@/components/krishi/lazy-image";
+import { DirectMessagePopup } from "@/components/krishi/direct-message-popup";
 
 export type FarmerProfile = {
   id: string;
@@ -34,19 +35,19 @@ export function FarmerCard({
   compact?: boolean;
 }) {
   const [contactBusy, setContactBusy] = useState(false);
-  const navigate = useNavigate();
+  const [messageOpen, setMessageOpen] = useState(false);
   const { state, busy, request, respond, cancel } = useConnectionState(profile.id);
   const isSelf = profile.id === currentUserId;
   const effectiveState: ConnectionState = connection?.status === "accepted" ? "accepted" : state;
 
   const contact = async (kind: "message" | "call") => {
     if (isSelf) return;
-    if (effectiveState !== "accepted") {
-      toast.info("যোগাযোগ করতে আগে সংযোগ গ্রহণ করুন");
+    if (kind === "message") {
+      setMessageOpen(true);
       return;
     }
-    if (kind === "message") {
-      navigate({ to: "/messages/$userId", params: { userId: profile.id } });
+    if (effectiveState !== "accepted") {
+      toast.info("যোগাযোগ করতে আগে সংযোগ গ্রহণ করুন");
       return;
     }
     setContactBusy(true);
@@ -63,7 +64,8 @@ export function FarmerCard({
   };
 
   return (
-    <article
+    <>
+      <article
       className={`home-pressable rounded-[22px] border border-border bg-card shadow-[var(--shadow-card)] ${compact ? "p-2.5" : "p-3"}`}
     >
       <div className="flex items-center gap-3">
@@ -189,6 +191,13 @@ export function FarmerCard({
           )}
         </div>
       )}
-    </article>
+      </article>
+      <DirectMessagePopup
+        recipient={profile}
+        open={messageOpen}
+        onClose={() => setMessageOpen(false)}
+        canMessage={effectiveState === "accepted"}
+      />
+    </>
   );
 }
