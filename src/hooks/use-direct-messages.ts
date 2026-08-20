@@ -19,6 +19,7 @@ export function useDirectThreads() {
   const { user } = useUser();
   const [threads, setThreads] = useState<DirectThread[]>([]);
   const [loading, setLoading] = useState(Boolean(user));
+  const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     if (!user) {
@@ -27,24 +28,43 @@ export function useDirectThreads() {
       return;
     }
     setLoading(true);
-    const { data, error } = await supabase.rpc("get_direct_threads");
-    if (!error) setThreads((data ?? []) as DirectThread[]);
-    setLoading(false);
+    try {
+      const { data, error: rpcError } = await supabase.rpc("get_direct_threads");
+      if (rpcError) throw rpcError;
+      setThreads((data ?? []) as DirectThread[]);
+      setError(null);
+    } catch (caught) {
+      console.error("[direct-messages] thread load failed", caught);
+      setError(caught instanceof Error ? caught.message : "মেসেজ লোড করা যায়নি");
+      setThreads([]);
+    } finally {
+      setLoading(false);
+    }
   }, [user]);
 
   useEffect(() => {
     void refresh();
     if (!user) return;
-    const channel = supabase
-      .channel(`direct-thread-list-${user.id}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "direct_messages" },
-        () => void refresh(),
-      )
-      .subscribe();
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    try {
+      channel = supabase
+        .channel(`direct-thread-list-${user.id}`)
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "direct_messages" },
+          () => void refresh(),
+        )
+        .subscribe((status) => {
+          if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+            setError("মেসেজ সেবা সংযোগ করা যায়নি");
+          }
+        });
+    } catch (caught) {
+      console.error("[direct-messages] thread subscription failed", caught);
+      setError("মেসেজ সেবা সংযোগ করা যায়নি");
+    }
     return () => {
-      supabase.removeChannel(channel);
+      if (channel) void supabase.removeChannel(channel);
     };
   }, [refresh, user]);
 
@@ -52,6 +72,7 @@ export function useDirectThreads() {
     threads,
     loading,
     unreadCount: threads.reduce((total, thread) => total + Number(thread.unread_count ?? 0), 0),
+    error,
     refresh,
   };
 }
@@ -61,6 +82,7 @@ export function useDirectConversation(peerId: string | undefined) {
   const [messages, setMessages] = useState<DirectMessage[]>([]);
   const [loading, setLoading] = useState(Boolean(user && peerId));
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [peerOnline, setPeerOnline] = useState(false);
   const [peerTyping, setPeerTyping] = useState(false);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
@@ -77,19 +99,26 @@ export function useDirectConversation(peerId: string | undefined) {
       return;
     }
     setLoading(true);
-    const { data, error } = await supabase
-      .from("direct_messages")
-      .select("*")
-      .or(
-        `and(sender_id.eq.${user.id},recipient_id.eq.${peerId}),and(sender_id.eq.${peerId},recipient_id.eq.${user.id})`,
-      )
-      .order("created_at", { ascending: true })
-      .limit(200);
-    if (!error) {
+    try {
+      const { data, error: queryError } = await supabase
+        .from("direct_messages")
+        .select("*")
+        .or(
+          `and(sender_id.eq.${user.id},recipient_id.eq.${peerId}),and(sender_id.eq.${peerId},recipient_id.eq.${user.id})`,
+        )
+        .order("created_at", { ascending: true })
+        .limit(200);
+      if (queryError) throw queryError;
       setMessages((data ?? []) as DirectMessage[]);
+      setError(null);
       void markRead();
+    } catch (caught) {
+      console.error("[direct-messages] conversation load failed", caught);
+      setError(caught instanceof Error ? caught.message : "মেসেজ লোড করা যায়নি");
+      setMessages([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [markRead, peerId, user]);
 
   useEffect(() => {
@@ -97,48 +126,54 @@ export function useDirectConversation(peerId: string | undefined) {
     if (!user || !peerId) return;
 
     const roomId = [user.id, peerId].sort().join(":");
-    const channel = supabase
-      .channel(`direct-message-room-${roomId}`, { config: { presence: { key: user.id } } })
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "direct_messages" },
-        (payload) => {
-          const message = payload.new as DirectMessage;
-          if (!isForConversation(message, user.id, peerId)) return;
-          setMessages((previous) =>
-            previous.some((item) => item.id === message.id) ? previous : [...previous, message],
-          );
-          if (message.recipient_id === user.id) void markRead();
-        },
-      )
-      .on("presence", { event: "sync" }, () => {
-        const state = channel.presenceState<PresencePayload>();
-        const peerEntries = state[peerId] ?? [];
-        setPeerOnline(peerEntries.length > 0);
-        setPeerTyping(peerEntries.some((entry) => entry.typing === true));
-      })
-      .on("presence", { event: "join" }, () => {
-        const state = channel.presenceState<PresencePayload>();
-        const peerEntries = state[peerId] ?? [];
-        setPeerOnline(peerEntries.length > 0);
-        setPeerTyping(peerEntries.some((entry) => entry.typing === true));
-      })
-      .on("presence", { event: "leave" }, () => {
-        const state = channel.presenceState<PresencePayload>();
-        const peerEntries = state[peerId] ?? [];
-        setPeerOnline(peerEntries.length > 0);
-        setPeerTyping(peerEntries.some((entry) => entry.typing === true));
-      })
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED") {
-          void channel.track({ online_at: new Date().toISOString(), typing: false });
-        }
-      });
-
-    channelRef.current = channel;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    const updatePresence = () => {
+      const activeChannel = channelRef.current;
+      if (!activeChannel) return;
+      const state = activeChannel.presenceState<PresencePayload>();
+      const peerEntries = state[peerId] ?? [];
+      setPeerOnline(peerEntries.length > 0);
+      setPeerTyping(peerEntries.some((entry) => entry.typing === true));
+    };
+    try {
+      channel = supabase
+        .channel(`direct-message-room-${roomId}`, { config: { presence: { key: user.id } } })
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "direct_messages" },
+          (payload) => {
+            const message = payload.new as DirectMessage;
+            if (!isForConversation(message, user.id, peerId)) return;
+            setMessages((previous) =>
+              previous.some((item) => item.id === message.id) ? previous : [...previous, message],
+            );
+            if (message.recipient_id === user.id) void markRead();
+          },
+        )
+        .on("presence", { event: "sync" }, () => {
+          updatePresence();
+        })
+        .on("presence", { event: "join" }, () => {
+          updatePresence();
+        })
+        .on("presence", { event: "leave" }, () => {
+          updatePresence();
+        })
+        .subscribe((status) => {
+          if (status === "SUBSCRIBED") {
+            void channel?.track({ online_at: new Date().toISOString(), typing: false });
+          } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+            setError("মেসেজ সেবা সংযোগ করা যায়নি");
+          }
+        });
+      channelRef.current = channel;
+    } catch (caught) {
+      console.error("[direct-messages] conversation subscription failed", caught);
+      setError("মেসেজ সেবা সংযোগ করা যায়নি");
+    }
     return () => {
       channelRef.current = null;
-      supabase.removeChannel(channel);
+      if (channel) void supabase.removeChannel(channel);
     };
   }, [markRead, peerId, refresh, user]);
 
@@ -173,6 +208,7 @@ export function useDirectConversation(peerId: string | undefined) {
     sending,
     peerOnline,
     peerTyping,
+    error,
     refresh,
     markRead,
     setTyping,
