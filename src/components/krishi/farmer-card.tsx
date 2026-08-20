@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { BadgeCheck, Check, Clock3, MapPin, MessageCircle, Phone, UserPlus, X } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -22,17 +22,6 @@ export type FarmerProfile = {
   is_verified: boolean;
 };
 
-function toInternationalPhone(phone: string) {
-  const digits = phone.replace(/\D/g, "");
-  if (digits.startsWith("880")) return digits;
-  if (digits.startsWith("0")) return `88${digits}`;
-  return `88${digits}`;
-}
-
-function toWhatsAppUrl(phone: string) {
-  return `https://wa.me/${toInternationalPhone(phone)}`;
-}
-
 export function FarmerCard({
   profile,
   currentUserId,
@@ -45,6 +34,7 @@ export function FarmerCard({
   compact?: boolean;
 }) {
   const [contactBusy, setContactBusy] = useState(false);
+  const navigate = useNavigate();
   const { state, busy, request, respond, cancel } = useConnectionState(profile.id);
   const isSelf = profile.id === currentUserId;
   const effectiveState: ConnectionState = connection?.status === "accepted" ? "accepted" : state;
@@ -53,6 +43,10 @@ export function FarmerCard({
     if (isSelf) return;
     if (effectiveState !== "accepted") {
       toast.info("যোগাযোগ করতে আগে সংযোগ গ্রহণ করুন");
+      return;
+    }
+    if (kind === "message") {
+      navigate({ to: "/messages/$userId", params: { userId: profile.id } });
       return;
     }
     setContactBusy(true);
@@ -65,12 +59,7 @@ export function FarmerCard({
       toast.info("এই কৃষকের ফোন নম্বর পাওয়া যায়নি");
       return;
     }
-    const phone = String(data);
-    if (kind === "call") {
-      window.location.href = `tel:${phone}`;
-      return;
-    }
-    window.open(toWhatsAppUrl(phone), "_blank", "noopener,noreferrer");
+    window.location.href = `tel:${String(data)}`;
   };
 
   return (
