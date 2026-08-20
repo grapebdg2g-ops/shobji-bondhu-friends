@@ -302,6 +302,33 @@ export type Database = {
           },
         ]
       }
+      direct_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          read_at: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       disease_history: {
         Row: {
           created_at: string
@@ -1233,6 +1260,18 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: string
       }
+      get_direct_threads: {
+        Args: never
+        Returns: {
+          last_body: string
+          last_message_at: string
+          peer_avatar_url: string
+          peer_district: string
+          peer_id: string
+          peer_name: string
+          unread_count: number
+        }[]
+      }
       get_exchange_phone: { Args: { _id: string }; Returns: string }
       get_my_phone: { Args: never; Returns: string }
       get_price_history: {
@@ -1278,6 +1317,10 @@ export type Database = {
       increment_comments: { Args: { post_id: string }; Returns: undefined }
       increment_likes: { Args: { post_id: string }; Returns: undefined }
       is_active_user: { Args: { _user_id: string }; Returns: boolean }
+      mark_direct_messages_read: {
+        Args: { peer_user_id: string }
+        Returns: number
+      }
       record_cache_feedback: {
         Args: { _helpful: boolean; _id: string }
         Returns: undefined
@@ -1332,6 +1375,23 @@ export type Database = {
           question: string
           similarity: number
         }[]
+      }
+      send_direct_message: {
+        Args: { message_body: string; target_user_id: string }
+        Returns: {
+          body: string
+          created_at: string
+          id: string
+          read_at: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "direct_messages"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {
