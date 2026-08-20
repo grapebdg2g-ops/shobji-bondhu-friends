@@ -17,6 +17,7 @@ import { Route as OrganicFertilizerRouteImport } from './routes/organic-fertiliz
 import { Route as OfflineRouteImport } from './routes/offline'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as ModerationRouteImport } from './routes/moderation'
+import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FriendsRouteImport } from './routes/friends'
 import { Route as FeedRouteImport } from './routes/feed'
@@ -39,6 +40,7 @@ import { Route as VegetableGuideSlugRouteImport } from './routes/vegetable-guide
 import { Route as UUserIdRouteImport } from './routes/u.$userId'
 import { Route as ProfileDiseaseHistoryRouteImport } from './routes/profile.disease-history'
 import { Route as PricePredictionHistoryRouteImport } from './routes/price-prediction.history'
+import { Route as MessagesUserIdRouteImport } from './routes/messages.$userId'
 import { Route as CropPlannerMyPlansRouteImport } from './routes/crop-planner.my-plans'
 import { Route as AiBondhuPesticideRouteImport } from './routes/ai-bondhu.pesticide'
 import { Route as AiBondhuDiseaseRouteImport } from './routes/ai-bondhu.disease'
@@ -102,6 +104,11 @@ const NotificationsRoute = NotificationsRouteImport.update({
 const ModerationRoute = ModerationRouteImport.update({
   id: '/moderation',
   path: '/moderation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MessagesRoute = MessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -213,6 +220,11 @@ const PricePredictionHistoryRoute = PricePredictionHistoryRouteImport.update({
   id: '/history',
   path: '/history',
   getParentRoute: () => PricePredictionRoute,
+} as any)
+const MessagesUserIdRoute = MessagesUserIdRouteImport.update({
+  id: '/$userId',
+  path: '/$userId',
+  getParentRoute: () => MessagesRoute,
 } as any)
 const CropPlannerMyPlansRoute = CropPlannerMyPlansRouteImport.update({
   id: '/my-plans',
@@ -354,6 +366,7 @@ export interface FileRoutesByFullPath {
   '/feed': typeof FeedRoute
   '/friends': typeof FriendsRoute
   '/login': typeof LoginRoute
+  '/messages': typeof MessagesRouteWithChildren
   '/moderation': typeof ModerationRoute
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
@@ -377,6 +390,7 @@ export interface FileRoutesByFullPath {
   '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
   '/crop-planner/my-plans': typeof CropPlannerMyPlansRoute
+  '/messages/$userId': typeof MessagesUserIdRoute
   '/price-prediction/history': typeof PricePredictionHistoryRoute
   '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
@@ -408,6 +422,7 @@ export interface FileRoutesByTo {
   '/feed': typeof FeedRoute
   '/friends': typeof FriendsRoute
   '/login': typeof LoginRoute
+  '/messages': typeof MessagesRouteWithChildren
   '/moderation': typeof ModerationRoute
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
@@ -431,6 +446,7 @@ export interface FileRoutesByTo {
   '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
   '/crop-planner/my-plans': typeof CropPlannerMyPlansRoute
+  '/messages/$userId': typeof MessagesUserIdRoute
   '/price-prediction/history': typeof PricePredictionHistoryRoute
   '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
@@ -465,6 +481,7 @@ export interface FileRoutesById {
   '/feed': typeof FeedRoute
   '/friends': typeof FriendsRoute
   '/login': typeof LoginRoute
+  '/messages': typeof MessagesRouteWithChildren
   '/moderation': typeof ModerationRoute
   '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
@@ -488,6 +505,7 @@ export interface FileRoutesById {
   '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
   '/crop-planner/my-plans': typeof CropPlannerMyPlansRoute
+  '/messages/$userId': typeof MessagesUserIdRoute
   '/price-prediction/history': typeof PricePredictionHistoryRoute
   '/profile/disease-history': typeof ProfileDiseaseHistoryRoute
   '/u/$userId': typeof UUserIdRoute
@@ -523,6 +541,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/friends'
     | '/login'
+    | '/messages'
     | '/moderation'
     | '/notifications'
     | '/offline'
@@ -546,6 +565,7 @@ export interface FileRouteTypes {
     | '/ai-bondhu/disease'
     | '/ai-bondhu/pesticide'
     | '/crop-planner/my-plans'
+    | '/messages/$userId'
     | '/price-prediction/history'
     | '/profile/disease-history'
     | '/u/$userId'
@@ -577,6 +597,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/friends'
     | '/login'
+    | '/messages'
     | '/moderation'
     | '/notifications'
     | '/offline'
@@ -600,6 +621,7 @@ export interface FileRouteTypes {
     | '/ai-bondhu/disease'
     | '/ai-bondhu/pesticide'
     | '/crop-planner/my-plans'
+    | '/messages/$userId'
     | '/price-prediction/history'
     | '/profile/disease-history'
     | '/u/$userId'
@@ -633,6 +655,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/friends'
     | '/login'
+    | '/messages'
     | '/moderation'
     | '/notifications'
     | '/offline'
@@ -656,6 +679,7 @@ export interface FileRouteTypes {
     | '/ai-bondhu/disease'
     | '/ai-bondhu/pesticide'
     | '/crop-planner/my-plans'
+    | '/messages/$userId'
     | '/price-prediction/history'
     | '/profile/disease-history'
     | '/u/$userId'
@@ -690,6 +714,7 @@ export interface RootRouteChildren {
   FeedRoute: typeof FeedRoute
   FriendsRoute: typeof FriendsRoute
   LoginRoute: typeof LoginRoute
+  MessagesRoute: typeof MessagesRouteWithChildren
   ModerationRoute: typeof ModerationRoute
   NotificationsRoute: typeof NotificationsRoute
   OfflineRoute: typeof OfflineRoute
@@ -773,6 +798,13 @@ declare module '@tanstack/react-router' {
       path: '/moderation'
       fullPath: '/moderation'
       preLoaderRoute: typeof ModerationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/messages': {
+      id: '/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof MessagesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -928,6 +960,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/price-prediction/history'
       preLoaderRoute: typeof PricePredictionHistoryRouteImport
       parentRoute: typeof PricePredictionRoute
+    }
+    '/messages/$userId': {
+      id: '/messages/$userId'
+      path: '/$userId'
+      fullPath: '/messages/$userId'
+      preLoaderRoute: typeof MessagesUserIdRouteImport
+      parentRoute: typeof MessagesRoute
     }
     '/crop-planner/my-plans': {
       id: '/crop-planner/my-plans'
@@ -1158,6 +1197,18 @@ const CropPlannerRouteWithChildren = CropPlannerRoute._addFileChildren(
   CropPlannerRouteChildren,
 )
 
+interface MessagesRouteChildren {
+  MessagesUserIdRoute: typeof MessagesUserIdRoute
+}
+
+const MessagesRouteChildren: MessagesRouteChildren = {
+  MessagesUserIdRoute: MessagesUserIdRoute,
+}
+
+const MessagesRouteWithChildren = MessagesRoute._addFileChildren(
+  MessagesRouteChildren,
+)
+
 interface PricePredictionRouteChildren {
   PricePredictionHistoryRoute: typeof PricePredictionHistoryRoute
 }
@@ -1184,6 +1235,7 @@ const rootRouteChildren: RootRouteChildren = {
   FeedRoute: FeedRoute,
   FriendsRoute: FriendsRoute,
   LoginRoute: LoginRoute,
+  MessagesRoute: MessagesRouteWithChildren,
   ModerationRoute: ModerationRoute,
   NotificationsRoute: NotificationsRoute,
   OfflineRoute: OfflineRoute,
