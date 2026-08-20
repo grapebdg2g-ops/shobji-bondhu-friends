@@ -50,7 +50,7 @@ function GridCard({ c }: { c: Card }) {
 function AiBondhuHub() {
   const navigate = useNavigate();
   return (
-    <main className="min-h-screen bg-[#F0FFF4] md:max-w-[560px] md:mx-auto">
+    <main className="min-h-screen overflow-x-hidden bg-[#F0FFF4] md:max-w-[560px] md:mx-auto">
       <header className="px-5 pt-8 pb-10 rounded-b-3xl" style={{ background: "var(--gradient-brand)" }}>
         <button onClick={() => navigate({ to: "/dashboard" })} className="h-9 w-9 rounded-full bg-white/15 flex items-center justify-center text-white">
           <ArrowLeft className="h-5 w-5" />
