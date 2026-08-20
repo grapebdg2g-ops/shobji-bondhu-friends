@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { BadgeCheck, Check, ChevronRight, MapPin, Search, UserPlus, Users, X } from "lucide-react";
+import { BadgeCheck, Check, ChevronRight, MapPin, MessageCircle, Search, UserPlus, Users, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/user-context";
 import { useConnectionState, type ConnectionRow } from "@/hooks/use-connections";
@@ -165,7 +165,7 @@ function PersonCard({ profile, connection, requestMode = false }: { profile: Pro
           <button type="button" disabled={busy} onClick={() => void respond("declined")} aria-label="প্রত্যাখ্যান করুন" className="home-pressable flex h-10 w-10 items-center justify-center rounded-xl bg-destructive/10 text-destructive disabled:opacity-50"><X className="h-4 w-4" /></button>
         </div>
       ) : effectiveState === "accepted" ? (
-        <span className="shrink-0 rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-extrabold text-emerald-700">সংযুক্ত</span>
+        <Link to="/messages/$userId" params={{ userId: profile.id }} aria-label={`${profile.name} কে মেসেজ করুন`} className="home-pressable flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E7F3FF] text-[#1877F2]"><MessageCircle className="h-4 w-4" /></Link>
       ) : effectiveState === "outgoing_pending" ? (
         <span className="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-extrabold text-amber-700">অপেক্ষায়</span>
       ) : (

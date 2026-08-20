@@ -204,8 +204,13 @@ function FacebookFriendRow({
   profile: FarmerProfile;
   connection: ConnectionRow;
 }) {
+  const navigate = useNavigate();
   const [contactBusy, setContactBusy] = useState(false);
   const contact = async (kind: "message" | "call") => {
+    if (kind === "message") {
+      navigate({ to: "/messages/$userId", params: { userId: profile.id } });
+      return;
+    }
     setContactBusy(true);
     const { data, error } = await supabase.rpc(
       "get_connected_farmer_phone" as never,
@@ -216,18 +221,7 @@ function FacebookFriendRow({
       toast.info("এই কৃষকের ফোন নম্বর পাওয়া যায়নি");
       return;
     }
-    const phone = String(data);
-    if (kind === "call") {
-      window.location.href = `tel:${phone}`;
-      return;
-    }
-    const digits = phone.replace(/\D/g, "");
-    const international = digits.startsWith("880")
-      ? digits
-      : digits.startsWith("0")
-        ? `88${digits}`
-        : `88${digits}`;
-    window.open(`https://wa.me/${international}`, "_blank", "noopener,noreferrer");
+    window.location.href = `tel:${String(data)}`;
   };
 
   return (

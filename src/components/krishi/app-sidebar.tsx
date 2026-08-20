@@ -2,10 +2,11 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import {
   Home, TrendingUp, Repeat2, Bug, Newspaper,
-  CloudSun, Bell, User, LogOut, Phone, X, Shield, UserCog, CalendarDays, Users,
+  CloudSun, Bell, User, LogOut, Phone, X, Shield, UserCog, CalendarDays, Users, MessageCircle,
 } from "lucide-react";
 import { useUser } from "@/contexts/user-context";
 import { useNotifications } from "@/hooks/use-notifications";
+import { useDirectThreads } from "@/hooks/use-direct-messages";
 import { useRole } from "@/hooks/use-role";
 import { RoleBadge } from "@/components/krishi/role-badge";
 
@@ -14,7 +15,7 @@ const BRAND = "#2D6A4F";
 type Item = {
   label: string;
   to:
-    | "/dashboard" | "/prices" | "/exchange" | "/disease-detection" | "/feed" | "/crop-diary" | "/farmers"
+    | "/dashboard" | "/prices" | "/exchange" | "/disease-detection" | "/feed" | "/crop-diary" | "/farmers" | "/messages"
     | "/weather" | "/notifications" | "/profile" | "/moderation" | "/admin";
   icon: typeof Home;
   badge?: number;
@@ -70,6 +71,7 @@ export function AppSidebar({
   const router = useRouter();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { unreadCount } = useNotifications(user?.id ?? null);
+  const { unreadCount: messageUnreadCount } = useDirectThreads();
   const { role, isStaff, isAdmin } = useRole();
 
   const primary: Item[] = [
@@ -83,6 +85,7 @@ export function AppSidebar({
   ];
   const secondary: Item[] = [
     { label: "আবহাওয়া", to: "/weather", icon: CloudSun },
+    { label: "মেসেজ", to: "/messages", icon: MessageCircle, badge: messageUnreadCount },
     { label: "নোটিফিকেশন", to: "/notifications", icon: Bell, badge: unreadCount },
   ];
   const account: Item[] = [

@@ -35,6 +35,7 @@ function iconFor(type: string) {
   if (type === "like") return { Icon: Heart, color: "text-rose-500", bg: "bg-rose-50" };
   if (type === "comment" || type === "comment_reply") return { Icon: MessageCircle, color: "text-sky-500", bg: "bg-sky-50" };
   if (type === "reaction") return { Icon: Heart, color: "text-rose-500", bg: "bg-rose-50" };
+  if (type === "message") return { Icon: MessageCircle, color: "text-[#1877F2]", bg: "bg-[#E7F3FF]" };
   if (type === "price_alert")
     return { Icon: TrendingDown, color: "text-amber-600", bg: "bg-amber-50" };
   if (type === "connection_request")
@@ -55,7 +56,8 @@ function NotificationsPage() {
 
   const open = async (n: Notification) => {
     if (!n.is_read) await markRead(n.id);
-    if (n.ref_type === "connection") navigate({ to: "/connections" });
+    if (n.type === "message" && n.ref_id) navigate({ to: "/messages/$userId", params: { userId: n.ref_id } });
+    else if (n.ref_type === "connection") navigate({ to: "/connections" });
     else if (n.ref_type === "post") navigate({ to: "/feed" });
     else if (n.ref_type === "price") navigate({ to: "/prices" });
     else if (n.ref_type === "crop_reminder") navigate({ to: "/crop-diary" });

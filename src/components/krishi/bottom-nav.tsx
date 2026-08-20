@@ -33,6 +33,7 @@ const QUICK_ACTIONS = [
   { to: "/ai-bondhu/chat", label: "AI বন্ধুকে জিজ্ঞেস করুন", Icon: MessageSquareText },
   { to: "/feed", label: "কমিউনিটিতে যান", Icon: Newspaper },
   { to: "/farmers", label: "সকল কৃষক", Icon: Users },
+  { to: "/messages", label: "মেসেজ", Icon: MessageSquareText },
   { to: "/connections", label: "সংযোগ অনুরোধ", Icon: UserRoundPlus },
 ] as const;
 
