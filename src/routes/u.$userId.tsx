@@ -1,12 +1,26 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, BadgeCheck, Check, Clock3, Loader2, MapPin, Share2, Sprout, UserPlus, X } from "lucide-react";
+import {
+  ArrowLeft,
+  BadgeCheck,
+  CalendarDays,
+  Check,
+  Clock3,
+  Loader2,
+  MapPin,
+  MessageCircle,
+  Share2,
+  Sprout,
+  UserPlus,
+  X,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ContentMenu } from "@/components/krishi/content-menu";
 import { useConnectionState } from "@/hooks/use-connections";
 import { useUser } from "@/contexts/user-context";
 import { EmptyState } from "@/components/krishi/empty-state";
 import { ConnectedFarmersList } from "@/components/krishi/connected-farmers-list";
+import { DirectMessagePopup } from "@/components/krishi/direct-message-popup";
 
 type Profile = {
   id: string;
@@ -38,7 +52,14 @@ function PublicProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const { state: connectionState, busy: connectionBusy, request, respond, cancel } = useConnectionState(profile?.id ?? null);
+  const [messageOpen, setMessageOpen] = useState(false);
+  const {
+    state: connectionState,
+    busy: connectionBusy,
+    request,
+    respond,
+    cancel,
+  } = useConnectionState(profile?.id ?? null);
 
   useEffect(() => {
     let cancelled = false;
@@ -65,18 +86,18 @@ function PublicProfilePage() {
   }, [userId]);
 
   return (
-    <main className="min-h-screen bg-background pb-24">
-      <header className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border">
-        <div className="flex items-center gap-2 px-3 py-3">
+    <main className="min-h-screen bg-[#F0F2F5] pb-24 text-[#1C1E21]">
+      <header className="sticky top-0 z-20 border-b border-[#DADDE1] bg-white/95 backdrop-blur">
+        <div className="mx-auto flex h-14 max-w-3xl items-center gap-2 px-3 sm:px-4">
           <button
             type="button"
             onClick={() => navigate({ to: "/feed" })}
             aria-label="ফিরে যান"
-            className="h-9 w-9 rounded-full flex items-center justify-center hover:bg-muted"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-[#E4E6EB] transition hover:bg-[#D8DADF]"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-base font-bold flex-1 truncate">প্রোফাইল</h1>
+          <h1 className="min-w-0 flex-1 truncate text-base font-extrabold">প্রোফাইল</h1>
           {profile && (
             <ContentMenu
               contentType="user"
@@ -89,89 +110,190 @@ function PublicProfilePage() {
       </header>
 
       {loading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <div className="mx-auto max-w-3xl space-y-3 bg-white p-4">
+          <div className="h-36 animate-pulse rounded-2xl bg-[#E4E6EB]" />
+          <div className="h-24 animate-pulse rounded-2xl bg-[#E4E6EB]" />
+          <div className="h-40 animate-pulse rounded-2xl bg-[#E4E6EB]" />
         </div>
       ) : notFound || !profile ? (
-        <div className="px-4 pt-10">
-          <EmptyState title="ব্যবহারকারী পাওয়া যায়নি" description="এই অ্যাকাউন্ট আর নেই বা মুছে দেওয়া হয়েছে।" />
+        <div className="mx-auto max-w-3xl px-4 pt-10">
+          <EmptyState
+            title="ব্যবহারকারী পাওয়া যায়নি"
+            description="এই অ্যাকাউন্ট আর নেই বা মুছে দেওয়া হয়েছে।"
+          />
         </div>
       ) : (
-        <section className="px-4 pt-6 space-y-5">
-          <div className="flex flex-col items-center text-center">
-            <div className="h-24 w-24 rounded-full bg-primary/15 text-primary flex items-center justify-center overflow-hidden text-3xl font-bold">
-              {profile.avatar_url ? (
-                <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
-              ) : (
-                profile.name.charAt(0) || "ক"
-              )}
+        <>
+          <section className="mx-auto max-w-3xl overflow-hidden bg-white sm:rounded-b-2xl">
+            <div className="relative h-36 overflow-hidden bg-gradient-to-br from-[#1B4332] via-[#2D6A4F] to-[#74C69D] sm:h-48">
+              <div className="pointer-events-none absolute -right-10 -top-20 h-56 w-56 rounded-full bg-white/15 blur-2xl" />
+              <div className="pointer-events-none absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-[#F4A261]/20 blur-2xl" />
             </div>
-            <h2 className="mt-3 text-xl font-bold flex items-center gap-1.5">
-              {profile.name || "অজ্ঞাত"}
-              {profile.is_verified && <BadgeCheck className="h-5 w-5 text-primary" />}
-            </h2>
-            {(profile.district || profile.upazila) && (
-              <p className="mt-1 text-sm text-muted-foreground inline-flex items-center gap-1">
-                <MapPin className="h-3.5 w-3.5" />
-                {profile.upazila ? `${profile.upazila}, ${profile.district}` : profile.district}
+            <div className="px-4 pb-5 sm:px-6">
+              <div className="-mt-14 flex items-end justify-between gap-3 sm:-mt-16">
+                <div className="h-28 w-28 shrink-0 overflow-hidden rounded-full border-4 border-white bg-[#E7F3FF] text-4xl font-black text-[#1877F2] shadow-md sm:h-32 sm:w-32">
+                  {profile.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt={profile.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center">
+                      {profile.name.charAt(0) || "ক"}
+                    </div>
+                  )}
+                </div>
+                {user?.id !== profile.id && (
+                  <div className="flex gap-2 pb-1">
+                    {connectionState === "accepted" && (
+                      <button
+                        type="button"
+                        onClick={() => setMessageOpen(true)}
+                        className="home-pressable flex h-10 items-center gap-1.5 rounded-lg bg-[#1877F2] px-3 text-xs font-extrabold text-white shadow-sm transition hover:bg-[#166FE5]"
+                      >
+                        <MessageCircle className="h-4 w-4" /> <span>মেসেজ</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => void navigator.clipboard?.writeText(window.location.href)}
+                      aria-label="প্রোফাইল শেয়ার করুন"
+                      className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#E4E6EB] text-[#1C1E21] transition hover:bg-[#D8DADF]"
+                    >
+                      <Share2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <h2 className="text-2xl font-black tracking-tight">{profile.name || "অজ্ঞাত"}</h2>
+                {profile.is_verified && <BadgeCheck className="h-5 w-5 text-[#1877F2]" />}
+                <span className="rounded-full bg-[#E7F3FF] px-2.5 py-1 text-[11px] font-extrabold text-[#1877F2]">
+                  {profile.role === "expert" ? "বিশেষজ্ঞ" : "কৃষক"}
+                </span>
+              </div>
+              <p className="mt-1 text-xs font-semibold text-[#65676B]">
+                {profile.district || "বাংলাদেশ"}
+                {profile.upazila ? `, ${profile.upazila}` : ""} ·{" "}
+                {formatMemberSince(profile.created_at)} থেকে সদস্য
               </p>
-            )}
-            {profile.bio && (
-              <p className="mt-3 max-w-md text-sm text-foreground/80">{profile.bio}</p>
-            )}
-            {user?.id !== profile.id && <div className="mt-4 flex w-full max-w-sm gap-2">
-              {connectionState === "accepted" ? (
-                <div className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-100 text-sm font-extrabold text-emerald-700"><Check className="h-4 w-4" /> সংযুক্ত</div>
-              ) : connectionState === "outgoing_pending" ? (
-                <button type="button" disabled={connectionBusy} onClick={() => void cancel()} className="home-pressable flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-amber-100 text-sm font-extrabold text-amber-700 disabled:opacity-50"><Clock3 className="h-4 w-4" /> অনুরোধ বাতিল</button>
-              ) : connectionState === "incoming_pending" ? (
-                <>
-                  <button type="button" disabled={connectionBusy} onClick={() => void respond("accepted")} className="home-pressable flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-primary text-sm font-extrabold text-primary-foreground disabled:opacity-50"><Check className="h-4 w-4" /> গ্রহণ করুন</button>
-                  <button type="button" disabled={connectionBusy} onClick={() => void respond("declined")} className="home-pressable flex h-11 w-11 items-center justify-center rounded-xl bg-destructive/10 text-destructive disabled:opacity-50" aria-label="প্রত্যাখ্যান"><X className="h-4 w-4" /></button>
-                </>
-              ) : (
-                <button type="button" disabled={connectionBusy} onClick={() => void request()} className="home-pressable flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-primary text-sm font-extrabold text-primary-foreground disabled:opacity-50"><UserPlus className="h-4 w-4" /> সংযোগ করুন</button>
+              {profile.bio && (
+                <p className="mt-3 max-w-xl text-sm leading-relaxed text-[#65676B]">
+                  {profile.bio}
+                </p>
               )}
-              <button type="button" onClick={() => { void navigator.clipboard?.writeText(window.location.href); }} className="home-pressable flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-card text-primary" aria-label="প্রোফাইল শেয়ার করুন"><Share2 className="h-4 w-4" /></button>
-            </div>}
-          </div>
 
-          <div className="grid grid-cols-3 gap-2">
-            <Stat label="পোস্ট" value={profile.posts_count} />
-            <Stat label="দাম" value={profile.prices_count} />
-            <Stat label="বিনিময়" value={profile.exchanges_count} />
-          </div>
+              {user?.id !== profile.id && connectionState !== "accepted" && (
+                <div className="mt-4 flex gap-2">
+                  {connectionState === "outgoing_pending" ? (
+                    <button
+                      type="button"
+                      disabled={connectionBusy}
+                      onClick={() => void cancel()}
+                      className="home-pressable flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg bg-[#FFF4D6] text-xs font-extrabold text-[#8A5A00] disabled:opacity-50"
+                    >
+                      <Clock3 className="h-4 w-4" /> অনুরোধ বাতিল
+                    </button>
+                  ) : connectionState === "incoming_pending" ? (
+                    <>
+                      <button
+                        type="button"
+                        disabled={connectionBusy}
+                        onClick={() => void respond("accepted")}
+                        className="home-pressable flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg bg-[#1877F2] text-xs font-extrabold text-white disabled:opacity-50"
+                      >
+                        <Check className="h-4 w-4" /> গ্রহণ করুন
+                      </button>
+                      <button
+                        type="button"
+                        disabled={connectionBusy}
+                        onClick={() => void respond("declined")}
+                        className="home-pressable flex h-10 w-10 items-center justify-center rounded-lg bg-[#FDE7E7] text-red-600 disabled:opacity-50"
+                        aria-label="প্রত্যাখ্যান"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={connectionBusy}
+                      onClick={() => void request()}
+                      className="home-pressable flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg bg-[#1877F2] text-xs font-extrabold text-white disabled:opacity-50"
+                    >
+                      <UserPlus className="h-4 w-4" /> সংযোগ করুন
+                    </button>
+                  )}
+                </div>
+              )}
 
-          {profile.crops && profile.crops.length > 0 && (
-            <div className="rounded-2xl border border-border bg-card p-4">
-              <p className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
-                <Sprout className="h-3.5 w-3.5" /> চাষ করা ফসল
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {profile.crops.map((c) => (
-                  <span
-                    key={c}
-                    className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold"
-                  >
-                    {c}
-                  </span>
-                ))}
+              <div className="mt-5 grid grid-cols-3 divide-x divide-[#DADDE1] rounded-xl border border-[#E4E6EB] bg-[#F7F8FA] py-2 text-center">
+                <Stat label="পোস্ট" value={profile.posts_count} />
+                <Stat label="দাম" value={profile.prices_count} />
+                <Stat label="বিনিময়" value={profile.exchanges_count} />
               </div>
             </div>
-          )}
+          </section>
 
-          <ConnectedFarmersList profileId={profile.id} currentUserId={user?.id} />
+          <div className="mx-auto mt-3 max-w-3xl space-y-3">
+            <section className="border-y border-[#DADDE1] bg-white px-4 py-4 sm:rounded-xl sm:border sm:px-6">
+              <h3 className="text-base font-black">পরিচিতি</h3>
+              <div className="mt-3 grid gap-3 text-sm text-[#65676B] sm:grid-cols-2">
+                <p className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 shrink-0 text-[#1877F2]" />
+                  {profile.upazila
+                    ? `${profile.upazila}, ${profile.district}`
+                    : profile.district || "বাংলাদেশ"}
+                </p>
+                <p className="flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4 shrink-0 text-[#1877F2]" />
+                  {formatMemberSince(profile.created_at)} থেকে কৃষিবন্ধুতে
+                </p>
+                <p className="flex items-center gap-2">
+                  <Sprout className="h-4 w-4 shrink-0 text-[#18A058]" />
+                  {profile.crops?.length
+                    ? `${profile.crops.length}টি ফসল নিয়ে কাজ করছেন`
+                    : "ফসলের তথ্য যোগ করেননি"}
+                </p>
+              </div>
+              {profile.crops && profile.crops.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-1.5 border-t border-[#E4E6EB] pt-3">
+                  {profile.crops.map((crop) => (
+                    <span
+                      key={crop}
+                      className="rounded-full bg-[#E7F8EF] px-2.5 py-1 text-xs font-bold text-[#18A058]"
+                    >
+                      {crop}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </section>
 
-          <Link
-            to="/feed"
-            className="block text-center text-sm text-muted-foreground underline pt-2"
-          >
-            ফিডে ফিরে যান
-          </Link>
-        </section>
+            <ConnectedFarmersList profileId={profile.id} currentUserId={user?.id} />
+            <Link
+              to="/feed"
+              className="block px-4 pb-4 text-center text-sm font-bold text-[#1877F2]"
+            >
+              ফিডে ফিরে যান
+            </Link>
+          </div>
+          <DirectMessagePopup
+            recipient={profile}
+            open={messageOpen}
+            onClose={() => setMessageOpen(false)}
+            canMessage={connectionState === "accepted"}
+          />
+        </>
       )}
     </main>
   );
+}
+
+function formatMemberSince(value: string) {
+  return new Date(value).toLocaleDateString("bn-BD", { month: "long", year: "numeric" });
 }
 
 function Stat({ label, value }: { label: string; value: number }) {

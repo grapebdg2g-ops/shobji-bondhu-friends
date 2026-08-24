@@ -121,14 +121,18 @@ function FriendsPage() {
 
       <div className="mx-auto max-w-3xl">
         <section className="border-b border-[#DADDE1] bg-white px-4 pb-4 pt-5 sm:rounded-b-xl sm:border-x sm:px-6">
+          <div className="relative -mx-4 -mt-5 mb-4 h-20 overflow-hidden bg-gradient-to-r from-[#1B4332] via-[#2D6A4F] to-[#74C69D] sm:-mx-6">
+            <div className="absolute -right-8 -top-16 h-40 w-40 rounded-full bg-white/15 blur-2xl" />
+            <div className="absolute -bottom-20 left-1/3 h-36 w-36 rounded-full bg-[#F4A261]/20 blur-2xl" />
+          </div>
           <div className="flex items-center gap-3">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E7F3FF] text-2xl font-black text-[#1877F2] ring-2 ring-[#E4E6EB]">
+            <div className="-mt-3 flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-[#E7F3FF] text-2xl font-black text-[#1877F2] shadow-sm">
               {user?.name?.charAt(0) ?? "ক"}
             </div>
             <div className="min-w-0">
               <h2 className="text-xl font-extrabold text-[#1C1E21]">আপনার বন্ধুরা</h2>
               <p className="mt-0.5 text-sm text-[#65676B]">
-                {friendsQuery.data?.length ?? 0} জন সংযুক্ত কৃষক
+                {friendsQuery.data?.length ?? 0} জন সংযুক্ত কৃষক · আপনার কৃষি নেটওয়ার্ক
               </p>
             </div>
           </div>
