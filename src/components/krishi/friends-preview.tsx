@@ -37,7 +37,9 @@ export function FriendsPreview({ userId }: { userId: string }) {
       if (error) throw error;
       const rows = (data as ConnectionRowLite[]) ?? [];
       const ids = Array.from(
-        new Set(rows.map((row) => (row.requester_id === userId ? row.addressee_id : row.requester_id))),
+        new Set(
+          rows.map((row) => (row.requester_id === userId ? row.addressee_id : row.requester_id)),
+        ),
       );
       if (!ids.length) return { total: 0, profiles: [] as FriendProfile[] };
       const res = await supabase
@@ -69,12 +71,12 @@ export function FriendsPreview({ userId }: { userId: string }) {
         </Link>
       </div>
 
-      <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-5">
+      <div className="mt-4 grid grid-cols-5 gap-2 sm:gap-4">
         {query.isLoading
           ? Array.from({ length: PREVIEW_LIMIT }).map((_, i) => (
-              <div key={i} className="space-y-2">
-                <Skeleton className="aspect-square w-full rounded-xl" />
-                <Skeleton className="h-3 w-16" />
+              <div key={i} className="flex min-w-0 flex-col items-center gap-2">
+                <Skeleton className="h-12 w-12 rounded-full sm:h-14 sm:w-14" />
+                <Skeleton className="h-2.5 w-12" />
               </div>
             ))
           : query.data?.profiles.map((friend) => (
@@ -82,20 +84,23 @@ export function FriendsPreview({ userId }: { userId: string }) {
                 key={friend.id}
                 to="/u/$userId"
                 params={{ userId: friend.id }}
-                className="group min-w-0"
+                className="group flex min-w-0 flex-col items-center text-center"
               >
-                <div className="aspect-square w-full overflow-hidden rounded-xl bg-[#E7F3FF] text-2xl font-black text-[#1877F2]">
+                <div className="h-12 w-12 overflow-hidden rounded-full border-2 border-[#E7F3FF] bg-[#E7F3FF] text-lg font-black text-[#1877F2] shadow-sm transition group-hover:border-[#1877F2] sm:h-14 sm:w-14 sm:text-xl">
                   {friend.avatar_url ? (
-                    <LazyImage src={friend.avatar_url} alt={friend.name} wrapperClassName="h-full w-full" />
+                    <LazyImage
+                      src={friend.avatar_url}
+                      alt={friend.name}
+                      wrapperClassName="h-full w-full"
+                    />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center">
                       {friend.name?.charAt(0) || "ক"}
                     </div>
                   )}
                 </div>
-                <p className="mt-1 truncate text-xs font-bold text-[#1C1E21]">{friend.name || "কৃষক"}</p>
-                <p className="truncate text-[10px] text-[#65676B]">
-                  {friend.upazila || friend.district || "বাংলাদেশ"}
+                <p className="mt-1.5 w-full truncate text-[10px] font-bold text-[#1C1E21] sm:text-xs">
+                  {friend.name || "কৃষক"}
                 </p>
               </Link>
             ))}
