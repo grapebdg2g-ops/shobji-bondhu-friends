@@ -48,7 +48,7 @@ export const Route = createFileRoute("/u/$userId")({
 function PublicProfilePage() {
   const { userId } = Route.useParams();
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { user, loading: userLoading } = useUser();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -63,6 +63,11 @@ function PublicProfilePage() {
 
   useEffect(() => {
     let cancelled = false;
+    if (userLoading) return;
+    if (user?.id === userId) {
+      void navigate({ to: "/profile" });
+      return;
+    }
     (async () => {
       setLoading(true);
       const { data, error } = await supabase
@@ -83,10 +88,10 @@ function PublicProfilePage() {
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, [navigate, user?.id, userId, userLoading]);
 
   return (
-    <main className="min-h-screen bg-[#F0F2F5] pb-24 text-[#1C1E21]">
+    <main className="min-h-screen overflow-x-hidden bg-[#F0F2F5] pb-24 text-[#1C1E21]">
       <header className="sticky top-0 z-20 border-b border-[#DADDE1] bg-white/95 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-3xl items-center gap-2 px-3 sm:px-4">
           <button
