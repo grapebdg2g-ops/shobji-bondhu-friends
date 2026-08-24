@@ -125,13 +125,13 @@ function PublicProfilePage() {
       ) : (
         <>
           <section className="mx-auto max-w-3xl overflow-hidden bg-white sm:rounded-b-2xl">
-            <div className="relative h-36 overflow-hidden bg-gradient-to-br from-[#1B4332] via-[#2D6A4F] to-[#74C69D] sm:h-48">
+            <div className="relative h-24 overflow-hidden bg-gradient-to-br from-[#1B4332] via-[#2D6A4F] to-[#74C69D] sm:h-48">
               <div className="pointer-events-none absolute -right-10 -top-20 h-56 w-56 rounded-full bg-white/15 blur-2xl" />
               <div className="pointer-events-none absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-[#F4A261]/20 blur-2xl" />
             </div>
-            <div className="px-4 pb-5 sm:px-6">
-              <div className="-mt-14 flex items-end justify-between gap-3 sm:-mt-16">
-                <div className="h-28 w-28 shrink-0 overflow-hidden rounded-full border-4 border-white bg-[#E7F3FF] text-4xl font-black text-[#1877F2] shadow-md sm:h-32 sm:w-32">
+            <div className="px-4 pb-4 sm:px-6 sm:pb-5">
+              <div className="-mt-10 flex items-end justify-between gap-3 sm:-mt-16">
+                <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border-4 border-white bg-[#E7F3FF] text-3xl font-black text-[#1877F2] shadow-md sm:h-32 sm:w-32 sm:text-4xl">
                   {profile.avatar_url ? (
                     <img
                       src={profile.avatar_url}
@@ -167,8 +167,10 @@ function PublicProfilePage() {
                 )}
               </div>
 
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <h2 className="text-2xl font-black tracking-tight">{profile.name || "অজ্ঞাত"}</h2>
+              <div className="mt-2 flex flex-wrap items-center gap-2 sm:mt-3">
+                <h2 className="text-xl font-black tracking-tight sm:text-2xl">
+                  {profile.name || "অজ্ঞাত"}
+                </h2>
                 {profile.is_verified && <BadgeCheck className="h-5 w-5 text-[#1877F2]" />}
                 <span className="rounded-full bg-[#E7F3FF] px-2.5 py-1 text-[11px] font-extrabold text-[#1877F2]">
                   {profile.role === "expert" ? "বিশেষজ্ঞ" : "কৃষক"}
@@ -229,7 +231,7 @@ function PublicProfilePage() {
                 </div>
               )}
 
-              <div className="mt-5 grid grid-cols-3 divide-x divide-[#DADDE1] rounded-xl border border-[#E4E6EB] bg-[#F7F8FA] py-2 text-center">
+              <div className="mt-4 grid grid-cols-3 divide-x divide-[#DADDE1] rounded-xl border border-[#E4E6EB] bg-[#F7F8FA] py-2 text-center sm:mt-5">
                 <Stat label="পোস্ট" value={profile.posts_count} />
                 <Stat label="দাম" value={profile.prices_count} />
                 <Stat label="বিনিময়" value={profile.exchanges_count} />
