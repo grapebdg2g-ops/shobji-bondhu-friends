@@ -23,6 +23,7 @@ import { Switch } from "@/components/ui/switch";
 import { DISTRICTS, getUpazilas } from "@/lib/bd-data";
 import { PROFILE_CROP_LABELS } from "@/lib/crop-options";
 import { sanitize, sanitizeOptional } from "@/lib/sanitize";
+import { FriendsPreview } from "@/components/krishi/friends-preview";
 
 export const Route = createFileRoute("/profile/")({
   component: ProfilePage,
