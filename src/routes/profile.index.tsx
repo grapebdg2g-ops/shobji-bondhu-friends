@@ -180,7 +180,7 @@ function ProfilePage() {
         </div>
 
         <div className="relative mx-auto max-w-3xl px-4 pb-4 sm:px-6">
-          <div className="relative z-10 -mt-8 flex items-end justify-between gap-3 sm:-mt-10">
+          <div className="relative z-10 flex items-center justify-between gap-3 pt-4">
             <div className="relative h-24 w-24 shrink-0 rounded-full border-4 border-white bg-[#E7F3FF] text-4xl font-black text-[#1877F2] shadow-md sm:h-32 sm:w-32">
               <div className="h-full w-full overflow-hidden rounded-full">
                 {full.avatar_url ? <LazyImage src={full.avatar_url} alt={full.name} wrapperClassName="h-full w-full rounded-full" priority /> : <div className="flex h-full w-full items-center justify-center">{initials(full.name)}</div>}
