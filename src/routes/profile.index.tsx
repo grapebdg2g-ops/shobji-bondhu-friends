@@ -23,6 +23,7 @@ import { Switch } from "@/components/ui/switch";
 import { DISTRICTS, getUpazilas } from "@/lib/bd-data";
 import { PROFILE_CROP_LABELS } from "@/lib/crop-options";
 import { sanitize, sanitizeOptional } from "@/lib/sanitize";
+import { FriendsPreview } from "@/components/krishi/friends-preview";
 
 export const Route = createFileRoute("/profile/")({
   component: ProfilePage,
@@ -179,9 +180,11 @@ function ProfilePage() {
         </div>
 
         <div className="relative mx-auto max-w-3xl px-4 pb-4 sm:px-6">
-          <div className="-mt-12 flex items-end justify-between gap-3 sm:-mt-16">
-            <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-white bg-[#E7F3FF] text-4xl font-black text-[#1877F2] shadow-md sm:h-32 sm:w-32">
-              {full.avatar_url ? <LazyImage src={full.avatar_url} alt={full.name} wrapperClassName="h-full w-full rounded-full" priority /> : <div className="flex h-full w-full items-center justify-center">{initials(full.name)}</div>}
+          <div className="relative z-10 -mt-8 flex items-end justify-between gap-3 sm:-mt-10">
+            <div className="relative h-24 w-24 shrink-0 rounded-full border-4 border-white bg-[#E7F3FF] text-4xl font-black text-[#1877F2] shadow-md sm:h-32 sm:w-32">
+              <div className="h-full w-full overflow-hidden rounded-full">
+                {full.avatar_url ? <LazyImage src={full.avatar_url} alt={full.name} wrapperClassName="h-full w-full rounded-full" priority /> : <div className="flex h-full w-full items-center justify-center">{initials(full.name)}</div>}
+              </div>
               {uploading && <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/45 text-xs font-bold text-white">আপলোড...</div>}
               <button type="button" onClick={() => fileRef.current?.click()} aria-label="ছবি পরিবর্তন" className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#E4E6EB] text-[#1C1E21] shadow-sm transition hover:bg-[#D8DADF]"><Camera className="h-4 w-4" /></button>
               <input ref={fileRef} type="file" accept="image/jpeg,image/png" className="hidden" onChange={onPickAvatar} />
@@ -207,6 +210,8 @@ function ProfilePage() {
           </div>
         </div>
       </header>
+
+      <FriendsPreview userId={full.id} />
 
       <section className="mx-auto mt-3 max-w-3xl border-y border-[#DADDE1] bg-white px-4 py-3 sm:rounded-xl sm:border sm:px-6">
         <div className="flex items-center gap-3">
