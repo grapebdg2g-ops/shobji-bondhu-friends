@@ -210,6 +210,8 @@ function ProfilePage() {
         </div>
       </header>
 
+      <FriendsPreview userId={full.id} />
+
       <section className="mx-auto mt-3 max-w-3xl border-y border-[#DADDE1] bg-white px-4 py-3 sm:rounded-xl sm:border sm:px-6">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E7F3FF] text-lg font-black text-[#1877F2]">
