@@ -25,10 +25,27 @@ export type Prediction = {
   risk_level: "কম" | "মাঝারি" | "বেশি";
 };
 
+const PredictionSchema = z.object({
+  direction: z.enum(["বাড়বে", "কমবে", "স্থির থাকবে"]),
+  confidence: z.number().min(0).max(100),
+  predicted_change_percent: z.number().min(-100).max(100),
+  timeframe: z.string().min(1).max(80),
+  current_avg_price: z.number().nonnegative(),
+  predicted_price_range: z.object({ min: z.number().nonnegative(), max: z.number().nonnegative() }),
+  main_reason: z.string().min(1).max(300),
+  factors: z.array(z.string().min(1).max(200)).min(1).max(6),
+  advice: z.string().min(1).max(500),
+  risk_level: z.enum(["কম", "মাঝারি", "বেশি"]),
+});
+
 const CACHE_HOURS = 6;
 
 function getSeason(): "রবি" | "খরিফ-১" | "খরিফ-২" {
-  const m = new Date().getMonth() + 1;
+  const m = Number(
+    new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Dhaka", month: "numeric" }).format(
+      new Date(),
+    ),
+  );
   if (m >= 11 || m <= 2) return "রবি";
   if (m >= 3 && m <= 6) return "খরিফ-১";
   return "খরিফ-২";
@@ -53,11 +70,13 @@ function computeTrend(history: HistoryRow[]): "rising" | "falling" | "stable" {
 export const getPricePrediction = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({
-      product: z.string().min(1).max(100),
-      district: z.string().min(1).max(100),
-      upazila: z.string().min(1).max(100).nullable().optional(),
-    }).parse(input),
+    z
+      .object({
+        product: z.string().min(1).max(100),
+        district: z.string().min(1).max(100),
+        upazila: z.string().min(1).max(100).nullable().optional(),
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const { supabase } = context;
@@ -92,6 +111,11 @@ export const getPricePrediction = createServerFn({ method: "POST" })
       p_days: 30,
     });
     const history = (historyRaw ?? []) as HistoryRow[];
+    if (history.length < 7) {
+      throw new Error(
+        "এই ফসলের জন্য অন্তত ৭ দিনের যাচাইযোগ্য বাজারদর না থাকায় এখনই নির্ভরযোগ্য পূর্বাভাস তৈরি করা যাচ্ছে না।",
+      );
+    }
 
     // ── Step 2: weather ──
     const [lat, lon] = getDistrictLatLng(district);
@@ -109,8 +133,7 @@ export const getPricePrediction = createServerFn({ method: "POST" })
     const season = getSeason();
     const trend = computeTrend(history);
 
-    const currentAvg =
-      history.length > 0 ? Number(history[history.length - 1]!.avg_price) : 0;
+    const currentAvg = history.length > 0 ? Number(history[history.length - 1]!.avg_price) : 0;
 
     // ── Step 5: Lovable AI Gateway ──
     const apiKey = process.env.LOVABLE_API_KEY ?? "";
@@ -184,15 +207,31 @@ ${JSON.stringify(history.slice(-10))}
     const raw = aiData.choices?.[0]?.message?.content ?? "";
     const cleaned = raw.replace(/```json|```/g, "").trim();
 
-    let prediction: Prediction;
+    let rawPrediction: unknown;
     try {
-      prediction = JSON.parse(cleaned) as Prediction;
+      rawPrediction = JSON.parse(cleaned);
     } catch {
-      // Try to extract JSON object from text
       const match = cleaned.match(/\{[\s\S]*\}/);
-      if (!match) throw new Error("Kimi returned non-JSON output");
-      prediction = JSON.parse(match[0]) as Prediction;
+      if (!match) throw new Error("AI response did not contain valid JSON");
+      rawPrediction = JSON.parse(match[0]);
     }
+
+    const parsedPrediction = PredictionSchema.parse(rawPrediction);
+    const prediction: Prediction = {
+      ...parsedPrediction,
+      confidence: Math.round(Math.min(parsedPrediction.confidence, history.length < 14 ? 65 : 90)),
+      predicted_price_range: {
+        min: Math.min(
+          parsedPrediction.predicted_price_range.min,
+          parsedPrediction.predicted_price_range.max,
+        ),
+        max: Math.max(
+          parsedPrediction.predicted_price_range.min,
+          parsedPrediction.predicted_price_range.max,
+        ),
+      },
+      risk_level: history.length < 14 ? "বেশি" : parsedPrediction.risk_level,
+    };
 
     // ── Step 6: save (uses service role to bypass RLS write restriction) ──
     try {
@@ -209,7 +248,6 @@ ${JSON.stringify(history.slice(-10))}
       console.warn("[prediction] cache save failed:", e);
     }
 
-
     return {
       prediction,
       trend,
@@ -222,29 +260,28 @@ ${JSON.stringify(history.slice(-10))}
 export const setPriceAlert = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({
-      product: z.string().min(1).max(100),
-      district: z.string().min(1).max(100),
-      threshold: z.number().min(1).max(100).default(10),
-      direction: z.enum(["both", "up", "down"]).default("both"),
-    }).parse(input),
+    z
+      .object({
+        product: z.string().min(1).max(100),
+        district: z.string().min(1).max(100),
+        threshold: z.number().min(1).max(100).default(10),
+        direction: z.enum(["both", "up", "down"]).default("both"),
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { error } = await supabase
-      .from("price_alerts")
-      .upsert(
-        {
-          user_id: userId,
-          product_name: data.product,
-          district: data.district,
-          alert_threshold: data.threshold,
-          direction: data.direction,
-          is_active: true,
-        },
-        { onConflict: "user_id,product_name,district" },
-      );
+    const { error } = await supabase.from("price_alerts").upsert(
+      {
+        user_id: userId,
+        product_name: data.product,
+        district: data.district,
+        alert_threshold: data.threshold,
+        direction: data.direction,
+        is_active: true,
+      },
+      { onConflict: "user_id,product_name,district" },
+    );
     if (error) throw new Error(error.message);
     return { ok: true };
   });
-

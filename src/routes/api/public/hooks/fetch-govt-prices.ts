@@ -10,10 +10,7 @@ import { createFileRoute } from "@tanstack/react-router";
 // You can also POST { rows: [...] } directly to seed/override (useful for
 // manual backfill or testing).
 
-const DAM_BULLETIN_URLS = [
-  "https://dam.portal.gov.bd/sites/default/files/files/dam.portal.gov.bd/daily_market_price/",
-  "https://www.dam.gov.bd/",
-];
+const DAM_REPORT_URL = "https://market.dam.gov.bd/market_daily_price_report";
 
 type GovtRow = {
   product_name: string;
@@ -23,6 +20,8 @@ type GovtRow = {
   price_max?: number | null;
   price_avg: number;
   price_date: string; // YYYY-MM-DD
+  unit?: string | null;
+  price_type?: "retail" | "wholesale" | "growers";
   source?: string;
 };
 
@@ -36,12 +35,19 @@ function todayInDhaka(): string {
   return fmt.format(new Date());
 }
 
-function parseNumber(s: string | undefined | null): number | null {
-  if (!s) return null;
-  const cleaned = s.replace(/[^\d.\-]/g, "");
-  if (!cleaned) return null;
-  const n = Number(cleaned);
-  return Number.isFinite(n) ? n : null;
+function normalizeDigits(s: string): string {
+  return s.replace(/[০-৯]/g, (digit) => String("০১২৩৪৫৬৭৮৯".indexOf(digit)));
+}
+
+function parseNumbers(s: string | undefined | null): number[] {
+  if (!s) return [];
+  return (
+    normalizeDigits(s)
+      .replace(/,/g, "")
+      .match(/-?\d+(?:\.\d+)?/g) ?? []
+  )
+    .map(Number)
+    .filter((n) => Number.isFinite(n));
 }
 
 // Best-effort table parser: tolerate whitespace, nested tags, malformed rows.
@@ -50,7 +56,11 @@ function parseDamHtml(html: string, priceDate: string): GovtRow[] {
   // Match each <tr>...</tr>
   const trRe = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
   const tdRe = /<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi;
-  const stripTags = (s: string) => s.replace(/<[^>]+>/g, "").replace(/&nbsp;/gi, " ").trim();
+  const stripTags = (s: string) =>
+    s
+      .replace(/<[^>]+>/g, "")
+      .replace(/&nbsp;/gi, " ")
+      .trim();
 
   let m: RegExpExecArray | null;
   while ((m = trRe.exec(html))) {
@@ -60,28 +70,38 @@ function parseDamHtml(html: string, priceDate: string): GovtRow[] {
     while ((c = tdRe.exec(inner))) cells.push(stripTags(c[1] ?? ""));
     if (cells.length < 3) continue;
 
-    // Heuristic: [product, ..., price] or [product, market, min, max, avg]
-    const product = cells[0]?.trim();
-    if (!product || /price|পণ্য|product|item/i.test(product)) continue;
+    // DAM's report table is usually [group, product, unit, price range].
+    // Keep a fallback for older tables that start with the product column.
+    const officialShape = cells.length >= 4 && parseNumbers(cells[0]).length > 0;
+    const productIndex = officialShape ? 1 : 0;
+    const product = cells[productIndex]?.trim();
+    if (
+      !product ||
+      /^[০-৯\d\s.,-]+$/.test(product) ||
+      /price|পণ্য|product|item|নাম|বিবরণ/i.test(product)
+    )
+      continue;
 
-    const nums = cells.slice(1).map(parseNumber).filter((n): n is number => n !== null);
+    const unit = officialShape ? cells[2]?.trim() || "কেজি" : "কেজি";
+    const priceCells = officialShape ? cells.slice(3) : cells.slice(1);
+    const nums = priceCells.flatMap((cell) => parseNumbers(cell));
     if (nums.length === 0) continue;
 
     const priceMin = nums.length >= 2 ? Math.min(...nums) : null;
     const priceMax = nums.length >= 2 ? Math.max(...nums) : null;
     const priceAvg =
-      nums.length >= 2
-        ? Math.round(((priceMin! + priceMax!) / 2) * 100) / 100
-        : nums[0]!;
+      nums.length >= 2 ? Math.round(((priceMin! + priceMax!) / 2) * 100) / 100 : nums[0]!;
 
     rows.push({
       product_name: product,
-      district: "ঢাকা", // DAM national bulletins default to Dhaka wholesale
-      market_name: cells.length > nums.length + 1 ? cells[1] ?? null : null,
+      district: "ঢাকা",
+      market_name: null,
       price_min: priceMin,
       price_max: priceMax,
       price_avg: priceAvg,
       price_date: priceDate,
+      unit,
+      price_type: "retail",
       source: "DAM",
     });
   }
@@ -89,20 +109,39 @@ function parseDamHtml(html: string, priceDate: string): GovtRow[] {
 }
 
 async function fetchDamRows(priceDate: string): Promise<GovtRow[]> {
-  for (const url of DAM_BULLETIN_URLS) {
-    try {
-      const res = await fetch(url, {
-        headers: { "User-Agent": "Mozilla/5.0 KrishiBondhuBot/1.0" },
-      });
-      if (!res.ok) continue;
-      const html = await res.text();
-      const rows = parseDamHtml(html, priceDate);
-      if (rows.length > 0) return rows;
-    } catch (e) {
-      console.warn("[fetch-govt-prices] source failed:", url, e);
-    }
+  try {
+    const headers = {
+      "User-Agent": "Mozilla/5.0 KrishiBondhuBot/1.0",
+      Accept: "text/html,application/xhtml+xml",
+    };
+    const form = await fetch(DAM_REPORT_URL, { headers });
+    if (!form.ok) return [];
+    const formHtml = await form.text();
+    const cookie = form.headers.get("set-cookie")?.split(";")[0];
+    const token = formHtml.match(/id=["']token["'][^>]*value=["']([^"']+)["']/i)?.[1];
+    if (!token) return [];
+
+    const body = new URLSearchParams();
+    body.append("PriceType_id[]", "4");
+    body.set("date", priceDate);
+    body.set("csrf_webspice_tkn", token);
+    body.set("filter", "Generate Report");
+
+    const report = await fetch(DAM_REPORT_URL, {
+      method: "POST",
+      headers: {
+        ...headers,
+        ...(cookie ? { Cookie: cookie } : {}),
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body,
+    });
+    if (!report.ok) return [];
+    return parseDamHtml(await report.text(), priceDate);
+  } catch (e) {
+    console.warn("[fetch-govt-prices] DAM report failed:", e);
+    return [];
   }
-  return [];
 }
 
 export const Route = createFileRoute("/api/public/hooks/fetch-govt-prices")({
@@ -131,7 +170,12 @@ export const Route = createFileRoute("/api/public/hooks/fetch-govt-prices")({
         const priceDate = todayInDhaka();
         const rows: GovtRow[] =
           Array.isArray(body.rows) && body.rows.length > 0
-            ? body.rows.map((r) => ({ ...r, source: r.source ?? "DAM" }))
+            ? body.rows.map((r) => ({
+                ...r,
+                source: r.source ?? "DAM",
+                unit: r.unit ?? "কেজি",
+                price_type: r.price_type ?? "retail",
+              }))
             : await fetchDamRows(priceDate);
 
         if (rows.length === 0) {
@@ -150,10 +194,17 @@ export const Route = createFileRoute("/api/public/hooks/fetch-govt-prices")({
 
         const { data, error } = await supabaseAdmin
           .from("govt_prices")
-          .upsert(rows, {
-            onConflict: "product_name,district,market_name,price_date,source",
-            ignoreDuplicates: false,
-          })
+          .upsert(
+            rows.map((row) => ({
+              ...row,
+              unit: row.unit ?? "কেজি",
+              price_type: row.price_type ?? "retail",
+            })),
+            {
+              onConflict: "product_name,district,market_name,price_date,source",
+              ignoreDuplicates: false,
+            },
+          )
           .select("id");
 
         if (error) {
