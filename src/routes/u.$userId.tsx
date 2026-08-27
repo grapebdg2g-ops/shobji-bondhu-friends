@@ -134,8 +134,8 @@ function PublicProfilePage() {
               <div className="pointer-events-none absolute -right-10 -top-20 h-56 w-56 rounded-full bg-white/15 blur-2xl" />
               <div className="pointer-events-none absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-[#F4A261]/20 blur-2xl" />
             </div>
-            <div className="px-4 pb-4 sm:px-6 sm:pb-5">
-              <div className="-mt-10 flex items-end justify-between gap-3 sm:-mt-16">
+            <div className="px-4 pb-4 pt-3 sm:px-6 sm:pb-5 sm:pt-4">
+              <div className="flex items-end justify-between gap-3">
                 <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border-4 border-white bg-[#E7F3FF] text-3xl font-black text-[#1877F2] shadow-md sm:h-32 sm:w-32 sm:text-4xl">
                   {profile.avatar_url ? (
                     <img
