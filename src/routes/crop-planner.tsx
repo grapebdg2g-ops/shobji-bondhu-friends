@@ -385,6 +385,17 @@ function CropPlannerPage() {
             </section>
           )}
 
+          {recs.length > 0 && (
+            <LakhpotiPlanSection
+              crops={recs}
+              areaShotok={areaShotok}
+              bighas={bighas}
+              soil={soil}
+              water={water}
+              goalLabel={GOALS.find((g) => g.v === primaryGoal)?.label ?? ""}
+            />
+          )}
+
           {recs.length > 0 && <UnsuitableSection soil={soil} water={water} recs={recs} />}
 
           {/* Floating compare button */}
@@ -637,6 +648,187 @@ function UnsuitableSection({ soil, water, recs }: { soil: SoilType; water: Water
             </div>
           </div>
         ))}
+      </div>
+    </section>
+  );
+}
+
+/* ============== Lakhpoti agricultural plan ============== */
+type LakhpotiPlanRow = {
+  crop: CropData;
+  share: number;
+  areaBigha: number;
+  cost: number;
+  yieldMin: number;
+  yieldMax: number;
+  revenueMin: number;
+  revenueMax: number;
+  profitMin: number;
+  profitMax: number;
+};
+
+function LakhpotiPlanSection({
+  crops,
+  areaShotok,
+  bighas,
+  soil,
+  water,
+  goalLabel,
+}: {
+  crops: CropData[];
+  areaShotok: number;
+  bighas: number;
+  soil: SoilType;
+  water: WaterNeed;
+  goalLabel: string;
+}) {
+  const planCrops = crops.slice(0, 3);
+  if (planCrops.length === 0 || bighas <= 0) return null;
+
+  const shares = planCrops.length === 1 ? [1] : planCrops.length === 2 ? [0.6, 0.4] : [0.5, 0.3, 0.2];
+  const rows: LakhpotiPlanRow[] = planCrops.map((crop, index) => {
+    const share = shares[index] ?? 0;
+    const areaBigha = bighas * share;
+    return {
+      crop,
+      share,
+      areaBigha,
+      cost: Math.round(crop.totalCost * areaBigha),
+      yieldMin: Math.round(crop.yieldMin * areaBigha),
+      yieldMax: Math.round(crop.yieldMax * areaBigha),
+      revenueMin: Math.round(crop.yieldMin * crop.avgMarketPrice * areaBigha),
+      revenueMax: Math.round(crop.yieldMax * crop.avgMarketPrice * areaBigha),
+      profitMin: Math.round(crop.profitMin * areaBigha),
+      profitMax: Math.round(crop.profitMax * areaBigha),
+    };
+  });
+
+  const totalCost = rows.reduce((sum, row) => sum + row.cost, 0);
+  const totalRevenueMin = rows.reduce((sum, row) => sum + row.revenueMin, 0);
+  const totalRevenueMax = rows.reduce((sum, row) => sum + row.revenueMax, 0);
+  const totalProfitMin = rows.reduce((sum, row) => sum + row.profitMin, 0);
+  const totalProfitMax = rows.reduce((sum, row) => sum + row.profitMax, 0);
+  const expectedProfit = Math.round((totalProfitMin + totalProfitMax) / 2);
+  const longestCycleDays = Math.max(...rows.map((row) => row.crop.totalDays));
+  const monthlyProfit = Math.round(expectedProfit / Math.max(1, Math.ceil(longestCycleDays / 30)));
+  const targetProgress = Math.min(100, Math.max(0, Math.round((expectedProfit / 100000) * 100)));
+  const targetGap = Math.max(0, 100000 - expectedProfit);
+  const targetReached = expectedProfit >= 100000;
+
+  return (
+    <section className="px-5 mt-7">
+      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-[#075E3D] via-[#0B7A4D] to-[#159A61] text-white shadow-lg">
+        <div className="px-5 pt-5 pb-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-emerald-50">
+                <TrendingUp className="h-4 w-4" /> আপনার পরিকল্পনার হিসাব
+              </div>
+              <h2 className="mt-3 text-2xl font-bold">লাখপতি কৃষি পরিকল্পনা</h2>
+              <p className="mt-1 text-sm leading-6 text-emerald-50/90">
+                {targetReached ? "এই ফসলচক্রে লাখ টাকার লাভের লক্ষ্য পূরণ হতে পারে।" : "লক্ষ্য ধরে ধাপে ধাপে লাভ বাড়ানোর একটি বাস্তবসম্মত ছক।"}
+              </p>
+            </div>
+            <div className="rounded-2xl bg-white/15 px-3 py-2 text-right backdrop-blur">
+              <div className="text-[10px] text-emerald-50/80">লাভের লক্ষ্য</div>
+              <div className="text-lg font-extrabold">৳১,০০,০০০</div>
+            </div>
+          </div>
+
+          <div className="mt-5 grid grid-cols-3 gap-2">
+            <div className="rounded-2xl bg-white/12 p-3">
+              <div className="text-[10px] text-emerald-50/75">মোট জমি</div>
+              <div className="mt-1 text-sm font-bold">{toBn(areaShotok)} শতক</div>
+            </div>
+            <div className="rounded-2xl bg-white/12 p-3">
+              <div className="text-[10px] text-emerald-50/75">সম্ভাব্য লাভ</div>
+              <div className="mt-1 text-sm font-bold">{fmtBdt(expectedProfit)}</div>
+            </div>
+            <div className="rounded-2xl bg-white/12 p-3">
+              <div className="text-[10px] text-emerald-50/75">মাসিক গড়</div>
+              <div className="mt-1 text-sm font-bold">{fmtBdt(monthlyProfit)}</div>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <div className="flex items-center justify-between text-xs text-emerald-50/90">
+              <span>লক্ষ্যের অগ্রগতি</span>
+              <span className="font-bold">{toBn(targetProgress)}%</span>
+            </div>
+            <div className="mt-2 h-2 overflow-hidden rounded-full bg-black/20">
+              <div className="h-full rounded-full bg-lime-300 transition-all" style={{ width: `${targetProgress}%` }} />
+            </div>
+            <p className="mt-2 text-[11px] text-emerald-50/80">
+              {targetReached ? "লক্ষ্য অতিক্রমের সম্ভাবনা আছে—বাজারদর ও খরচ নিয়মিত যাচাই করুন।" : `লক্ষ্য পূরণে আনুমানিক আরও ${fmtBdt(targetGap)} লাভ দরকার।`}
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-t-3xl bg-[#F5FFF8] px-4 py-4 text-gray-900">
+          <div className="rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm">
+            <div className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-emerald-600" />
+              <h3 className="font-bold">উপরের পরিকল্পনার হিসাব কীভাবে ব্যবহার করা হয়েছে?</h3>
+            </div>
+            <p className="mt-2 text-sm leading-6 text-gray-600">
+              আপনার <b>{toBn(areaShotok)} শতক</b> জমি, <b>{soil}</b> মাটি, <b>{water}</b> সেচ এবং “<b>{goalLabel}</b>” লক্ষ্য ধরে আগের সুপারিশের প্রথম তিনটি ফসল ভাগ করে হিসাব করা হয়েছে। প্রতি ফসলের পরিমাণ = মোট জমি × পরিকল্পনার ভাগ।
+            </p>
+            <div className="mt-3 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800">
+              হিসাবের সূত্র: সম্ভাব্য বিক্রয় = ফলন × গড় বাজারদর; আনুমানিক লাভ = সম্ভাব্য বিক্রয় − মোট চাষ খরচ
+            </div>
+          </div>
+
+          <div className="mt-4 overflow-x-auto rounded-2xl border border-emerald-100 bg-white shadow-sm">
+            <table className="min-w-[820px] w-full text-xs">
+              <thead className="bg-emerald-50 text-emerald-900">
+                <tr>
+                  <th className="px-3 py-3 text-left font-bold">ফসল ও জমির ভাগ</th>
+                  <th className="px-3 py-3 text-right font-bold">জমি (বিঘা)</th>
+                  <th className="px-3 py-3 text-right font-bold">চাষ খরচ</th>
+                  <th className="px-3 py-3 text-right font-bold">ফলন</th>
+                  <th className="px-3 py-3 text-right font-bold">গড় দাম</th>
+                  <th className="px-3 py-3 text-right font-bold">মোট বিক্রয়</th>
+                  <th className="px-3 py-3 text-right font-bold">আনুমানিক লাভ</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row) => (
+                  <tr key={row.crop.id} className="border-t border-emerald-50 align-top">
+                    <td className="px-3 py-3">
+                      <div className="font-bold text-gray-900">{row.crop.icon} {row.crop.name}</div>
+                      <div className="mt-1 text-[10px] text-emerald-700">{toBn(Math.round(row.share * 100))}% জমি • {toBn(row.crop.totalDays)} দিন</div>
+                    </td>
+                    <td className="px-3 py-3 text-right text-gray-700">{toBn(Math.round(row.areaBigha * 100) / 100)}</td>
+                    <td className="px-3 py-3 text-right text-gray-700">{fmtBdt(row.cost)}</td>
+                    <td className="px-3 py-3 text-right text-gray-700">{toBn(row.yieldMin)}–{toBn(row.yieldMax)}</td>
+                    <td className="px-3 py-3 text-right text-gray-700">{fmtBdt(row.crop.avgMarketPrice)}</td>
+                    <td className="px-3 py-3 text-right font-semibold text-blue-700">{fmtBdt(row.revenueMin)}–{fmtBdt(row.revenueMax).replace("৳", "")}</td>
+                    <td className="px-3 py-3 text-right font-bold text-emerald-700">{fmtBdt(row.profitMin)}–{fmtBdt(row.profitMax).replace("৳", "")}</td>
+                  </tr>
+                ))}
+                <tr className="border-t-2 border-emerald-200 bg-emerald-50 font-bold">
+                  <td className="px-3 py-3">মোট পরিকল্পনা</td>
+                  <td className="px-3 py-3 text-right">{toBn(Math.round(bighas * 100) / 100)}</td>
+                  <td className="px-3 py-3 text-right">{fmtBdt(totalCost)}</td>
+                  <td className="px-3 py-3 text-right">—</td>
+                  <td className="px-3 py-3 text-right">—</td>
+                  <td className="px-3 py-3 text-right text-blue-700">{fmtBdt(totalRevenueMin)}–{fmtBdt(totalRevenueMax).replace("৳", "")}</td>
+                  <td className="px-3 py-3 text-right text-emerald-700">{fmtBdt(totalProfitMin)}–{fmtBdt(totalProfitMax).replace("৳", "")}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+            <h3 className="font-bold text-amber-900">চাষে ব্যবহার করার ৩টি ধাপ</h3>
+            <ol className="mt-2 space-y-2 text-sm leading-5 text-amber-900/85">
+              <li><b>১.</b> আগে টেবিলের জমির ভাগ অনুযায়ী বীজ, সার, শ্রম ও সেচের বাজেট আলাদা করুন।</li>
+              <li><b>২.</b> একই সময়ে সব ফসল না তুলে কাটার সময় ভিন্ন এমন ফসল রাখুন, যাতে বাজারে নিয়মিত বিক্রির সুযোগ থাকে।</li>
+              <li><b>৩.</b> প্রতি সপ্তাহে বাজারদর ও খরচ লিখে প্রকৃত লাভ মিলিয়ে দেখুন; বাজারদর কমলে পুরো জমিতে এক ফসল না করে ভাগ করে চাষ করুন।</li>
+            </ol>
+            <p className="mt-3 text-[11px] text-amber-800">এটি পরিকল্পনা তৈরির আনুমানিক হিসাব—আবহাওয়া, রোগ-পোকা, ফলন, বাজারদর ও বাস্তব খরচের কারণে ফলাফল কম-বেশি হতে পারে।</p>
+          </div>
+        </div>
       </div>
     </section>
   );
