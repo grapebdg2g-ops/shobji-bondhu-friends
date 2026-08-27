@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -444,8 +444,6 @@ export type Database = {
           id: string
           market_name: string | null
           price_avg: number
-          price_type: string
-          unit: string
           price_date: string
           price_max: number | null
           price_min: number | null
@@ -461,10 +459,8 @@ export type Database = {
           price_date: string
           price_max?: number | null
           price_min?: number | null
-          price_type?: string
           product_name: string
           source?: string
-          unit?: string
         }
         Update: {
           created_at?: string
@@ -475,10 +471,8 @@ export type Database = {
           price_date?: string
           price_max?: number | null
           price_min?: number | null
-          price_type?: string
           product_name?: string
           source?: string
-          unit?: string
         }
         Relationships: []
       }
@@ -831,9 +825,7 @@ export type Database = {
           market_name: string
           previous_price: number | null
           price: number
-          price_type: string
           product_name: string
-          source: string
           unit: string
           upazila: string | null
           user_id: string
@@ -847,9 +839,7 @@ export type Database = {
           market_name: string
           previous_price?: number | null
           price: number
-          price_type?: string
           product_name: string
-          source?: string
           unit?: string
           upazila?: string | null
           user_id: string
@@ -863,9 +853,7 @@ export type Database = {
           market_name?: string
           previous_price?: number | null
           price?: number
-          price_type?: string
           product_name?: string
-          source?: string
           unit?: string
           upazila?: string | null
           user_id?: string
