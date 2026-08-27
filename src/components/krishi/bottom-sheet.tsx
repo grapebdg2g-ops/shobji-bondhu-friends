@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -15,14 +15,28 @@ export function BottomSheet({
   children: ReactNode;
   className?: string;
 }) {
+  const [keyboardInset, setKeyboardInset] = useState(0);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const viewport = window.visualViewport;
+    const updateViewport = () => {
+      if (!viewport) return;
+      setKeyboardInset(Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop));
+    };
+
     window.addEventListener("keydown", onKey);
+    viewport?.addEventListener("resize", updateViewport);
+    viewport?.addEventListener("scroll", updateViewport);
+    updateViewport();
     document.body.style.overflow = "hidden";
     return () => {
       window.removeEventListener("keydown", onKey);
+      viewport?.removeEventListener("resize", updateViewport);
+      viewport?.removeEventListener("scroll", updateViewport);
       document.body.style.overflow = "";
+      setKeyboardInset(0);
     };
   }, [open, onClose]);
 
@@ -32,8 +46,12 @@ export function BottomSheet({
       <div className="absolute inset-0 bg-black/50 animate-in fade-in" />
       <div
         onClick={(e) => e.stopPropagation()}
+        style={{
+          marginBottom: keyboardInset,
+          paddingBottom: "calc(2rem + env(safe-area-inset-bottom))",
+        }}
         className={cn(
-          "relative w-full bg-card rounded-t-3xl p-5 pb-8 max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom duration-300",
+          "relative w-full max-h-[calc(100dvh-0.5rem)] overflow-y-auto overscroll-contain rounded-t-3xl bg-card p-5 animate-in slide-in-from-bottom duration-300",
           className,
         )}
         role="dialog"

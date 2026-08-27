@@ -114,13 +114,18 @@ function DirectMessagePopupContent({
   };
 
   const recentMessages = conversation.messages.slice(-5);
+  const focusComposer = (element: HTMLInputElement) => {
+    window.requestAnimationFrame(() => {
+      element.scrollIntoView({ block: "center", behavior: "smooth" });
+    });
+  };
 
   return (
     <BottomSheet
       open
       onClose={onClose}
       title="দ্রুত মেসেজ"
-      className="mx-auto max-w-xl px-4 pb-[calc(1rem+env(safe-area-inset-bottom))]"
+      className="mx-auto max-h-[calc(100dvh-0.5rem)] max-w-xl px-3 pb-2 sm:px-4"
     >
       <div className="flex items-center gap-3 rounded-2xl bg-[#F0F2F5] p-3">
         <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-[#E7F3FF] text-lg font-black text-[#1877F2]">
@@ -159,7 +164,7 @@ function DirectMessagePopupContent({
 
       {canMessage ? (
         <>
-          <div className="mt-3 max-h-52 min-h-16 space-y-2 overflow-y-auto rounded-2xl border border-[#E4E6EB] bg-[#F8FAFC] p-3">
+          <div className="mt-3 max-h-[30dvh] min-h-16 space-y-2 overflow-y-auto overscroll-contain rounded-2xl border border-[#E4E6EB] bg-[#F8FAFC] p-3 sm:max-h-52">
             {conversation.loading ? (
               <div className="flex items-center justify-center py-5 text-[#1877F2]">
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -207,6 +212,8 @@ function DirectMessagePopupContent({
           <form onSubmit={send} className="mt-3 flex items-center gap-2">
             <input
               autoFocus
+              enterKeyHint="send"
+              onFocus={(event) => focusComposer(event.currentTarget)}
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
               maxLength={2000}
