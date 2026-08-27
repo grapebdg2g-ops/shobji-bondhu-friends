@@ -315,11 +315,11 @@ function CropPlannerPage() {
             )}
           </section>
 
-          <div className="fixed bottom-0 left-0 right-0 md:max-w-[560px] md:left-1/2 md:-translate-x-1/2 bg-white border-t border-gray-100 p-4">
+          <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 z-30 border-t border-gray-100 bg-white/95 p-3 shadow-[0_-4px_14px_rgba(0,0,0,0.08)] backdrop-blur md:bottom-0 md:mx-auto md:max-w-[560px] md:p-4">
             <button
               onClick={next}
               disabled={(step === 1 && areaShotok <= 0) || (step === 4 && goals.length === 0)}
-              className="w-full py-3 rounded-xl bg-emerald-600 text-white font-bold disabled:opacity-50 inline-flex items-center justify-center gap-2"
+              className="mx-auto flex w-full max-w-lg items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 font-bold text-white shadow-sm transition active:scale-[0.99] disabled:opacity-50"
             >
               {step === 4 ? <>ফলাফল দেখুন <Sparkles className="h-5 w-5" /></> : <>পরবর্তী <ChevronRight className="h-5 w-5" /></>}
             </button>
