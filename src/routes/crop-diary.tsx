@@ -680,7 +680,7 @@ function ReminderTab({
 }) {
   return (
     <>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-xs font-bold uppercase tracking-wider text-[#52B788]">
             কোনো কাজ ভুলবেন না
@@ -754,15 +754,15 @@ function DiaryForm({
   onSubmit: (form: HTMLFormElement) => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#0A1F13]/45 p-0 backdrop-blur-[2px] sm:items-center sm:p-4">
       <form
         onSubmit={(e) => {
           e.preventDefault();
           onSubmit(e.currentTarget);
         }}
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-[28px] bg-background p-5 sm:rounded-[28px]"
+        className="flex max-h-[min(92vh,760px)] w-full max-w-lg flex-col overflow-hidden rounded-t-[28px] border border-white/70 bg-[#FBFEFC] shadow-[0_-12px_42px_-20px_rgba(27,67,50,0.45)] sm:rounded-[28px] sm:shadow-[0_24px_70px_-28px_rgba(27,67,50,0.55)]"
       >
-        <div className="flex items-center justify-between">
+        <div className="flex shrink-0 items-center justify-between border-b border-[#E5EFE7] px-5 pb-4 pt-5">
           <div>
             <p className="text-xs font-bold text-primary">ফসল ডায়েরি</p>
             <h2 className="mt-1 text-xl font-black">আজকের নোট লিখুন</h2>
@@ -770,17 +770,17 @@ function DiaryForm({
           <button
             type="button"
             onClick={onClose}
-            className="text-sm font-bold text-muted-foreground"
+            className="rounded-full px-3 py-2 text-xs font-extrabold text-muted-foreground transition hover:bg-muted hover:text-foreground"
           >
             বন্ধ করুন
           </button>
         </div>
-        <div className="mt-5 space-y-4">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 pb-5 pt-5">
           <Field label="ফসল">
             <select
               name="crop_type"
               defaultValue={plans[0]?.crop_type ?? MASTER_CROP_LABELS[0]}
-              className="field"
+              className="field h-12 rounded-xl border border-[#D8E5DB] bg-white px-4 text-sm font-semibold text-foreground shadow-sm outline-none transition placeholder:text-[#9AA7A0] focus:border-primary focus:ring-4 focus:ring-primary/10"
             >
               <option value="">ফসল বাছাই করুন</option>
               {MASTER_CROP_LABELS.map((crop) => (
@@ -791,7 +791,10 @@ function DiaryForm({
             </select>
           </Field>
           <Field label="কোন crop plan-এর সঙ্গে যুক্ত? (ঐচ্ছিক)">
-            <select name="plan_id" className="field">
+            <select
+              name="plan_id"
+              className="field h-12 rounded-xl border border-[#D8E5DB] bg-white px-4 text-sm font-semibold text-foreground shadow-sm outline-none transition placeholder:text-[#9AA7A0] focus:border-primary focus:ring-4 focus:ring-primary/10"
+            >
               <option value="">শুধু ডায়েরি নোট</option>
               {plans.map((plan) => (
                 <option key={plan.id} value={plan.id}>
@@ -801,10 +804,19 @@ function DiaryForm({
             </select>
           </Field>
           <Field label="তারিখ">
-            <input name="entry_date" type="date" defaultValue={todayIso()} className="field" />
+            <input
+              name="entry_date"
+              type="date"
+              defaultValue={todayIso()}
+              className="field h-12 rounded-xl border border-[#D8E5DB] bg-white px-4 text-sm font-semibold text-foreground shadow-sm outline-none transition placeholder:text-[#9AA7A0] focus:border-primary focus:ring-4 focus:ring-primary/10"
+            />
           </Field>
           <Field label="গাছের অবস্থা">
-            <select name="status" defaultValue="ভালো" className="field">
+            <select
+              name="status"
+              defaultValue="ভালো"
+              className="field h-12 rounded-xl border border-[#D8E5DB] bg-white px-4 text-sm font-semibold text-foreground shadow-sm outline-none transition placeholder:text-[#9AA7A0] focus:border-primary focus:ring-4 focus:ring-primary/10"
+            >
               <option>ভালো</option>
               <option>সতর্কতা</option>
               <option>সমস্যা</option>
@@ -817,13 +829,13 @@ function DiaryForm({
               maxLength={1000}
               rows={5}
               placeholder="আজ কী দেখলেন? কী কাজ করলেন?"
-              className="field resize-none"
+              className="field min-h-28 rounded-xl border border-[#D8E5DB] bg-white px-4 py-3 text-sm font-semibold leading-relaxed text-foreground shadow-sm outline-none transition placeholder:text-[#9AA7A0] focus:border-primary focus:ring-4 focus:ring-primary/10 resize-none"
             />
           </Field>
         </div>
         <button
           disabled={saving}
-          className="mt-5 flex h-12 w-full items-center justify-center rounded-xl bg-primary font-bold text-primary-foreground"
+          className="mx-5 mb-5 mt-1 flex h-12 shrink-0 items-center justify-center rounded-xl bg-primary font-bold text-primary-foreground shadow-[0_10px_22px_-12px_rgba(45,106,79,0.9)] transition hover:bg-[#245C43] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {saving ? "সংরক্ষণ হচ্ছে..." : "ডায়েরিতে সংরক্ষণ করুন"}
         </button>
@@ -844,15 +856,15 @@ function ReminderForm({
   onSubmit: (form: HTMLFormElement) => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#0A1F13]/45 p-0 backdrop-blur-[2px] sm:items-center sm:p-4">
       <form
         onSubmit={(e) => {
           e.preventDefault();
           onSubmit(e.currentTarget);
         }}
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-[28px] bg-background p-5 sm:rounded-[28px]"
+        className="flex max-h-[min(92vh,760px)] w-full max-w-lg flex-col overflow-hidden rounded-t-[28px] border border-white/70 bg-[#FBFEFC] shadow-[0_-12px_42px_-20px_rgba(27,67,50,0.45)] sm:rounded-[28px] sm:shadow-[0_24px_70px_-28px_rgba(27,67,50,0.55)]"
       >
-        <div className="flex items-center justify-between">
+        <div className="flex shrink-0 items-center justify-between border-b border-[#E5EFE7] px-5 pb-4 pt-5">
           <div>
             <p className="text-xs font-bold text-primary">স্মার্ট রিমাইন্ডার</p>
             <h2 className="mt-1 text-xl font-black">কাজের তারিখ সেট করুন</h2>
@@ -860,26 +872,26 @@ function ReminderForm({
           <button
             type="button"
             onClick={onClose}
-            className="text-sm font-bold text-muted-foreground"
+            className="rounded-full px-3 py-2 text-xs font-extrabold text-muted-foreground transition hover:bg-muted hover:text-foreground"
           >
             বন্ধ করুন
           </button>
         </div>
-        <div className="mt-5 space-y-4">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 pb-5 pt-5">
           <Field label="রিমাইন্ডারের নাম">
             <input
               name="title"
               required
               maxLength={120}
               placeholder="যেমন: ইউরিয়ার ২য় কিস্তি"
-              className="field"
+              className="field h-12 rounded-xl border border-[#D8E5DB] bg-white px-4 text-sm font-semibold text-foreground shadow-sm outline-none transition placeholder:text-[#9AA7A0] focus:border-primary focus:ring-4 focus:ring-primary/10"
             />
           </Field>
           <Field label="ফসল">
             <select
               name="crop_type"
               defaultValue={plans[0]?.crop_type ?? MASTER_CROP_LABELS[0]}
-              className="field"
+              className="field h-12 rounded-xl border border-[#D8E5DB] bg-white px-4 text-sm font-semibold text-foreground shadow-sm outline-none transition placeholder:text-[#9AA7A0] focus:border-primary focus:ring-4 focus:ring-primary/10"
             >
               {MASTER_CROP_LABELS.map((crop) => (
                 <option key={crop} value={crop}>
@@ -889,7 +901,10 @@ function ReminderForm({
             </select>
           </Field>
           <Field label="কোন crop plan-এর সঙ্গে যুক্ত? (ঐচ্ছিক)">
-            <select name="plan_id" className="field">
+            <select
+              name="plan_id"
+              className="field h-12 rounded-xl border border-[#D8E5DB] bg-white px-4 text-sm font-semibold text-foreground shadow-sm outline-none transition placeholder:text-[#9AA7A0] focus:border-primary focus:ring-4 focus:ring-primary/10"
+            >
               <option value="">শুধু রিমাইন্ডার</option>
               {plans.map((plan) => (
                 <option key={plan.id} value={plan.id}>
@@ -904,7 +919,7 @@ function ReminderForm({
               type="date"
               required
               defaultValue={todayIso()}
-              className="field"
+              className="field h-12 rounded-xl border border-[#D8E5DB] bg-white px-4 text-sm font-semibold text-foreground shadow-sm outline-none transition placeholder:text-[#9AA7A0] focus:border-primary focus:ring-4 focus:ring-primary/10"
             />
           </Field>
           <Field label="ছোট নোট (ঐচ্ছিক)">
@@ -913,13 +928,13 @@ function ReminderForm({
               maxLength={300}
               rows={3}
               placeholder="কাজটির বিস্তারিত লিখুন"
-              className="field resize-none"
+              className="field min-h-28 rounded-xl border border-[#D8E5DB] bg-white px-4 py-3 text-sm font-semibold leading-relaxed text-foreground shadow-sm outline-none transition placeholder:text-[#9AA7A0] focus:border-primary focus:ring-4 focus:ring-primary/10 resize-none"
             />
           </Field>
         </div>
         <button
           disabled={saving}
-          className="mt-5 flex h-12 w-full items-center justify-center rounded-xl bg-primary font-bold text-primary-foreground"
+          className="mx-5 mb-5 mt-1 flex h-12 shrink-0 items-center justify-center rounded-xl bg-primary font-bold text-primary-foreground shadow-[0_10px_22px_-12px_rgba(45,106,79,0.9)] transition hover:bg-[#245C43] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {saving ? "সংরক্ষণ হচ্ছে..." : "রিমাইন্ডার সেট করুন"}
         </button>
@@ -931,7 +946,7 @@ function ReminderForm({
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="block text-sm font-bold text-foreground">
-      <span className="mb-1.5 block">{label}</span>
+      <span className="mb-2 block text-[13px] font-extrabold tracking-[-0.01em]">{label}</span>
       {children}
     </label>
   );
