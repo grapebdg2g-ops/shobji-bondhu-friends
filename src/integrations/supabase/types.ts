@@ -447,8 +447,10 @@ export type Database = {
           price_date: string
           price_max: number | null
           price_min: number | null
+          price_type: string
           product_name: string
           source: string
+          unit: string
         }
         Insert: {
           created_at?: string
@@ -459,8 +461,10 @@ export type Database = {
           price_date: string
           price_max?: number | null
           price_min?: number | null
+          price_type?: string
           product_name: string
           source?: string
+          unit?: string
         }
         Update: {
           created_at?: string
@@ -471,8 +475,10 @@ export type Database = {
           price_date?: string
           price_max?: number | null
           price_min?: number | null
+          price_type?: string
           product_name?: string
           source?: string
+          unit?: string
         }
         Relationships: []
       }
@@ -825,7 +831,9 @@ export type Database = {
           market_name: string
           previous_price: number | null
           price: number
+          price_type: string
           product_name: string
+          source: string
           unit: string
           upazila: string | null
           user_id: string
@@ -839,7 +847,9 @@ export type Database = {
           market_name: string
           previous_price?: number | null
           price: number
+          price_type?: string
           product_name: string
+          source?: string
           unit?: string
           upazila?: string | null
           user_id: string
@@ -853,7 +863,9 @@ export type Database = {
           market_name?: string
           previous_price?: number | null
           price?: number
+          price_type?: string
           product_name?: string
+          source?: string
           unit?: string
           upazila?: string | null
           user_id?: string
