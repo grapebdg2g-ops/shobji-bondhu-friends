@@ -444,6 +444,8 @@ export type Database = {
           id: string
           market_name: string | null
           price_avg: number
+          price_type: string
+          unit: string
           price_date: string
           price_max: number | null
           price_min: number | null

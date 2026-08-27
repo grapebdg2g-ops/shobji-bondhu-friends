@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ChevronRight, MessageCircle, Search, Users } from "lucide-react";
 import { useMemo, useState } from "react";
+import { DirectMessagePopup } from "@/components/krishi/direct-message-popup";
 import { LazyImage } from "@/components/krishi/lazy-image";
 import { useDirectThreads, type DirectThread } from "@/hooks/use-direct-messages";
 
@@ -21,6 +22,7 @@ function MessagesPage() {
   const navigate = useNavigate();
   const { threads, loading, unreadCount, error, refresh } = useDirectThreads();
   const [query, setQuery] = useState("");
+  const [selectedThread, setSelectedThread] = useState<DirectThread | null>(null);
   const filtered = useMemo(() => {
     const value = query.trim().toLocaleLowerCase("bn-BD");
     if (!value) return threads;
@@ -116,21 +118,38 @@ function MessagesPage() {
         ) : (
           <div className="divide-y divide-[#E4E6EB]">
             {filtered.map((thread) => (
-              <ThreadRow key={thread.peer_id} thread={thread} />
+              <ThreadRow
+                key={thread.peer_id}
+                thread={thread}
+                onOpen={() => setSelectedThread(thread)}
+              />
             ))}
           </div>
         )}
       </section>
+      {selectedThread && (
+        <DirectMessagePopup
+          recipient={{
+            id: selectedThread.peer_id,
+            name: selectedThread.peer_name || "কৃষক",
+            avatar_url: selectedThread.peer_avatar_url,
+            district: selectedThread.peer_district,
+          }}
+          open
+          onClose={() => setSelectedThread(null)}
+          canMessage
+        />
+      )}
     </main>
   );
 }
 
-function ThreadRow({ thread }: { thread: DirectThread }) {
+function ThreadRow({ thread, onOpen }: { thread: DirectThread; onOpen: () => void }) {
   return (
-    <Link
-      to="/messages/$userId"
-      params={{ userId: thread.peer_id }}
-      className="flex items-center gap-3 px-4 py-3 transition hover:bg-[#F0F2F5]"
+    <button
+      type="button"
+      onClick={onOpen}
+      className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-[#F0F2F5]"
     >
       <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-[#E7F3FF] text-lg font-black text-[#1877F2]">
         {thread.peer_avatar_url ? (
@@ -176,7 +195,12 @@ function ThreadRow({ thread }: { thread: DirectThread }) {
           <p className="mt-1 truncate text-[10px] text-[#65676B]">{thread.peer_district}</p>
         )}
       </div>
-      <MessageCircle className="h-5 w-5 shrink-0 text-[#1877F2]" />
-    </Link>
+      <span
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#E7F3FF] text-[#1877F2]"
+        aria-hidden="true"
+      >
+        <MessageCircle className="h-5 w-5" />
+      </span>
+    </button>
   );
 }
