@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ChevronRight, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { LazyImage } from "@/components/krishi/lazy-image";
+import { CompactFriendItem } from "@/components/krishi/direct-message-popup";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type FriendProfile = {
@@ -80,29 +80,7 @@ export function FriendsPreview({ userId }: { userId: string }) {
               </div>
             ))
           : query.data?.profiles.map((friend) => (
-              <Link
-                key={friend.id}
-                to="/u/$userId"
-                params={{ userId: friend.id }}
-                className="group flex min-w-0 flex-col items-center text-center"
-              >
-                <div className="h-12 w-12 overflow-hidden rounded-full border-2 border-[#E7F3FF] bg-[#E7F3FF] text-lg font-black text-[#1877F2] shadow-sm transition group-hover:border-[#1877F2] sm:h-14 sm:w-14 sm:text-xl">
-                  {friend.avatar_url ? (
-                    <LazyImage
-                      src={friend.avatar_url}
-                      alt={friend.name}
-                      wrapperClassName="h-full w-full"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center">
-                      {friend.name?.charAt(0) || "ক"}
-                    </div>
-                  )}
-                </div>
-                <p className="mt-1.5 w-full truncate text-[10px] font-bold text-[#1C1E21] sm:text-xs">
-                  {friend.name || "কৃষক"}
-                </p>
-              </Link>
+              <CompactFriendItem key={friend.id} friend={friend} />
             ))}
       </div>
 

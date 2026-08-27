@@ -13,6 +13,53 @@ export type DirectMessageRecipient = {
   district?: string | null;
 };
 
+export function CompactFriendItem({ friend }: { friend: DirectMessageRecipient }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <div className="group relative min-w-0 text-center">
+        <Link
+          to="/u/$userId"
+          params={{ userId: friend.id }}
+          className="flex min-w-0 flex-col items-center"
+        >
+          <div className="relative h-12 w-12 overflow-hidden rounded-full border-2 border-[#E7F3FF] bg-[#E7F3FF] text-lg font-black text-[#1877F2] shadow-sm transition group-hover:border-[#1877F2] sm:h-14 sm:w-14 sm:text-xl">
+            {friend.avatar_url ? (
+              <LazyImage
+                src={friend.avatar_url}
+                alt={friend.name}
+                wrapperClassName="h-full w-full"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center">
+                {friend.name?.charAt(0) || "ক"}
+              </div>
+            )}
+          </div>
+          <p className="mt-1.5 w-full truncate text-[10px] font-bold text-[#1C1E21] sm:text-xs">
+            {friend.name || "কৃষক"}
+          </p>
+        </Link>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label={`${friend.name || "কৃষক"} কে মেসেজ করুন`}
+          className="absolute right-0 top-0 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-[#1877F2] text-white shadow-sm transition hover:scale-110"
+        >
+          <MessageCircle className="h-2.5 w-2.5" />
+        </button>
+      </div>
+      <DirectMessagePopup
+        recipient={friend}
+        open={open}
+        onClose={() => setOpen(false)}
+        canMessage
+      />
+    </>
+  );
+}
+
 export function DirectMessagePopup({
   recipient,
   open,

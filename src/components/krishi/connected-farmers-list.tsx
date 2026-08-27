@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { type FarmerProfile } from "@/components/krishi/farmer-card";
-import { LazyImage } from "@/components/krishi/lazy-image";
+import { CompactFriendItem } from "@/components/krishi/direct-message-popup";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const PREVIEW_LIMIT = 5;
@@ -52,24 +52,7 @@ export function ConnectedFarmersList({ profileId }: { profileId: string; current
         ) : query.data?.length ? (
           <div className="grid grid-cols-5 gap-2 sm:gap-4">
             {query.data.slice(0, PREVIEW_LIMIT).map((farmer) => (
-              <div key={farmer.id} className="min-w-0 text-center">
-                <div className="mx-auto h-12 w-12 overflow-hidden rounded-full border-2 border-[#E7F3FF] bg-[#E7F3FF] text-lg font-black text-[#1877F2] shadow-sm sm:h-14 sm:w-14">
-                  {farmer.avatar_url ? (
-                    <LazyImage
-                      src={farmer.avatar_url}
-                      alt={farmer.name}
-                      wrapperClassName="h-full w-full"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center">
-                      {farmer.name?.charAt(0) || "ক"}
-                    </div>
-                  )}
-                </div>
-                <p className="mt-1.5 truncate text-[10px] font-bold text-[#1C1E21] sm:text-xs">
-                  {farmer.name || "কৃষক"}
-                </p>
-              </div>
+              <CompactFriendItem key={farmer.id} friend={farmer} />
             ))}
           </div>
         ) : (
