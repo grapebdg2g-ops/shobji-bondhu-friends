@@ -141,7 +141,7 @@ async function fetchForecastFromMetNo(lat: number, lng: number): Promise<Forecas
   const res = await fetch(`${MET_NO_ENDPOINT}?${params}`, {
     headers: {
       "accept": "application/json",
-      "user-agent": "ShobjiBondhu/1.0 https://shobji-bondhu-friends.lovable.app",
+      "user-agent": "KrishokBondhu/1.0 https://shobji-bondhu-friends.lovable.app",
     },
   });
   if (!res.ok) throw new Error(`upstream ${res.status}`);

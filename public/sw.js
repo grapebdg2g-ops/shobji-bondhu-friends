@@ -11,7 +11,7 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("push", (event) => {
-  let payload = { title: "কৃষিবন্ধু", body: "নতুন বিজ্ঞপ্তি", url: "/dashboard" };
+  let payload = { title: "কৃষক বন্ধু", body: "নতুন বিজ্ঞপ্তি", url: "/dashboard" };
   try {
     if (event.data) payload = { ...payload, ...event.data.json() };
   } catch (_) {
