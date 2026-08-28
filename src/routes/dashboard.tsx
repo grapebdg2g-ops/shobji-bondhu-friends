@@ -20,6 +20,7 @@ import {
   CircleCheck,
   CloudRain,
   ArrowUpRight,
+  Activity,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNotifications } from "@/hooks/use-notifications";
