@@ -112,10 +112,17 @@ export const getPricePrediction = createServerFn({ method: "POST" })
     });
     const history = (historyRaw ?? []) as HistoryRow[];
     if (history.length < 7) {
-      throw new Error(
-        "এই ফসলের জন্য অন্তত ৭ দিনের যাচাইযোগ্য বাজারদর না থাকায় এখনই নির্ভরযোগ্য পূর্বাভাস তৈরি করা যাচ্ছে না।",
-      );
+      // Not an exception: return a friendly, renderable state instead of
+      // throwing (a thrown server-fn error blanks the page).
+      return {
+        insufficient: true as const,
+        message:
+          "এই ফসলের জন্য অন্তত ৭ দিনের যাচাইযোগ্য বাজারদর না থাকায় এখনই নির্ভরযোগ্য পূর্বাভাস তৈরি করা যাচ্ছে না।",
+        data_points: history.length,
+        history,
+      };
     }
+
 
     // ── Step 2: weather ──
     const [lat, lon] = getDistrictLatLng(district);
