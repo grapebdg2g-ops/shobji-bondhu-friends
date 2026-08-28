@@ -19,6 +19,9 @@
  */
 
 @theme inline {
+  --font-sans: "Tiro Bangla", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Tiro Bangla", ui-serif, Georgia, serif;
+  --font-display: "Tiro Bangla", ui-sans-serif, system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -147,9 +150,19 @@
     border-color: var(--color-border);
   }
 
+  html,
+  body {
+    font-family: "Tiro Bangla", ui-sans-serif, system-ui, sans-serif;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+  }
+
+  h1, h2, h3, h4, h5, h6,
+  button, input, textarea, select {
+    font-family: "Tiro Bangla", ui-sans-serif, system-ui, sans-serif;
   }
 }
 
