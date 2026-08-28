@@ -69,13 +69,36 @@ export function FarmerCard({
       className={`home-pressable rounded-[22px] border border-border bg-card shadow-[var(--shadow-card)] ${compact ? "p-2.5" : "p-3"}`}
     >
       <div className="flex items-center gap-3">
+        {!isSelf && (
+          <div className="flex shrink-0 items-center gap-1.5 pr-1">
+            <button
+              type="button"
+              disabled={contactBusy}
+              onClick={() => void contact("message")}
+              aria-label={`${profile.name} কে মেসেজ করুন`}
+              className="home-pressable flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary disabled:opacity-50"
+            >
+              <MessageCircle className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              disabled={contactBusy}
+              onClick={() => void contact("call")}
+              aria-label={`${profile.name} কে কল করুন`}
+              className="home-pressable flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 disabled:opacity-50"
+            >
+              <Phone className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
         <Link
           to="/u/$userId"
           params={{ userId: profile.id }}
           className="flex min-w-0 flex-1 items-center gap-3"
         >
           <div
-            className={`${compact ? "h-11 w-11 rounded-xl" : "h-14 w-14 rounded-2xl"} shrink-0 overflow-hidden bg-primary/10 text-primary ring-2 ring-primary/10`}
+            className={`${compact ? "h-10 w-10 rounded-full" : "h-12 w-12 rounded-full"} shrink-0 overflow-hidden bg-primary/10 text-primary ring-2 ring-primary/10`}
           >
             {profile.avatar_url ? (
               <LazyImage
@@ -96,49 +119,14 @@ export function FarmerCard({
               </h2>
               {profile.is_verified && <BadgeCheck className="h-4 w-4 shrink-0 text-primary" />}
             </div>
-            <p className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-muted-foreground">
-              <MapPin className="h-3 w-3 shrink-0" />
+            <p className="mt-0.5 flex items-center gap-1 truncate text-[10px] text-muted-foreground">
+              <MapPin className="h-2.5 w-2.5 shrink-0" />
               {profile.upazila
                 ? `${profile.upazila}, ${profile.district}`
                 : (profile.district ?? "বাংলাদেশ")}
             </p>
-            {!compact && (
-              <div className="mt-1 flex gap-1 overflow-hidden">
-                {(profile.crops ?? []).slice(0, 2).map((crop) => (
-                  <span
-                    key={crop}
-                    className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary"
-                  >
-                    {crop}
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
         </Link>
-
-        {!isSelf && (
-          <div className="flex shrink-0 items-center gap-1.5">
-            <button
-              type="button"
-              disabled={contactBusy}
-              onClick={() => void contact("message")}
-              aria-label={`${profile.name} কে মেসেজ করুন`}
-              className="home-pressable flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary disabled:opacity-50"
-            >
-              <MessageCircle className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              disabled={contactBusy}
-              onClick={() => void contact("call")}
-              aria-label={`${profile.name} কে কল করুন`}
-              className="home-pressable flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 disabled:opacity-50"
-            >
-              <Phone className="h-4 w-4" />
-            </button>
-          </div>
-        )}
       </div>
 
       {!isSelf && (

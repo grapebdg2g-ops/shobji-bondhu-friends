@@ -213,18 +213,37 @@ function ProfilePage() {
 
       <FriendsPreview userId={full.id} />
 
-      <section className="mx-auto mt-3 max-w-3xl border-y border-[#DADDE1] bg-white px-4 py-3 sm:rounded-xl sm:border sm:px-6">
+      <section className="mx-auto mt-3 max-w-3xl border-y border-[#DADDE1] bg-white px-4 py-3 shadow-sm sm:rounded-xl sm:border sm:px-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E7F3FF] text-lg font-black text-[#1877F2]">
-            {full.avatar_url ? <LazyImage src={full.avatar_url} alt="" wrapperClassName="h-full w-full" /> : initials(full.name)}
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E7F3FF] ring-1 ring-black/5">
+            {full.avatar_url ? <LazyImage src={full.avatar_url} alt="" wrapperClassName="h-full w-full" /> : <span className="text-lg font-black text-[#1877F2]">{initials(full.name)}</span>}
           </div>
-          <button type="button" onClick={() => setCreatePostOpen(true)} className="flex h-10 min-w-0 flex-1 items-center rounded-full bg-[#F0F2F5] px-4 text-left text-sm text-[#65676B] transition hover:bg-[#E4E6EB]">
+          <button
+            type="button"
+            onClick={() => setCreatePostOpen(true)}
+            className="flex h-10 min-w-0 flex-1 items-center rounded-full bg-[#F0F2F5] px-4 text-left text-[15px] text-[#65676B] transition hover:bg-[#E4E6EB]"
+          >
             {full.name || "কৃষক"}, আপনি কী ভাবছেন?
           </button>
         </div>
-        <div className="mt-3 flex border-t border-[#E4E6EB] pt-3">
-          <button type="button" onClick={() => setCreatePostOpen(true)} className="flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-xs font-extrabold text-[#18A058] transition hover:bg-[#F0F2F5]"><Camera className="h-4 w-4" /> ছবি/ভিডিও</button>
-          <button type="button" onClick={() => setCreatePostOpen(true)} className="flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-xs font-extrabold text-[#1877F2] transition hover:bg-[#F0F2F5]"><Edit3 className="h-4 w-4" /> পোস্ট লিখুন</button>
+        <div className="mt-3 flex gap-1 border-t border-[#E4E6EB] pt-2">
+          <button
+            type="button"
+            onClick={() => setCreatePostOpen(true)}
+            className="flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-[13px] font-semibold text-[#65676B] transition hover:bg-[#F2F2F2]"
+          >
+            <Camera className="h-5 w-5 text-[#F3425F]" />
+            <span>ছবি/ভিডিও</span>
+          </button>
+          <div className="my-2 w-[1px] bg-[#E4E6EB]" />
+          <button
+            type="button"
+            onClick={() => setCreatePostOpen(true)}
+            className="flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-[13px] font-semibold text-[#65676B] transition hover:bg-[#F2F2F2]"
+          >
+            <Edit3 className="h-5 w-5 text-[#1877F2]" />
+            <span>পোস্ট লিখুন</span>
+          </button>
         </div>
       </section>
 

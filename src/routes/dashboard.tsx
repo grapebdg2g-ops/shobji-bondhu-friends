@@ -65,8 +65,8 @@ function Dashboard() {
         <div className="home-float pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[#74C69D]/20 blur-3xl" />
         <div className="pointer-events-none absolute -left-20 bottom-0 h-40 w-40 rounded-full bg-[#F4A261]/15 blur-3xl" />
         <div className="relative z-10">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="flex shrink-0 items-center gap-2">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => setCollapsed(false)}
                 aria-label="মেনু খুলুন"
@@ -87,7 +87,7 @@ function Dashboard() {
                 )}
               </button>
             </div>
-            <div className="ml-auto inline-flex min-w-0 max-w-[62%] items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-white/95 ring-1 ring-white/20 backdrop-blur-md sm:max-w-none">
+            <div className="inline-flex min-w-0 max-w-[62%] items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-white/95 ring-1 ring-white/20 backdrop-blur-md sm:max-w-none">
               <MapPin className="h-3.5 w-3.5 shrink-0" />
               <span className="truncate text-xs font-bold">{user?.district ?? "আপনার এলাকা"}</span>
             </div>
@@ -98,26 +98,27 @@ function Dashboard() {
             <p className="mt-2 max-w-md text-sm leading-relaxed text-white/75">আপনার ফসল, আবহাওয়া এবং বাজারের খবর এক জায়গায় দেখে আজকের সেরা সিদ্ধান্ত নিন।</p>
             <div className="mt-5 flex flex-wrap gap-2">
               <button
-                onClick={() => navigate({ to: "/disease-detection" })}
-                className="home-pressable inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-xs font-extrabold text-[#1B4332] shadow-lg shadow-black/10"
+                onClick={() => navigate({ to: "/ai-bondhu/pesticide" })}
+                className="home-rise-in-2 home-pressable inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-xs font-extrabold text-[#1B4332] shadow-lg shadow-black/10"
               >
-                <Bug className="h-4 w-4" /> রোগের ছবি তুলুন
+                <Leaf className="h-4 w-4" /> কীটনাশক গাইড
               </button>
               <button
-                onClick={() => navigate({ to: "/ai-bondhu/chat" })}
-                className="home-pressable inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-xs font-extrabold text-white ring-1 ring-white/25 backdrop-blur-md"
+                onClick={() => navigate({ to: "/ai-bondhu/calculator" })}
+                className="home-rise-in-3 home-pressable inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-xs font-extrabold text-white ring-1 ring-white/25 backdrop-blur-md"
               >
-                <Sparkles className="h-4 w-4" /> AI বন্ধুকে জিজ্ঞেস করুন
+                <FlaskConical className="h-4 w-4" /> সার ক্যালকুলেটর
               </button>
             </div>
           </div>
         </div>
       </header>
 
-      <WeatherAlertBanner district={user?.district} />
-
-      {/* SECTION 2 — Weather */}
-      <DashboardWeatherWidget district={user?.district} upazila={user?.upazila} />
+      <div className="relative -mt-8 px-4 sm:px-6">
+        <WeatherAlertBanner district={user?.district} />
+        {/* SECTION 2 — Weather */}
+        <DashboardWeatherWidget district={user?.district} upazila={user?.upazila} />
+      </div>
 
       <TodayBrief onCreatePost={() => setCreateOpen(true)} />
 
