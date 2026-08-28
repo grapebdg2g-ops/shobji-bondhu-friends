@@ -171,12 +171,23 @@ function PricePredictionPage() {
       </header>
 
       {!result && !loading && (
-        <SelectorScreen
-          product={product} setProduct={setProduct}
-          district={district} setDistrict={setDistrict}
-          onSubmit={() => handleSubmit()}
-        />
+        <>
+          {notice && (
+            <div className="mx-4 mt-4 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-foreground">
+              <div className="flex gap-2">
+                <Info className="h-4 w-4 shrink-0 text-amber-600" />
+                <p>{notice}</p>
+              </div>
+            </div>
+          )}
+          <SelectorScreen
+            product={product} setProduct={setProduct}
+            district={district} setDistrict={setDistrict}
+            onSubmit={() => handleSubmit()}
+          />
+        </>
       )}
+
 
       {loading && <LoadingScreen step={step} />}
 
