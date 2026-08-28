@@ -150,9 +150,19 @@
     border-color: var(--color-border);
   }
 
+  html,
+  body {
+    font-family: "Tiro Bangla", ui-sans-serif, system-ui, sans-serif;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+  }
+
+  h1, h2, h3, h4, h5, h6,
+  button, input, textarea, select {
+    font-family: "Tiro Bangla", ui-sans-serif, system-ui, sans-serif;
   }
 }
 
