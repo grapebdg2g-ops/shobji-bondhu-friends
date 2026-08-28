@@ -96,6 +96,7 @@ export const getPricePrediction = createServerFn({ method: "POST" })
 
     if (cached) {
       return {
+        insufficient: false as const,
         prediction: cached.prediction_json as Prediction,
         trend: (cached.trend ?? "stable") as "rising" | "falling" | "stable",
         cached: true,
@@ -256,6 +257,7 @@ ${JSON.stringify(history.slice(-10))}
     }
 
     return {
+      insufficient: false as const,
       prediction,
       trend,
       cached: false,
