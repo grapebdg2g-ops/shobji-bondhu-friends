@@ -658,14 +658,44 @@ type LakhpotiPlanRow = {
   crop: CropData;
   share: number;
   areaBigha: number;
+  saplings: number;
+  productivePlants: number;
+  yieldPerPlant: number;
   cost: number;
-  yieldMin: number;
-  yieldMax: number;
-  revenueMin: number;
-  revenueMax: number;
-  profitMin: number;
-  profitMax: number;
+  revenue: number;
+  profit: number;
 };
+
+const SMART_PRESETS = [
+  {
+    id: 1,
+    name: "লাখপতি প্রজেক্ট প্ল্যান-১",
+    crops: [
+      { name: "তরমুজ", share: 0.4, saplingsPerBigha: 1400, productiveRatio: 0.85, yieldPerPlant: 3, costPerBigha: 50000, pricePerKg: 30 },
+      { name: "শসা", share: 0.35, saplingsPerBigha: 4000, productiveRatio: 0.75, yieldPerPlant: 2.5, costPerBigha: 37500, pricePerKg: 15 },
+      { name: "মরিচ", share: 0.25, saplingsPerBigha: 4500, productiveRatio: 0.88, yieldPerPlant: 1, costPerBigha: 45000, pricePerKg: 40 },
+    ],
+  },
+  {
+    id: 3,
+    name: "লাখপতি প্রজেক্ট প্ল্যান-৩",
+    crops: [
+      { name: "টমেটো", share: 0.3, saplingsPerBigha: 3000, productiveRatio: 0.83, yieldPerPlant: 3, costPerBigha: 60000, pricePerKg: 40 },
+      { name: "শসা", share: 0.3, saplingsPerBigha: 4000, productiveRatio: 0.75, yieldPerPlant: 2.5, costPerBigha: 50000, pricePerKg: 20 },
+      { name: "করলা", share: 0.25, saplingsPerBigha: 1000, productiveRatio: 0.8, yieldPerPlant: 6, costPerBigha: 50000, pricePerKg: 30 },
+      { name: "ঝিঙা", share: 0.15, saplingsPerBigha: 600, productiveRatio: 0.83, yieldPerPlant: 7, costPerBigha: 35000, pricePerKg: 30 },
+    ],
+  },
+  {
+    id: 5,
+    name: "লাখপতি প্রজেক্ট প্ল্যান-৫",
+    crops: [
+      { name: "ফুলকপি", share: 0.4, saplingsPerBigha: 5500, productiveRatio: 0.9, yieldPerPlant: 0.4, costPerBigha: 40000, pricePerKg: 50 },
+      { name: "শসা", share: 0.35, saplingsPerBigha: 4000, productiveRatio: 0.75, yieldPerPlant: 2.5, costPerBigha: 50000, pricePerKg: 20 },
+      { name: "করলা", share: 0.25, saplingsPerBigha: 1000, productiveRatio: 0.8, yieldPerPlant: 6, costPerBigha: 50000, pricePerKg: 30 },
+    ],
+  },
+];
 
 function LakhpotiPlanSection({
   crops,
@@ -682,33 +712,64 @@ function LakhpotiPlanSection({
   water: WaterNeed;
   goalLabel: string;
 }) {
-  const planCrops = crops.slice(0, 3);
-  if (planCrops.length === 0 || bighas <= 0) return null;
+  const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
 
-  const shares = planCrops.length === 1 ? [1] : planCrops.length === 2 ? [0.6, 0.4] : [0.5, 0.3, 0.2];
-  const rows: LakhpotiPlanRow[] = planCrops.map((crop, index) => {
-    const share = shares[index] ?? 0;
-    const areaBigha = bighas * share;
-    return {
-      crop,
-      share,
-      areaBigha,
-      cost: Math.round(crop.totalCost * areaBigha),
-      yieldMin: Math.round(crop.yieldMin * areaBigha),
-      yieldMax: Math.round(crop.yieldMax * areaBigha),
-      revenueMin: Math.round(crop.yieldMin * crop.avgMarketPrice * areaBigha),
-      revenueMax: Math.round(crop.yieldMax * crop.avgMarketPrice * areaBigha),
-      profitMin: Math.round(crop.profitMin * areaBigha),
-      profitMax: Math.round(crop.profitMax * areaBigha),
-    };
-  });
+  const rows: LakhpotiPlanRow[] = useMemo(() => {
+    if (selectedPreset !== null) {
+      const preset = SMART_PRESETS.find((p) => p.id === selectedPreset);
+      if (preset) {
+        return preset.crops.map((pc) => {
+          const crop = crops.find((c) => c.name.includes(pc.name)) || crops[0];
+          const areaBigha = bighas * pc.share;
+          const saplings = Math.round(pc.saplingsPerBigha * areaBigha);
+          const productivePlants = Math.round(saplings * pc.productiveRatio);
+          const totalYield = productivePlants * pc.yieldPerPlant;
+          const revenue = totalYield * pc.pricePerKg;
+          const cost = pc.costPerBigha * areaBigha;
+          return {
+            crop,
+            share: pc.share,
+            areaBigha,
+            saplings,
+            productivePlants,
+            yieldPerPlant: pc.yieldPerPlant,
+            cost,
+            revenue,
+            profit: revenue - cost,
+          };
+        });
+      }
+    }
+
+    const planCrops = crops.slice(0, 3);
+    const shares = planCrops.length === 1 ? [1] : planCrops.length === 2 ? [0.6, 0.4] : [0.5, 0.3, 0.2];
+    return planCrops.map((crop, index) => {
+      const share = shares[index] ?? 0;
+      const areaBigha = bighas * share;
+      const saplingsPerBigha = crop.category === "শাকসবজি" ? 4000 : 2000;
+      const saplings = Math.round(saplingsPerBigha * areaBigha);
+      const productivePlants = Math.round(saplings * 0.8);
+      const yieldPerPlant = crop.yieldMax / saplingsPerBigha || 2;
+      const revenue = Math.round(crop.yieldMax * crop.avgMarketPrice * areaBigha);
+      const cost = Math.round(crop.totalCost * areaBigha);
+      return {
+        crop,
+        share,
+        areaBigha,
+        saplings,
+        productivePlants,
+        yieldPerPlant: Math.round(yieldPerPlant * 10) / 10,
+        cost,
+        revenue,
+        profit: revenue - cost,
+      };
+    });
+  }, [selectedPreset, crops, bighas]);
 
   const totalCost = rows.reduce((sum, row) => sum + row.cost, 0);
-  const totalRevenueMin = rows.reduce((sum, row) => sum + row.revenueMin, 0);
-  const totalRevenueMax = rows.reduce((sum, row) => sum + row.revenueMax, 0);
-  const totalProfitMin = rows.reduce((sum, row) => sum + row.profitMin, 0);
-  const totalProfitMax = rows.reduce((sum, row) => sum + row.profitMax, 0);
-  const expectedProfit = Math.round((totalProfitMin + totalProfitMax) / 2);
+  const totalRevenue = rows.reduce((sum, row) => sum + row.revenue, 0);
+  const totalProfit = rows.reduce((sum, row) => sum + row.profit, 0);
+  const expectedProfit = totalProfit;
   const longestCycleDays = Math.max(...rows.map((row) => row.crop.totalDays));
   const monthlyProfit = Math.round(expectedProfit / Math.max(1, Math.ceil(longestCycleDays / 30)));
   const targetProgress = Math.min(100, Math.max(0, Math.round((expectedProfit / 100000) * 100)));
@@ -735,7 +796,25 @@ function LakhpotiPlanSection({
             </div>
           </div>
 
-          <div className="mt-5 grid grid-cols-3 gap-2">
+          <div className="mt-5 flex gap-2 overflow-x-auto no-scrollbar pb-1">
+            <button
+              onClick={() => setSelectedPreset(null)}
+              className={`shrink-0 rounded-xl px-3 py-2 text-[10px] font-bold transition ${selectedPreset === null ? "bg-white text-emerald-800 shadow-sm" : "bg-white/15 text-white ring-1 ring-white/25"}`}
+            >
+              স্বয়ংক্রিয় প্ল্যান
+            </button>
+            {SMART_PRESETS.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => setSelectedPreset(p.id)}
+                className={`shrink-0 rounded-xl px-3 py-2 text-[10px] font-bold transition ${selectedPreset === p.id ? "bg-white text-emerald-800 shadow-sm" : "bg-white/15 text-white ring-1 ring-white/25"}`}
+              >
+                প্রজেক্ট প্ল্যান-{p.id}
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-4 grid grid-cols-3 gap-2">
             <div className="rounded-2xl bg-white/12 p-3">
               <div className="text-[10px] text-emerald-50/75">মোট জমি</div>
               <div className="mt-1 text-sm font-bold">{toBn(areaShotok)} শতক</div>
@@ -779,16 +858,16 @@ function LakhpotiPlanSection({
           </div>
 
           <div className="mt-4 overflow-x-auto rounded-2xl border border-emerald-100 bg-white shadow-sm">
-            <table className="min-w-[820px] w-full text-xs">
+            <table className="min-w-[1000px] w-full text-[11px]">
               <thead className="bg-emerald-50 text-emerald-900">
                 <tr>
                   <th className="px-3 py-3 text-left font-bold">ফসল ও জমির ভাগ</th>
-                  <th className="px-3 py-3 text-right font-bold">জমি (বিঘা)</th>
-                  <th className="px-3 py-3 text-right font-bold">চাষ খরচ</th>
-                  <th className="px-3 py-3 text-right font-bold">ফলন</th>
-                  <th className="px-3 py-3 text-right font-bold">গড় দাম</th>
-                  <th className="px-3 py-3 text-right font-bold">মোট বিক্রয়</th>
-                  <th className="px-3 py-3 text-right font-bold">আনুমানিক লাভ</th>
+                  <th className="px-3 py-3 text-right font-bold">চারা</th>
+                  <th className="px-3 py-3 text-right font-bold">ফলন গাছ</th>
+                  <th className="px-3 py-3 text-right font-bold">ব্যয় (৳)</th>
+                  <th className="px-3 py-3 text-right font-bold">ফলন (কেজি)</th>
+                  <th className="px-3 py-3 text-right font-bold">বিক্রয় (৳)</th>
+                  <th className="px-3 py-3 text-right font-bold">মুনাফা (৳)</th>
                 </tr>
               </thead>
               <tbody>
@@ -796,24 +875,27 @@ function LakhpotiPlanSection({
                   <tr key={row.crop.id} className="border-t border-emerald-50 align-top">
                     <td className="px-3 py-3">
                       <div className="font-bold text-gray-900">{row.crop.icon} {row.crop.name}</div>
-                      <div className="mt-1 text-[10px] text-emerald-700">{toBn(Math.round(row.share * 100))}% জমি • {toBn(row.crop.totalDays)} দিন</div>
+                      <div className="mt-1 text-[9px] text-emerald-700">{toBn(Math.round(row.share * 100))}% জমি • {toBn(Math.round(row.areaBigha * 100) / 100)} বিঘা</div>
                     </td>
-                    <td className="px-3 py-3 text-right text-gray-700">{toBn(Math.round(row.areaBigha * 100) / 100)}</td>
-                    <td className="px-3 py-3 text-right text-gray-700">{fmtBdt(row.cost)}</td>
-                    <td className="px-3 py-3 text-right text-gray-700">{toBn(row.yieldMin)}–{toBn(row.yieldMax)}</td>
-                    <td className="px-3 py-3 text-right text-gray-700">{fmtBdt(row.crop.avgMarketPrice)}</td>
-                    <td className="px-3 py-3 text-right font-semibold text-blue-700">{fmtBdt(row.revenueMin)}–{fmtBdt(row.revenueMax).replace("৳", "")}</td>
-                    <td className="px-3 py-3 text-right font-bold text-emerald-700">{fmtBdt(row.profitMin)}–{fmtBdt(row.profitMax).replace("৳", "")}</td>
+                    <td className="px-3 py-3 text-right text-gray-700">{toBn(row.saplings)}</td>
+                    <td className="px-3 py-3 text-right text-gray-700">{toBn(row.productivePlants)}</td>
+                    <td className="px-3 py-3 text-right text-gray-700">{fmtBdt(row.cost).replace("৳", "")}</td>
+                    <td className="px-3 py-3 text-right text-gray-700">{toBn(Math.round(row.productivePlants * row.yieldPerPlant))}</td>
+                    <td className="px-3 py-3 text-right font-semibold text-blue-700">{fmtBdt(row.revenue).replace("৳", "")}</td>
+                    <td className="px-3 py-3 text-right">
+                      <div className="font-bold text-emerald-700">{fmtBdt(row.profit).replace("৳", "")}</div>
+                      <div className="text-[8px] text-gray-400">বিঘায়: {fmtBdt(Math.round(row.profit / row.areaBigha)).replace("৳", "")}</div>
+                    </td>
                   </tr>
                 ))}
                 <tr className="border-t-2 border-emerald-200 bg-emerald-50 font-bold">
                   <td className="px-3 py-3">মোট পরিকল্পনা</td>
-                  <td className="px-3 py-3 text-right">{toBn(Math.round(bighas * 100) / 100)}</td>
-                  <td className="px-3 py-3 text-right">{fmtBdt(totalCost)}</td>
                   <td className="px-3 py-3 text-right">—</td>
                   <td className="px-3 py-3 text-right">—</td>
-                  <td className="px-3 py-3 text-right text-blue-700">{fmtBdt(totalRevenueMin)}–{fmtBdt(totalRevenueMax).replace("৳", "")}</td>
-                  <td className="px-3 py-3 text-right text-emerald-700">{fmtBdt(totalProfitMin)}–{fmtBdt(totalProfitMax).replace("৳", "")}</td>
+                  <td className="px-3 py-3 text-right">{toBn(totalCost)}</td>
+                  <td className="px-3 py-3 text-right">—</td>
+                  <td className="px-3 py-3 text-right text-blue-700">{toBn(totalRevenue)}</td>
+                  <td className="px-3 py-3 text-right text-emerald-700">{toBn(totalProfit)}</td>
                 </tr>
               </tbody>
             </table>
