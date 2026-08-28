@@ -190,6 +190,14 @@ const AI_CARDS = [
     iconColor: "text-red-700",
   },
   {
+    href: "/ai-bondhu/soil",
+    Icon: Activity,
+    title: "মৃত্তিকা বিশ্লেষণ",
+    desc: "মাটির পুষ্টি ও সারের স্মার্ট রিপোর্ট",
+    iconBg: "bg-blue-100",
+    iconColor: "text-blue-700",
+  },
+  {
     href: "/crop-planner",
     Icon: Sparkles,
     title: "ফসল পরিকল্পনা",
@@ -292,8 +300,8 @@ function AiSolutionsSection() {
 
 const QUICK_ACTIONS = [
   { href: "/prices", Icon: ShoppingBasket, label: "বাজারদর", desc: "আজকের দাম দেখুন", bg: "bg-[#FFF1E5]", color: "text-[#D96B27]" },
+  { href: "/ai-bondhu/soil", Icon: Activity, label: "মৃত্তিকা বিশ্লেষণ", desc: "মাটির পুষ্টি পরীক্ষা", bg: "bg-[#E7F4FB]", color: "text-[#3186B7]" },
   { href: "/ai-bondhu/pesticide", Icon: Leaf, label: "কীটনাশক গাইড", desc: "নিরাপদে পোকা দমন করুন", bg: "bg-[#E8F7EC]", color: "text-[#2D6A4F]" },
-  { href: "/ai-bondhu/calculator", Icon: FlaskConical, label: "সার ক্যালকুলেটর", desc: "জমির জন্য সার হিসাব করুন", bg: "bg-[#E7F4FB]", color: "text-[#3186B7]" },
   { href: "/crop-planner", Icon: Sprout, label: "ফসল পরিকল্পনা", desc: "চাষের ধাপ সাজান", bg: "bg-[#F0EBFF]", color: "text-[#7457C7]" },
 ];
 
