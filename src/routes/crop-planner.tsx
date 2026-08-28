@@ -746,7 +746,7 @@ function LakhpotiPlanSection({
     return planCrops.map((crop, index) => {
       const share = shares[index] ?? 0;
       const areaBigha = bighas * share;
-      const saplingsPerBigha = crop.category === "শাকসবজি" ? 4000 : 2000;
+      const saplingsPerBigha = crop.category === "সবজি" ? 4000 : 2000;
       const saplings = Math.round(saplingsPerBigha * areaBigha);
       const productivePlants = Math.round(saplings * 0.8);
       const yieldPerPlant = crop.yieldMax / saplingsPerBigha || 2;

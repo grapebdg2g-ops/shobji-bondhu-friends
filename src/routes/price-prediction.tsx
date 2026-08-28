@@ -74,6 +74,7 @@ function PricePredictionPage() {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(0);
   const [result, setResult] = useState<PredictionResult | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const runPrediction = useServerFn(getPricePrediction);
   const runSetAlert = useServerFn(setPriceAlert);
@@ -100,10 +101,17 @@ function PricePredictionPage() {
     setLoading(true);
     setStep(0);
     setResult(null);
+    setNotice(null);
     const stepTimer = setInterval(() => setStep((s) => Math.min(s + 1, 3)), 1400);
     try {
       const res = await runPrediction({ data: { product: prod, district: dist } });
-      setResult(res as PredictionResult);
+      if ((res as { insufficient?: boolean }).insufficient) {
+        setResult(null);
+        setNotice((res as { message: string }).message);
+      } else {
+        setNotice(null);
+        setResult(res as PredictionResult);
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "পূর্বাভাস পাওয়া যায়নি");
     } finally {
@@ -163,12 +171,23 @@ function PricePredictionPage() {
       </header>
 
       {!result && !loading && (
-        <SelectorScreen
-          product={product} setProduct={setProduct}
-          district={district} setDistrict={setDistrict}
-          onSubmit={() => handleSubmit()}
-        />
+        <>
+          {notice && (
+            <div className="mx-4 mt-4 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-foreground">
+              <div className="flex gap-2">
+                <Info className="h-4 w-4 shrink-0 text-amber-600" />
+                <p>{notice}</p>
+              </div>
+            </div>
+          )}
+          <SelectorScreen
+            product={product} setProduct={setProduct}
+            district={district} setDistrict={setDistrict}
+            onSubmit={() => handleSubmit()}
+          />
+        </>
       )}
+
 
       {loading && <LoadingScreen step={step} />}
 
