@@ -29,7 +29,7 @@ export const Route = createFileRoute("/profile/")({
   component: ProfilePage,
   head: () => ({
     meta: [
-      { title: "প্রোফাইল — কৃষিবন্ধু" },
+      { title: "প্রোফাইল — কৃষক বন্ধু" },
       { name: "description", content: "আপনার প্রোফাইল, পোস্ট, বিনিময় ও দাম আপডেট দেখুন।" },
     ],
   }),
@@ -826,7 +826,7 @@ function SettingsList({ open, onClose, onLogout }: { open: boolean; onClose: () 
 
       <BottomSheet open={aboutOpen} onClose={() => setAboutOpen(false)} title="অ্যাপ সম্পর্কে">
         <div className="space-y-3 text-sm text-foreground">
-          <p><span className="font-bold">কৃষিবন্ধু</span> — বাংলাদেশের কৃষকদের জন্য একটি কমিউনিটি অ্যাপ।</p>
+          <p><span className="font-bold">কৃষক বন্ধু</span> — বাংলাদেশের কৃষকদের জন্য একটি কমিউনিটি অ্যাপ।</p>
           <p>সংস্করণ: <span className="font-mono">1.0.0</span></p>
           <a href="#" className="block text-primary font-semibold">শর্তাবলী</a>
           <a href="#" className="block text-primary font-semibold">গোপনীয়তা নীতি</a>

@@ -111,7 +111,7 @@ function parseDamHtml(html: string, priceDate: string): GovtRow[] {
 async function fetchDamRows(priceDate: string): Promise<GovtRow[]> {
   try {
     const headers = {
-      "User-Agent": "Mozilla/5.0 KrishiBondhuBot/1.0",
+      "User-Agent": "Mozilla/5.0 KrishokBondhuBot/1.0",
       Accept: "text/html,application/xhtml+xml",
     };
     const form = await fetch(DAM_REPORT_URL, { headers });

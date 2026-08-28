@@ -32,7 +32,7 @@ export const Route = createFileRoute("/feed")({
   component: FeedPage,
   head: () => ({
     meta: [
-      { title: "সংবাদ ফিড — কৃষিবন্ধু" },
+      { title: "সংবাদ ফিড — কৃষক বন্ধু" },
       { name: "description", content: "কৃষকদের সাম্প্রতিক পোস্ট, সাহায্য ও সাফল্যের গল্প।" },
     ],
   }),
@@ -220,7 +220,7 @@ function FeedPage() {
     const url = typeof window !== "undefined" ? window.location.href : "";
     const text = `${p.user_name} (${p.district ?? ""}): ${p.content}`;
     try {
-      if (navigator.share) await navigator.share({ title: "কৃষিবন্ধু পোস্ট", text, url });
+      if (navigator.share) await navigator.share({ title: "কৃষক বন্ধু পোস্ট", text, url });
       else { await navigator.clipboard.writeText(`${text}\n${url}`); toast.success("কপি হয়েছে"); }
     } catch { /* user cancel */ }
   };

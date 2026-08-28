@@ -33,7 +33,7 @@ export default defineTool({
         ...input,
         upazila: input.upazila ?? null,
         user_id: userId!,
-        user_name: profile?.name ?? "কৃষিবন্ধু ব্যবহারকারী",
+        user_name: profile?.name ?? "কৃষক বন্ধু ব্যবহারকারী",
       })
       .select("id, product_name, price, unit, market_name, district, previous_price, created_at");
     if (error) return { content: [{ type: "text", text: error.message }], isError: true };

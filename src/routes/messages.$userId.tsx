@@ -19,7 +19,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/messages/$userId")({
   component: DirectMessagePage,
-  head: () => ({ meta: [{ title: "চ্যাট — কৃষিবন্ধু" }] }),
+  head: () => ({ meta: [{ title: "চ্যাট — কৃষক বন্ধু" }] }),
 });
 
 type ChatProfile = {

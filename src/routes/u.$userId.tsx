@@ -256,7 +256,7 @@ function PublicProfilePage() {
                 </p>
                 <p className="flex items-center gap-2">
                   <CalendarDays className="h-4 w-4 shrink-0 text-[#1877F2]" />
-                  {formatMemberSince(profile.created_at)} থেকে কৃষিবন্ধুতে
+                  {formatMemberSince(profile.created_at)} থেকে কৃষক বন্ধুতে
                 </p>
                 <p className="flex items-center gap-2">
                   <Sprout className="h-4 w-4 shrink-0 text-[#18A058]" />

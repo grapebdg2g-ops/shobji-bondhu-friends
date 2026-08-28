@@ -6,7 +6,7 @@ import { toBn } from "@/lib/bn";
 
 export const Route = createFileRoute("/ai-bondhu/calendar")({
   component: CalendarPage,
-  head: () => ({ meta: [{ title: "চাষের ক্যালেন্ডার — কৃষিবন্ধু" }] }),
+  head: () => ({ meta: [{ title: "চাষের ক্যালেন্ডার — কৃষক বন্ধু" }] }),
 });
 
 const MONTHS = [

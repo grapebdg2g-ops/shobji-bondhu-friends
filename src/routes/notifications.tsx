@@ -19,7 +19,7 @@ import { LoadingSpinner } from "@/components/krishi/loading-spinner";
 
 export const Route = createFileRoute("/notifications")({
   component: NotificationsPage,
-  head: () => ({ meta: [{ title: "বিজ্ঞপ্তি — কৃষিবন্ধু" }] }),
+  head: () => ({ meta: [{ title: "বিজ্ঞপ্তি — কৃষক বন্ধু" }] }),
 });
 
 function timeAgo(iso: string) {

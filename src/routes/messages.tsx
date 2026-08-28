@@ -7,7 +7,7 @@ import { useDirectThreads, type DirectThread } from "@/hooks/use-direct-messages
 
 export const Route = createFileRoute("/messages")({
   component: MessagesPage,
-  head: () => ({ meta: [{ title: "মেসেজ — কৃষিবন্ধু" }] }),
+  head: () => ({ meta: [{ title: "মেসেজ — কৃষক বন্ধু" }] }),
 });
 
 function formatThreadTime(value: string) {

@@ -30,7 +30,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/ai-bondhu/calculator")({
   component: CalculatorPage,
-  head: () => ({ meta: [{ title: "সার ক্যালকুলেটর — কৃষিবন্ধু" }] }),
+  head: () => ({ meta: [{ title: "সার ক্যালকুলেটর — কৃষক বন্ধু" }] }),
 });
 
 function bn1(n: number) {
@@ -398,7 +398,7 @@ function StepResult({
       `উৎস: ${crop.sourceTitle}`,
       `মাটি পরীক্ষা করে চূড়ান্ত dose নির্ধারণ করুন`,
       ``,
-      `— কৃষিবন্ধু অ্যাপ`,
+      `— কৃষক বন্ধু অ্যাপ`,
     ];
     return lines.join("\n");
   }

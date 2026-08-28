@@ -25,7 +25,7 @@ export const Route = createFileRoute("/disease-detection")({
   component: DiseaseDetectionPage,
   head: () => ({
     meta: [
-      { title: "রোগ শনাক্ত — কৃষিবন্ধু" },
+      { title: "রোগ শনাক্ত — কৃষক বন্ধু" },
       { name: "description", content: "ফসলের ছবি তুলে AI দিয়ে রোগ শনাক্ত করুন।" },
     ],
   }),
@@ -209,7 +209,7 @@ function DiseaseDetectionPage() {
     const r = state.result;
     const text = `🌱 ${r.diseaseName}\n\n${r.description}\n\nচিকিৎসা:\n${r.treatments
       .map((t, i) => `${i + 1}. ${t}`)
-      .join("\n")}\n\n— কৃষিবন্ধু অ্যাপ`;
+      .join("\n")}\n\n— কৃষক বন্ধু অ্যাপ`;
     try {
       if (navigator.share) {
         await navigator.share({ title: r.diseaseName, text });

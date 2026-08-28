@@ -9,7 +9,7 @@ export const Route = createFileRoute("/profile/disease-history")({
   component: DiseaseHistoryPage,
   head: () => ({
     meta: [
-      { title: "রোগ শনাক্তের ইতিহাস — কৃষিবন্ধু" },
+      { title: "রোগ শনাক্তের ইতিহাস — কৃষক বন্ধু" },
       { name: "description", content: "আপনার পূর্ববর্তী রোগ বিশ্লেষণের ইতিহাস দেখুন।" },
     ],
   }),

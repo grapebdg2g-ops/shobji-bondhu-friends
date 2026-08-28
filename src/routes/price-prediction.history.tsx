@@ -10,7 +10,7 @@ export const Route = createFileRoute("/price-prediction/history")({
   component: HistoryPage,
   head: () => ({
     meta: [
-      { title: "আমার সংরক্ষিত পূর্বাভাস — কৃষিবন্ধু" },
+      { title: "আমার সংরক্ষিত পূর্বাভাস — কৃষক বন্ধু" },
       { name: "description", content: "আপনার AI দাম পূর্বাভাসের ইতিহাস ও নির্ভুলতা।" },
     ],
   }),

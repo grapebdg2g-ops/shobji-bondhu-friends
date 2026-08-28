@@ -11,7 +11,7 @@ import { DISTRICTS } from "@/lib/bd-data";
 
 export const Route = createFileRoute("/exchange")({
   component: ExchangePage,
-  head: () => ({ meta: [{ title: "বিনিময় — কৃষিবন্ধু" }] }),
+  head: () => ({ meta: [{ title: "বিনিময় — কৃষক বন্ধু" }] }),
 });
 
 const TABS: { type: ExchangeType; label: string; icon: typeof Sprout }[] = [

@@ -16,7 +16,7 @@ import { useMutedIds } from "@/hooks/use-muted-users";
 
 export const Route = createFileRoute("/prices")({
   component: PricesPage,
-  head: () => ({ meta: [{ title: "বাজার দর — কৃষিবন্ধু" }] }),
+  head: () => ({ meta: [{ title: "বাজার দর — কৃষক বন্ধু" }] }),
 });
 
 type Price = {

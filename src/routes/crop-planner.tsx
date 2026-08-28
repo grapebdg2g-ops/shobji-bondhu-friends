@@ -15,7 +15,7 @@ export const Route = createFileRoute("/crop-planner")({
   component: CropPlannerPage,
   head: () => ({
     meta: [
-      { title: "ফসল পরিকল্পনা — কৃষিবন্ধু" },
+      { title: "ফসল পরিকল্পনা — কৃষক বন্ধু" },
       { name: "description", content: "আপনার জমির জন্য সেরা ফসল খুঁজুন — মাটি, পানি ও লক্ষ্যের ভিত্তিতে।" },
     ],
   }),

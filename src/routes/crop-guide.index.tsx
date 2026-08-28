@@ -11,7 +11,7 @@ export const Route = createFileRoute("/crop-guide/")({
   component: CropGuideIndex,
   head: () => ({
     meta: [
-      { title: "ফসল পরামর্শ — কৃষিবন্ধু" },
+      { title: "ফসল পরামর্শ — কৃষক বন্ধু" },
       { name: "description", content: "রোপণ থেকে বিক্রি পর্যন্ত সম্পূর্ণ ফসল চাষ গাইড।" },
     ],
   }),

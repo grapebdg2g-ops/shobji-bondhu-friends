@@ -23,7 +23,7 @@ export const Route = createFileRoute("/friends")({
   component: FriendsPage,
   head: () => ({
     meta: [
-      { title: "বন্ধু তালিকা — কৃষিবন্ধু" },
+      { title: "বন্ধু তালিকা — কৃষক বন্ধু" },
       { name: "description", content: "আপনার সঙ্গে সংযুক্ত কৃষকদের বন্ধু তালিকা দেখুন এবং সাজান।" },
     ],
   }),

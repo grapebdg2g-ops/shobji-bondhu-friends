@@ -10,7 +10,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminLayout,
   head: () => ({
     meta: [
-      { title: "অ্যাডমিন প্যানেল — কৃষিবন্ধু" },
+      { title: "অ্যাডমিন প্যানেল — কৃষক বন্ধু" },
       { name: "robots", content: "noindex" },
     ],
   }),

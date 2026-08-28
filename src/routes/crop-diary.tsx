@@ -23,7 +23,7 @@ import { toBn } from "@/lib/bn";
 
 export const Route = createFileRoute("/crop-diary")({
   component: CropDiaryPage,
-  head: () => ({ meta: [{ title: "ফসল ডায়েরি — কৃষিবন্ধু" }] }),
+  head: () => ({ meta: [{ title: "ফসল ডায়েরি — কৃষক বন্ধু" }] }),
 });
 
 type Tab = "today" | "diary" | "reminders";
