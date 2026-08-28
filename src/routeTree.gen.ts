@@ -42,6 +42,7 @@ import { Route as ProfileDiseaseHistoryRouteImport } from './routes/profile.dise
 import { Route as PricePredictionHistoryRouteImport } from './routes/price-prediction.history'
 import { Route as MessagesUserIdRouteImport } from './routes/messages.$userId'
 import { Route as CropPlannerMyPlansRouteImport } from './routes/crop-planner.my-plans'
+import { Route as AiBondhuSoilRouteImport } from './routes/ai-bondhu.soil'
 import { Route as AiBondhuPesticideRouteImport } from './routes/ai-bondhu.pesticide'
 import { Route as AiBondhuDiseaseRouteImport } from './routes/ai-bondhu.disease'
 import { Route as AiBondhuCalendarRouteImport } from './routes/ai-bondhu.calendar'
@@ -231,6 +232,11 @@ const CropPlannerMyPlansRoute = CropPlannerMyPlansRouteImport.update({
   path: '/my-plans',
   getParentRoute: () => CropPlannerRoute,
 } as any)
+const AiBondhuSoilRoute = AiBondhuSoilRouteImport.update({
+  id: '/ai-bondhu/soil',
+  path: '/ai-bondhu/soil',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AiBondhuPesticideRoute = AiBondhuPesticideRouteImport.update({
   id: '/ai-bondhu/pesticide',
   path: '/ai-bondhu/pesticide',
@@ -389,6 +395,7 @@ export interface FileRoutesByFullPath {
   '/ai-bondhu/calendar': typeof AiBondhuCalendarRoute
   '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
+  '/ai-bondhu/soil': typeof AiBondhuSoilRoute
   '/crop-planner/my-plans': typeof CropPlannerMyPlansRoute
   '/messages/$userId': typeof MessagesUserIdRoute
   '/price-prediction/history': typeof PricePredictionHistoryRoute
@@ -445,6 +452,7 @@ export interface FileRoutesByTo {
   '/ai-bondhu/calendar': typeof AiBondhuCalendarRoute
   '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
+  '/ai-bondhu/soil': typeof AiBondhuSoilRoute
   '/crop-planner/my-plans': typeof CropPlannerMyPlansRoute
   '/messages/$userId': typeof MessagesUserIdRoute
   '/price-prediction/history': typeof PricePredictionHistoryRoute
@@ -504,6 +512,7 @@ export interface FileRoutesById {
   '/ai-bondhu/calendar': typeof AiBondhuCalendarRoute
   '/ai-bondhu/disease': typeof AiBondhuDiseaseRoute
   '/ai-bondhu/pesticide': typeof AiBondhuPesticideRoute
+  '/ai-bondhu/soil': typeof AiBondhuSoilRoute
   '/crop-planner/my-plans': typeof CropPlannerMyPlansRoute
   '/messages/$userId': typeof MessagesUserIdRoute
   '/price-prediction/history': typeof PricePredictionHistoryRoute
@@ -564,6 +573,7 @@ export interface FileRouteTypes {
     | '/ai-bondhu/calendar'
     | '/ai-bondhu/disease'
     | '/ai-bondhu/pesticide'
+    | '/ai-bondhu/soil'
     | '/crop-planner/my-plans'
     | '/messages/$userId'
     | '/price-prediction/history'
@@ -620,6 +630,7 @@ export interface FileRouteTypes {
     | '/ai-bondhu/calendar'
     | '/ai-bondhu/disease'
     | '/ai-bondhu/pesticide'
+    | '/ai-bondhu/soil'
     | '/crop-planner/my-plans'
     | '/messages/$userId'
     | '/price-prediction/history'
@@ -678,6 +689,7 @@ export interface FileRouteTypes {
     | '/ai-bondhu/calendar'
     | '/ai-bondhu/disease'
     | '/ai-bondhu/pesticide'
+    | '/ai-bondhu/soil'
     | '/crop-planner/my-plans'
     | '/messages/$userId'
     | '/price-prediction/history'
@@ -727,6 +739,7 @@ export interface RootRouteChildren {
   AiBondhuCalendarRoute: typeof AiBondhuCalendarRoute
   AiBondhuDiseaseRoute: typeof AiBondhuDiseaseRoute
   AiBondhuPesticideRoute: typeof AiBondhuPesticideRoute
+  AiBondhuSoilRoute: typeof AiBondhuSoilRoute
   ProfileDiseaseHistoryRoute: typeof ProfileDiseaseHistoryRoute
   UUserIdRoute: typeof UUserIdRoute
   VegetableGuideSlugRoute: typeof VegetableGuideSlugRoute
@@ -974,6 +987,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/crop-planner/my-plans'
       preLoaderRoute: typeof CropPlannerMyPlansRouteImport
       parentRoute: typeof CropPlannerRoute
+    }
+    '/ai-bondhu/soil': {
+      id: '/ai-bondhu/soil'
+      path: '/ai-bondhu/soil'
+      fullPath: '/ai-bondhu/soil'
+      preLoaderRoute: typeof AiBondhuSoilRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/ai-bondhu/pesticide': {
       id: '/ai-bondhu/pesticide'
@@ -1248,6 +1268,7 @@ const rootRouteChildren: RootRouteChildren = {
   AiBondhuCalendarRoute: AiBondhuCalendarRoute,
   AiBondhuDiseaseRoute: AiBondhuDiseaseRoute,
   AiBondhuPesticideRoute: AiBondhuPesticideRoute,
+  AiBondhuSoilRoute: AiBondhuSoilRoute,
   ProfileDiseaseHistoryRoute: ProfileDiseaseHistoryRoute,
   UUserIdRoute: UUserIdRoute,
   VegetableGuideSlugRoute: VegetableGuideSlugRoute,
