@@ -175,7 +175,7 @@ export function PWAManager() {
             </div>
             <div>
               <h3 className="text-lg font-bold text-foreground">
-                কৃষিবন্ধু ইনস্টল করুন
+                কৃষক বন্ধু ইনস্টল করুন
               </h3>
               <p className="text-xs text-muted-foreground">হোম স্ক্রিনে যোগ করুন</p>
             </div>

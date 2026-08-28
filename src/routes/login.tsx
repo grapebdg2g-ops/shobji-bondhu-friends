@@ -12,7 +12,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
-  head: () => ({ meta: [{ title: "প্রবেশ করুন — কৃষিবন্ধু" }] }),
+  head: () => ({ meta: [{ title: "প্রবেশ করুন — কৃষক বন্ধু" }] }),
 });
 
 function LoginPage() {
@@ -121,9 +121,9 @@ function LoginPage() {
     <main className="min-h-screen bg-background flex flex-col">
       <header className="flex flex-col items-center gap-3 px-6 pt-12 pb-8" style={{ background: "var(--gradient-brand)" }}>
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 ring-2 ring-white/25 overflow-hidden">
-          <img src={logo} alt="কৃষিবন্ধু লোগো" width={56} height={56} decoding="async" className="h-14 w-14 object-contain" />
+          <img src={logo} alt="কৃষক বন্ধু লোগো" width={56} height={56} decoding="async" className="h-14 w-14 object-contain" />
         </div>
-        <h1 className="text-2xl font-bold text-white">কৃষিবন্ধু</h1>
+        <h1 className="text-2xl font-bold text-white">কৃষক বন্ধু</h1>
         <p className="text-sm text-white/85">আপনার কৃষি সঙ্গী</p>
       </header>
 

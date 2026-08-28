@@ -9,7 +9,7 @@ export const Route = createFileRoute("/vegetable-guide/")({
   component: VegetableGuidePage,
   head: () => ({
     meta: [
-      { title: "ফসল চাষ গাইড — কৃষিবন্ধু" },
+      { title: "ফসল চাষ গাইড — কৃষক বন্ধু" },
       { name: "description", content: "২৭+ ফসলের পূর্ণাঙ্গ চাষ পদ্ধতি, লাভ, ঝুঁকি ও জাত-পরিচিতি।" },
     ],
   }),

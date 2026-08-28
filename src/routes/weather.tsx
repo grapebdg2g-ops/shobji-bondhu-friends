@@ -15,7 +15,7 @@ export const Route = createFileRoute("/weather")({
   component: WeatherPage,
   head: () => ({
     meta: [
-      { title: "আবহাওয়া — কৃষিবন্ধু" },
+      { title: "আবহাওয়া — কৃষক বন্ধু" },
       { name: "description", content: "আপনার জেলার আজকের ও আগামী ৭ দিনের আবহাওয়া + কৃষি পরামর্শ।" },
     ],
   }),

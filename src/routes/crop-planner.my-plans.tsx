@@ -11,7 +11,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/crop-planner/my-plans")({
   component: MyPlansPage,
   head: () => ({
-    meta: [{ title: "আমার ফসল পরিকল্পনা — কৃষিবন্ধু" }],
+    meta: [{ title: "আমার ফসল পরিকল্পনা — কৃষক বন্ধু" }],
   }),
 });
 

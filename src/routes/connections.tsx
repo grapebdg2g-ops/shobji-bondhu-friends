@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/connections")({
   component: ConnectionsPage,
-  head: () => ({ meta: [{ title: "সংযোগ — কৃষিবন্ধু" }, { name: "description", content: "আপনার এলাকার কৃষকদের সঙ্গে সংযুক্ত হন।" }] }),
+  head: () => ({ meta: [{ title: "সংযোগ — কৃষক বন্ধু" }, { name: "description", content: "আপনার এলাকার কৃষকদের সঙ্গে সংযুক্ত হন।" }] }),
 });
 
 type Tab = "connections" | "requests" | "discover";

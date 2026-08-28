@@ -43,7 +43,7 @@ export function AdminSidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
           <Settings2 className="h-5 w-5" />
         </div>
         <div>
-          <p className="text-sm font-bold text-gray-900">KrishiBondhu</p>
+          <p className="text-sm font-bold text-gray-900">KrishokBondhu</p>
           <p className="text-[11px] text-purple-700 font-semibold -mt-0.5">Admin</p>
         </div>
       </div>

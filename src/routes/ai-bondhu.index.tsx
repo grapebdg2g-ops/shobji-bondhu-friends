@@ -5,7 +5,7 @@ export const Route = createFileRoute("/ai-bondhu/")({
   component: AiBondhuHub,
   head: () => ({
     meta: [
-      { title: "AI কৃষি সমাধান — কৃষিবন্ধু" },
+      { title: "AI কৃষি সমাধান — কৃষক বন্ধু" },
       { name: "description", content: "রোগ শনাক্ত, ফসল ক্যালেন্ডার, সার ও কীটনাশক — সবকিছু এক জায়গায়।" },
     ],
   }),

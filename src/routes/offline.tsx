@@ -5,7 +5,7 @@ import { BengaliButton } from "@/components/krishi/bengali-button";
 export const Route = createFileRoute("/offline")({
   head: () => ({
     meta: [
-      { title: "অফলাইন — কৃষিবন্ধু" },
+      { title: "অফলাইন — কৃষক বন্ধু" },
       { name: "description", content: "ইন্টারনেট সংযোগ নেই। অফলাইন মোডে সীমিত সুবিধা পাওয়া যাচ্ছে।" },
     ],
   }),

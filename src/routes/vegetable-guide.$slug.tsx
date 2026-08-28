@@ -17,7 +17,7 @@ export const Route = createFileRoute("/vegetable-guide/$slug")({
   },
   head: ({ loaderData }) => ({
     meta: [
-      { title: `${loaderData?.crop.name ?? "ফসল"} চাষ গাইড — কৃষিবন্ধু` },
+      { title: `${loaderData?.crop.name ?? "ফসল"} চাষ গাইড — কৃষক বন্ধু` },
       { name: "description", content: `${loaderData?.crop.name ?? ""} চাষের পদ্ধতি, খরচ, লাভ, জাত ও বাজার বিশ্লেষণ।` },
     ],
   }),

@@ -26,7 +26,7 @@ export const Route = createFileRoute("/price-prediction")({
   component: PricePredictionPage,
   head: () => ({
     meta: [
-      { title: "দামের পূর্বাভাস — কৃষিবন্ধু" },
+      { title: "দামের পূর্বাভাস — কৃষক বন্ধু" },
       { name: "description", content: "AI ও বাজার ডেটা বিশ্লেষণ দিয়ে কৃষিপণ্যের দাম পূর্বাভাস।" },
     ],
   }),
@@ -124,7 +124,7 @@ function PricePredictionPage() {
 
   function handleShare() {
     if (!result) return;
-    const text = `${product}: ${result.prediction.direction} (${toBn(result.prediction.predicted_change_percent)}%) — কৃষিবন্ধু`;
+    const text = `${product}: ${result.prediction.direction} (${toBn(result.prediction.predicted_change_percent)}%) — কৃষক বন্ধু`;
     if (navigator.share) {
       void navigator.share({ title: "দামের পূর্বাভাস", text });
     } else {
@@ -411,7 +411,7 @@ function ResultScreen(props: {
 
       {/* SOURCE */}
       <div className="text-xs text-gray-500 text-center space-y-1">
-        <div>📊 তথ্য উৎস: কৃষিবন্ধু বাজার ডেটা + সরকারি DAM ডেটা</div>
+        <div>📊 তথ্য উৎস: কৃষক বন্ধু বাজার ডেটা + সরকারি DAM ডেটা</div>
         {result.cached && result.cached_at && (
           <div>🕐 আপডেট: {relativeTime(result.cached_at)}</div>
         )}

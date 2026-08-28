@@ -11,7 +11,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/crop-guide/plan/$planId")({
   component: PlanAdvisory,
-  head: () => ({ meta: [{ title: "ফসল পরামর্শ — কৃষিবন্ধু" }] }),
+  head: () => ({ meta: [{ title: "ফসল পরামর্শ — কৃষক বন্ধু" }] }),
   errorComponent: ({ error, reset }) => (
     <div className="min-h-screen flex items-center justify-center p-6 text-center">
       <div>
@@ -125,7 +125,7 @@ function PlanAdvisory() {
 
   async function handleShare() {
     const url = window.location.href;
-    const title = `${guide?.icon ?? ""} ${plan?.crop_type ?? ""} পরামর্শ — কৃষিবন্ধু`;
+    const title = `${guide?.icon ?? ""} ${plan?.crop_type ?? ""} পরামর্শ — কৃষক বন্ধু`;
     if (navigator.share) {
       try { await navigator.share({ title, url }); } catch { /* cancelled */ }
     } else {

@@ -156,7 +156,7 @@ function NotifyPage() {
         <div className="border border-gray-200 rounded-xl p-3 bg-gray-50">
           <p className="text-[10px] font-bold uppercase text-gray-500 mb-1">প্রিভিউ</p>
           <div className="bg-white rounded-lg p-3 border border-gray-200">
-            <p className="text-xs text-gray-500">{icon} KrishiBondhu</p>
+            <p className="text-xs text-gray-500">{icon} KrishokBondhu</p>
             <p className="text-sm font-bold">{title || "শিরোনাম এখানে"}</p>
             <p className="text-xs text-gray-700">{body || "বার্তা এখানে দেখাবে…"}</p>
           </div>

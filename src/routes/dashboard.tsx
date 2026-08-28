@@ -39,7 +39,7 @@ import { usePostReactions } from "@/hooks/use-post-reactions";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
-  head: () => ({ meta: [{ title: "হোম — কৃষিবন্ধু" }] }),
+  head: () => ({ meta: [{ title: "হোম — কৃষক বন্ধু" }] }),
 });
 
 function Dashboard() {
@@ -422,7 +422,7 @@ function CommunityFeedSection({ userName, onCompose }: { userName: string | null
   const share = async (post: Post) => {
     const text = `${post.user_name} (${post.district ?? ""}): ${post.content}`;
     try {
-      if (navigator.share) await navigator.share({ title: "কৃষিবন্ধু পোস্ট", text, url: window.location.href });
+      if (navigator.share) await navigator.share({ title: "কৃষক বন্ধু পোস্ট", text, url: window.location.href });
       else { await navigator.clipboard.writeText(`${text}\n${window.location.href}`); toast.success("পোস্টের লিংক কপি হয়েছে"); }
     } catch { /* user cancelled */ }
   };

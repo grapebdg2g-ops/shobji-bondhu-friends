@@ -12,7 +12,7 @@ export const Route = createFileRoute("/moderation")({
   component: ModerationPage,
   head: () => ({
     meta: [
-      { title: "মডারেশন — কৃষিবন্ধু" },
+      { title: "মডারেশন — কৃষক বন্ধু" },
       { name: "robots", content: "noindex" },
     ],
   }),

@@ -198,7 +198,7 @@ export function AppSidebar({
         {expanded && (
           <div className="border-t border-gray-100 p-3 text-[11px] text-gray-400 leading-tight animate-fade-in">
             <p>v1.0.0</p>
-            <p>কৃষিবন্ধু © ২০২৫</p>
+            <p>কৃষক বন্ধু © ২০২৫</p>
           </div>
         )}
       </aside>

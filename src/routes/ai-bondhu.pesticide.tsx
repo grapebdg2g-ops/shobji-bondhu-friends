@@ -28,7 +28,7 @@ import { AI_CROP_LABELS, COMMUNITY_CROP_LABELS } from "@/lib/crop-options";
 
 export const Route = createFileRoute("/ai-bondhu/pesticide")({
   component: PesticidePage,
-  head: () => ({ meta: [{ title: "কীটনাশক গাইড — কৃষিবন্ধু" }] }),
+  head: () => ({ meta: [{ title: "কীটনাশক গাইড — কৃষক বন্ধু" }] }),
 });
 
 const CROP_FILTERS = COMMUNITY_CROP_LABELS;
@@ -651,7 +651,7 @@ function SolutionDetail({
         <button
           type="button"
           onClick={async () => {
-            const text = `${problem.name} — ${problem.crops}\nলক্ষণ: ${problem.symptoms}\nআক্রান্তি: ${SEVERITY_LABEL[severity]}\n\nকৃষিবন্ধু কীটনাশক গাইড`;
+            const text = `${problem.name} — ${problem.crops}\nলক্ষণ: ${problem.symptoms}\nআক্রান্তি: ${SEVERITY_LABEL[severity]}\n\nকৃষক বন্ধু কীটনাশক গাইড`;
             if (navigator.share) {
               try {
                 await navigator.share({ title: problem.name, text });

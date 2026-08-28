@@ -11,8 +11,8 @@ export const Route = createFileRoute("/farmers")({
   component: FarmersPage,
   head: () => ({
     meta: [
-      { title: "সকল কৃষক — কৃষিবন্ধু" },
-      { name: "description", content: "কৃষিবন্ধুতে নিবন্ধিত কৃষকদের খুঁজুন এবং সংযুক্ত হন।" },
+      { title: "সকল কৃষক — কৃষক বন্ধু" },
+      { name: "description", content: "কৃষক বন্ধুতে নিবন্ধিত কৃষকদের খুঁজুন এবং সংযুক্ত হন।" },
     ],
   }),
 });
