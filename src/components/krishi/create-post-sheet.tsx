@@ -1,6 +1,6 @@
 import { useReducer, useRef, useState } from "react";
-import imageCompression from "browser-image-compression";
 import { toast } from "sonner";
+import { optimizeImage } from "@/lib/image-optimizer";
 import { Camera, X, FileText, HelpCircle, Star, CloudRain } from "lucide-react";
 import { BottomSheet } from "@/components/krishi/bottom-sheet";
 import { supabase } from "@/integrations/supabase/client";
@@ -57,9 +57,9 @@ export function CreatePostSheet({
     const f = e.target.files?.[0];
     if (!f) return;
     try {
-      const compressed = await imageCompression(f, { maxSizeMB: 0.6, maxWidthOrHeight: 1280, useWebWorker: true });
+      const compressed = await optimizeImage(f, "post");
       const preview = URL.createObjectURL(compressed);
-      dispatch({ type: "set", patch: { imageFile: compressed as File, preview } });
+      dispatch({ type: "set", patch: { imageFile: compressed, preview } });
     } catch {
       toast.error("ছবি প্রস্তুত করা যায়নি");
     }

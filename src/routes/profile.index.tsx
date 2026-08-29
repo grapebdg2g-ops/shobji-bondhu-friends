@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import imageCompression from "browser-image-compression";
 import { toast } from "sonner";
+import { optimizeImage } from "@/lib/image-optimizer";
 import {
   ArrowLeft, Camera, Edit3, Trash2, Power, Pencil, LogOut,
   Bell, Globe, Info, Star, HelpCircle, ChevronRight, MapPin, Plus, BellOff, Settings, Users,
@@ -49,6 +49,7 @@ type ProfileFull = {
   crops: string[];
   role: string;
   avatar_url: string | null;
+  cover_url: string | null;
   bio: string | null;
   posts_count: number;
   exchanges_count: number;
@@ -72,9 +73,11 @@ function ProfilePage() {
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [tab, setTab] = useState<"posts" | "exchanges" | "prices" | "diseases">("posts");
   const [uploading, setUploading] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [createPostOpen, setCreatePostOpen] = useState(false);
   const [postsRefreshKey, setPostsRefreshKey] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
+  const coverFileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     (async () => {
@@ -83,7 +86,7 @@ function ProfilePage() {
       if (!uid) { navigate({ to: "/login" }); return; }
       const { data: p } = await supabase
         .from("profiles")
-        .select("id, name, district, upazila, crops, role, avatar_url, bio, posts_count, exchanges_count, prices_count")
+        .select("id, name, district, upazila, crops, role, avatar_url, cover_url, bio, posts_count, exchanges_count, prices_count")
         .eq("id", uid)
         .maybeSingle();
       const { data: phone } = await supabase.rpc("get_my_phone" as never);
@@ -111,10 +114,10 @@ function ProfilePage() {
     }
     setUploading(true);
     try {
-      const compressed = await imageCompression(f, { maxSizeMB: 0.3, maxWidthOrHeight: 400, useWebWorker: true });
+      const compressed = await optimizeImage(f, "profile");
       const path = `${full.id}/avatar-${Date.now()}.jpg`;
       const { error: upErr } = await supabase.storage.from("avatars").upload(path, compressed, {
-        contentType: "image/jpeg",
+        contentType: compressed.type,
         upsert: true,
       });
       if (upErr) throw upErr;
@@ -129,6 +132,37 @@ function ProfilePage() {
       toast.error("ছবি আপলোড ব্যর্থ");
     } finally {
       setUploading(false);
+    }
+  };
+
+  const onPickCover = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (!f || !full) return;
+    if (!["image/jpeg", "image/png"].includes(f.type)) {
+      toast.error("শুধু JPG/PNG আপলোড করা যাবে");
+      return;
+    }
+    setUploadingCover(true);
+    try {
+      const compressed = await optimizeImage(f, "cover");
+      const path = `${full.id}/cover-${Date.now()}.jpg`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, compressed, {
+        contentType: compressed.type,
+        upsert: true,
+      });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      const url = `${data.publicUrl}?v=${Date.now()}`;
+      const { error: dbErr } = await supabase.from("profiles").update({ cover_url: url }).eq("id", full.id);
+      if (dbErr) throw dbErr;
+      setFull((p) => (p ? { ...p, cover_url: url } : p));
+      await refreshUser();
+      toast.success("কাভার ফটো আপডেট হয়েছে");
+    } catch {
+      toast.error("কাভার ফটো আপলোড ব্যর্থ");
+    } finally {
+      setUploadingCover(false);
     }
   };
 
@@ -168,13 +202,36 @@ function ProfilePage() {
   return (
     <main className="min-h-screen bg-[#F0F2F5] pb-24">
       <header className="bg-white">
-        <div className="relative h-32 overflow-hidden bg-gradient-to-r from-[#2D6A4F] via-[#40916C] to-[#74C69D] sm:h-44">
-          <div className="pointer-events-none absolute -right-8 -top-16 h-48 w-48 rounded-full bg-white/15 blur-2xl" />
-          <div className="pointer-events-none absolute -bottom-20 left-1/3 h-40 w-40 rounded-full bg-[#F4A261]/20 blur-2xl" />
-          <button onClick={() => navigate({ to: "/dashboard" })} aria-label="ফিরে যান" className="absolute left-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur transition hover:bg-black/30">
+        <div className="relative h-32 overflow-hidden bg-gray-100 sm:h-44 group">
+          {full.cover_url ? (
+            <LazyImage src={full.cover_url} alt="" wrapperClassName="h-full w-full" priority />
+          ) : (
+            <div className="h-full w-full bg-gradient-to-r from-[#2D6A4F] via-[#40916C] to-[#74C69D]">
+              <div className="pointer-events-none absolute -right-8 -top-16 h-48 w-48 rounded-full bg-white/15 blur-2xl" />
+              <div className="pointer-events-none absolute -bottom-20 left-1/3 h-40 w-40 rounded-full bg-[#F4A261]/20 blur-2xl" />
+            </div>
+          )}
+          
+          {uploadingCover && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 text-white text-xs font-bold">
+              আপলোড হচ্ছে...
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => coverFileRef.current?.click()}
+            className="absolute bottom-3 right-3 z-10 flex h-9 items-center gap-2 rounded-lg bg-black/40 px-3 text-xs font-bold text-white backdrop-blur transition hover:bg-black/60 active:scale-95"
+          >
+            <Camera className="h-4 w-4" />
+            <span>কাভার পরিবর্তন</span>
+          </button>
+          <input ref={coverFileRef} type="file" accept="image/jpeg,image/png" className="hidden" onChange={onPickCover} />
+
+          <button onClick={() => navigate({ to: "/dashboard" })} aria-label="ফিরে যান" className="absolute left-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur transition hover:bg-black/30">
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <button type="button" onClick={() => setSettingsOpen(true)} aria-label="সেটিংস খুলুন" className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur transition hover:bg-black/30">
+          <button type="button" onClick={() => setSettingsOpen(true)} aria-label="সেটিংস খুলুন" className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur transition hover:bg-black/30">
             <Settings className="h-5 w-5" />
           </button>
         </div>

@@ -13,13 +13,13 @@ import {
   ChevronDown,
   X,
 } from "lucide-react";
-import imageCompression from "browser-image-compression";
 import { toast } from "sonner";
 import { BengaliButton } from "@/components/krishi/bengali-button";
 import { cn } from "@/lib/utils";
 import { analyzeDisease, type DiseaseResult } from "@/lib/disease.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { AI_CROP_LABELS } from "@/lib/crop-options";
+import { optimizeImage, fileToBase64, fileToRawBase64 } from "@/lib/image-optimizer";
 
 export const Route = createFileRoute("/disease-detection")({
   component: DiseaseDetectionPage,
@@ -119,14 +119,9 @@ function DiseaseDetectionPage() {
       return;
     }
     try {
-      const compressed = await imageCompression(file, {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1024,
-        initialQuality: 0.85,
-        useWebWorker: true,
-      });
-      const base64 = await fileToBase64(compressed);
-      const dataUrl = `data:${compressed.type};base64,${base64}`;
+      const compressed = await optimizeImage(file, "disease");
+      const dataUrl = await fileToBase64(compressed);
+      const base64 = await fileToRawBase64(compressed);
       dispatch({ type: "SET_IMAGE", dataUrl, base64, mime: compressed.type });
     } catch (e) {
       console.error(e);
@@ -574,15 +569,4 @@ function ErrorScreen({ message, onRetry }: { message: string; onRetry: () => voi
 }
 
 // ─── Utils ─────────────────────────────────────────────
-
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => {
-      const s = r.result as string;
-      resolve(s.split(",")[1] ?? "");
-    };
-    r.onerror = reject;
-    r.readAsDataURL(file);
-  });
-}
+// fileToBase64 is now imported from @/lib/image-optimizer
