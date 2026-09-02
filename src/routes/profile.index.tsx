@@ -81,17 +81,55 @@ function ProfilePage() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.auth.getSession();
-      const uid = data.session?.user.id;
-      if (!uid) { navigate({ to: "/login" }); return; }
-      const { data: p } = await supabase
-        .from("profiles")
-        .select("id, name, district, upazila, crops, role, avatar_url, cover_url, bio, posts_count, exchanges_count, prices_count")
-        .eq("id", uid)
-        .maybeSingle();
-      const { data: phone } = await supabase.rpc("get_my_phone" as never);
-      setFull(p ? ({ ...(p as object), phone: (phone as string | null) ?? null } as ProfileFull) : null);
-      setLoading(false);
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const uid = sessionData.session?.user.id;
+        if (!uid) {
+          navigate({ to: "/login" });
+          return;
+        }
+
+        // Fetch profile fields safely
+        // We fetch fields individually to handle cases where cover_url might not exist yet
+        const fields = ["id", "name", "district", "upazila", "crops", "role", "avatar_url", "bio", "posts_count", "exchanges_count", "prices_count"];
+        
+        // Try fetching with cover_url first
+        let { data: p, error } = await supabase
+          .from("profiles")
+          .select([...fields, "cover_url"].join(","))
+          .eq("id", uid)
+          .maybeSingle();
+
+        // Fallback if cover_url query fails
+        if (error) {
+          console.warn("Primary profile fetch failed, trying fallback...", error.message);
+          const { data: fallbackP, error: fallbackErr } = await supabase
+            .from("profiles")
+            .select(fields.join(","))
+            .eq("id", uid)
+            .maybeSingle();
+          
+          if (fallbackErr) throw fallbackErr;
+          p = fallbackP;
+        }
+
+        const { data: phone } = await supabase.rpc("get_my_phone" as never);
+        
+        if (p) {
+          setFull({
+            ...(p as any),
+            cover_url: (p as any).cover_url || null,
+            phone: (phone as string | null) ?? null,
+          } as ProfileFull);
+        } else {
+          toast.error("প্রোফাইল তথ্য পাওয়া যায়নি");
+        }
+      } catch (err) {
+        console.error("Profile load error:", err);
+        toast.error("প্রোফাইল লোড করতে সমস্যা হয়েছে");
+      } finally {
+        setLoading(false);
+      }
     })();
   }, [navigate]);
 
@@ -187,12 +225,29 @@ function ProfilePage() {
     setFull((current) => current ? { ...current, posts_count: current.posts_count + 1 } : current);
   };
 
-  if (loading || !full) {
+  if (loading) {
     return (
       <main className="min-h-screen bg-background p-4 space-y-4">
         <Skeleton className="h-48 w-full rounded-2xl" />
         <Skeleton className="h-12 w-full rounded-xl" />
         <Skeleton className="h-40 w-full rounded-2xl" />
+      </main>
+    );
+  }
+
+  if (!full) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center bg-[#F0F2F5] p-4 text-center">
+        <div className="rounded-3xl bg-white p-8 shadow-sm border border-emerald-50">
+          <h2 className="text-xl font-black text-gray-900">প্রোফাইল পাওয়া যায়নি</h2>
+          <p className="mt-2 text-sm text-gray-500">আপনার প্রোফাইল তথ্য লোড করতে সমস্যা হয়েছে।</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-6 rounded-xl bg-emerald-600 px-6 py-2 text-sm font-bold text-white shadow-md active:scale-95 transition-all"
+          >
+            আবার চেষ্টা করুন
+          </button>
+        </div>
       </main>
     );
   }
