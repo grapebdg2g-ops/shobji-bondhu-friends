@@ -1,29 +1,48 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { CROP_FERTILIZERS, type FertilizerDose } from "@/lib/crop-data";
+
+const LevelSchema = z.enum(["low", "medium", "high"]).optional();
 
 const SoilInputSchema = z.object({
   soilType: z.string().min(1),
-  phLevel: z.number().optional(),
-  nitrogen: z.string().optional(), // low, medium, high
-  phosphorus: z.string().optional(),
-  potassium: z.string().optional(),
-  organicMatter: z.string().optional(),
-  lastCrop: z.string().optional(),
-  plannedCrop: z.string().optional(),
+  phLevel: z.number().min(3).max(10).optional(),
+  nitrogen: LevelSchema,
+  phosphorus: LevelSchema,
+  potassium: LevelSchema,
+  organicMatter: LevelSchema,
+  lastCrop: z.string().max(60).optional(),
+  plannedCrop: z.string().max(60).optional(),
+  district: z.string().max(60).optional(),
+  areaValue: z.number().positive().max(10000).optional(),
+  areaUnit: z.enum(["শতক", "বিঘা", "একর", "হেক্টর"]).optional(),
+  irrigation: z.enum(["সেচ সুবিধা আছে", "বৃষ্টিনির্ভর"]).optional(),
 });
+
+export type SoilFertilizerItem = {
+  name: string;
+  amount: string;
+  timing: string;
+};
 
 export type SoilAnalysisResult = {
   healthScore: number; // 0-100
+  scoreLabel: string;
   summary: string;
+  phStatus: { value: number | null; label: string; advice: string };
+  limeAdvice: { needed: boolean; amount: string; note: string };
+  areaLabel: string;
   nutrientStatus: {
     nitrogen: string;
     phosphorus: string;
     potassium: string;
     ph: string;
+    organicMatter: string;
   };
+  computedDoses: { name: string; amount: string; note: string }[];
   recommendations: {
-    fertilizers: { name: string; amount: string; timing: string }[];
+    fertilizers: SoilFertilizerItem[];
     organicAmendments: string[];
     soilManagement: string[];
   };
@@ -31,81 +50,285 @@ export type SoilAnalysisResult = {
   warnings: string[];
 };
 
-const SYSTEM_PROMPT = `তুমি একজন অভিজ্ঞ বাংলাদেশী মৃত্তিকা বিজ্ঞানী (Soil Scientist)। কৃষকের দেওয়া মাটির তথ্য (মাটির ধরন, pH, পুষ্টির মাত্রা) বিশ্লেষণ করে বাংলায় একটি বিস্তারিত রিপোর্ট প্রদান করো।
+// ── Deterministic agronomy helpers ───────────────────────
 
-রিপোর্টটি অবশ্যই নিচের JSON ফরম্যাটে হতে হবে:
+const UNIT_TO_BIGHA: Record<string, number> = {
+  "শতক": 1 / 33,
+  "বিঘা": 1,
+  "একর": 3.03,
+  "হেক্টর": 7.48,
+};
 
-{
-  "healthScore": 0-100,
-  "summary": "মাটির স্বাস্থ্যের একটি সংক্ষিপ্ত সারসংক্ষেপ (২-৩ বাক্য)",
-  "nutrientStatus": {
-    "nitrogen": "নাইট্রোজেনের অবস্থা ও পরামর্শ",
-    "phosphorus": "ফসফরাসের অবস্থা ও পরামর্শ",
-    "potassium": "পটাশিয়ামের অবস্থা ও পরামর্শ",
-    "ph": "pH লেভেলের অবস্থা ও পরামর্শ"
-  },
-  "recommendations": {
-    "fertilizers": [
-      { "name": "সারের নাম", "amount": "পরিমাণ (যেমন: বিঘাপ্রতি কেজি)", "timing": "কখন প্রয়োগ করতে হবে" }
-    ],
-    "organicAmendments": ["জৈব সার বা মাটির উন্নতির উপায় ১", "উপায় ২"],
-    "soilManagement": ["চাষাবাদ পদ্ধতি বা ম্যানেজমেন্ট পরামর্শ ১", "পরামর্শ ২"]
-  },
-  "suitableCrops": ["উপযুক্ত ফসল ১", "ফসল ২", "ফসল ৩"],
-  "warnings": ["সতর্কতা ১ (যদি থাকে)", "সতর্কতা ২"]
+const BN_DIGITS = "০১২৩৪৫৬৭৮৯";
+const toBn = (v: number | string) =>
+  String(v).replace(/\d/g, (d) => BN_DIGITS[Number(d)]);
+
+const round1 = (n: number) => Math.round(n * 10) / 10;
+
+function phInfo(ph?: number) {
+  if (ph == null) {
+    return {
+      label: "অজানা",
+      advice: "নিকটস্থ মৃত্তিকা সম্পদ উন্নয়ন ইনস্টিটিউট (SRDI) ল্যাবে pH পরীক্ষা করিয়ে নিন।",
+      penalty: 8,
+    };
+  }
+  if (ph < 5.0) return { label: "তীব্র অম্লীয়", advice: "চুন প্রয়োগ ছাড়া অধিকাংশ ফসলে ফলন কমবে।", penalty: 30 };
+  if (ph < 5.5) return { label: "অম্লীয়", advice: "ডলোচুন প্রয়োগ করে pH ৬.০–৬.৫ এ আনুন।", penalty: 20 };
+  if (ph < 6.0) return { label: "সামান্য অম্লীয়", advice: "হালকা চুন ও জৈব সার দিলেই যথেষ্ট।", penalty: 8 };
+  if (ph <= 7.5) return { label: "উপযুক্ত", advice: "pH আদর্শ মাত্রায় আছে, বজায় রাখুন।", penalty: 0 };
+  if (ph <= 8.5) return { label: "ক্ষারীয়", advice: "জিপসাম ও জৈব সার প্রয়োগে ক্ষারত্ব কমান।", penalty: 18 };
+  return { label: "তীব্র ক্ষারীয়", advice: "জিপসাম প্রয়োগ ও পর্যাপ্ত সেচে লবণ ধুয়ে ফেলুন।", penalty: 28 };
 }
 
-উত্তর শুধুমাত্র বাংলায় হবে এবং JSON ছাড়া অন্য কোনো টেক্সট থাকবে না।`;
+function limeRecommendation(soilType: string, ph?: number) {
+  if (ph == null || ph >= 6.0) {
+    return {
+      needed: false,
+      amount: "প্রয়োজন নেই",
+      note: ph == null ? "pH জানা গেলে সঠিক চুনের পরিমাণ বলা যাবে।" : "মাটির pH সহনীয় মাত্রায় আছে।",
+    };
+  }
+  const base = ph < 5.0 ? 120 : ph < 5.5 ? 80 : 45; // kg/বিঘা
+  const factor = soilType.includes("এঁটেল") ? 1.3 : soilType.includes("বেলে") ? 0.7 : 1;
+  const kg = Math.round(base * factor);
+  return {
+    needed: true,
+    amount: `${toBn(kg)} কেজি/বিঘা ডলোচুন`,
+    note: "জমি তৈরির ১৫–২০ দিন আগে ছিটিয়ে চাষ দিন; চুন ও সার একসাথে দেবেন না।",
+  };
+}
+
+const LEVEL_FACTOR: Record<string, number> = { low: 1.25, medium: 1, high: 0.75 };
+
+function baseDose(crop?: string): { dose: FertilizerDose; matched: string | null } {
+  if (crop) {
+    const exact = CROP_FERTILIZERS[crop];
+    if (exact) return { dose: exact, matched: crop };
+    const key = Object.keys(CROP_FERTILIZERS).find((k) => k.includes(crop) || crop.includes(k));
+    if (key) return { dose: CROP_FERTILIZERS[key], matched: key };
+  }
+  // BARI general vegetable dose per বিঘা
+  return { dose: { urea: 20, tsp: 10, mop: 12, gypsum: 6, zinc: 1.2, boron: 0.4 }, matched: null };
+}
+
+function computeDoses(data: z.infer<typeof SoilInputSchema>) {
+  const { dose, matched } = baseDose(data.plannedCrop);
+  const bigha = (data.areaValue ?? 1) * (UNIT_TO_BIGHA[data.areaUnit ?? "বিঘা"] ?? 1);
+  const nF = LEVEL_FACTOR[data.nitrogen ?? "medium"] ?? 1;
+  const pF = LEVEL_FACTOR[data.phosphorus ?? "medium"] ?? 1;
+  const kF = LEVEL_FACTOR[data.potassium ?? "medium"] ?? 1;
+  // High organic matter supplies N
+  const omF = data.organicMatter === "high" ? 0.85 : data.organicMatter === "low" ? 1.1 : 1;
+  const sandy = data.soilType.includes("বেলে") ? 1.1 : 1;
+
+  const items = [
+    { name: "ইউরিয়া", kg: dose.urea * nF * omF * sandy, note: "৩ কিস্তিতে ভাগ করে দিন" },
+    { name: "টিএসপি (TSP)", kg: dose.tsp * pF, note: "সম্পূর্ণ শেষ চাষের সময়" },
+    { name: "এমওপি (MoP)", kg: dose.mop * kF * sandy, note: "অর্ধেক বেসাল, বাকি ফুল আসার আগে" },
+    { name: "জিপসাম", kg: dose.gypsum, note: "শেষ চাষের সময় বেসাল ডোজ" },
+    { name: "জিংক সালফেট", kg: dose.zinc, note: "প্রতি ২ বছরে একবার হলেও প্রয়োগ করুন" },
+    ...(dose.boron ? [{ name: "বোরন", kg: dose.boron, note: "ফুল ও ফল ধরার আগে" }] : []),
+    {
+      name: "গোবর/জৈব সার",
+      kg: data.organicMatter === "low" ? 1200 : 800,
+      note: "জমি তৈরির ১৫ দিন আগে",
+    },
+  ];
+
+  const areaLabel =
+    data.areaValue && data.areaUnit
+      ? `${toBn(round1(data.areaValue))} ${data.areaUnit} (≈ ${toBn(round1(bigha))} বিঘা)`
+      : "১ বিঘা";
+
+  return {
+    matched,
+    areaLabel,
+    doses: items.map((i) => ({
+      name: i.name,
+      amount: `${toBn(round1(i.kg * bigha))} কেজি`,
+      note: i.note,
+    })),
+  };
+}
+
+function computeScore(data: z.infer<typeof SoilInputSchema>) {
+  let score = 100;
+  score -= phInfo(data.phLevel).penalty;
+  const drop = (lvl?: string, low = 14, unknown = 5) =>
+    lvl === "low" ? low : lvl === "high" ? 0 : lvl === "medium" ? 4 : unknown;
+  score -= drop(data.nitrogen);
+  score -= drop(data.phosphorus, 12);
+  score -= drop(data.potassium, 12);
+  score -= drop(data.organicMatter, 18, 8);
+  if (data.soilType.includes("বেলে") && !data.soilType.includes("দোআঁশ")) score -= 8;
+  if (data.soilType.includes("দোআঁশ")) score += 5;
+  return Math.max(15, Math.min(98, Math.round(score)));
+}
+
+const scoreLabel = (s: number) =>
+  s >= 80 ? "চমৎকার" : s >= 65 ? "ভালো" : s >= 50 ? "মোটামুটি" : s >= 35 ? "দুর্বল" : "ঝুঁকিপূর্ণ";
+
+// ── Gemini narrative layer ───────────────────────────────
+
+const GEMINI_URL =
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+
+const LEVEL_BN: Record<string, string> = { low: "কম", medium: "মাঝারি", high: "বেশি" };
+
+type Narrative = {
+  summary: string;
+  nutrientStatus: SoilAnalysisResult["nutrientStatus"];
+  organicAmendments: string[];
+  soilManagement: string[];
+  suitableCrops: string[];
+  warnings: string[];
+};
+
+async function callGeminiNarrative(
+  data: z.infer<typeof SoilInputSchema>,
+  score: number,
+  ph: ReturnType<typeof phInfo>,
+  lime: ReturnType<typeof limeRecommendation>,
+  doses: { name: string; amount: string }[],
+): Promise<Narrative | null> {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) return null;
+
+  const system = `তুমি বাংলাদেশ মৃত্তিকা সম্পদ উন্নয়ন ইনস্টিটিউট (SRDI) ও BARI-এর সুপারিশ অনুসরণকারী একজন অভিজ্ঞ মৃত্তিকা বিজ্ঞানী।
+শুদ্ধ প্রমিত বাংলায় বাস্তবসম্মত, কৃষকবান্ধব পরামর্শ দেবে। শুধু JSON দেবে, অন্য কোনো টেক্সট নয়।
+JSON স্কিমা:
+{"summary":"৩-৪ বাক্য","nutrientStatus":{"nitrogen":"","phosphorus":"","potassium":"","ph":"","organicMatter":""},"organicAmendments":["৩-৫টি"],"soilManagement":["৩-৫টি"],"suitableCrops":["৫-৮টি ফসলের নাম"],"warnings":["০-৩টি"]}`;
+
+  const prompt = `মাটির তথ্য:
+- ধরন: ${data.soilType}
+- জেলা: ${data.district ?? "অজানা"}
+- pH: ${data.phLevel ?? "অজানা"} (${ph.label})
+- নাইট্রোজেন: ${LEVEL_BN[data.nitrogen ?? ""] ?? "অজানা"}
+- ফসফরাস: ${LEVEL_BN[data.phosphorus ?? ""] ?? "অজানা"}
+- পটাশিয়াম: ${LEVEL_BN[data.potassium ?? ""] ?? "অজানা"}
+- জৈব উপাদান: ${LEVEL_BN[data.organicMatter ?? ""] ?? "অজানা"}
+- সেচ: ${data.irrigation ?? "অজানা"}
+- আগের ফসল: ${data.lastCrop || "অজানা"}
+- পরিকল্পিত ফসল: ${data.plannedCrop || "অজানা"}
+
+আমাদের হিসাবকৃত ফলাফল (এগুলোর সাথে সাংঘর্ষিক কিছু বলবে না):
+- স্বাস্থ্য স্কোর: ${score}/100
+- চুন: ${lime.needed ? lime.amount : "প্রয়োজন নেই"}
+- সার (মোট জমির জন্য): ${doses.map((d) => `${d.name} ${d.amount}`).join(", ")}
+
+এই তথ্যের ভিত্তিতে JSON রিপোর্ট দাও। suitableCrops-এ চলতি মৌসুমে এই মাটিতে লাভজনক ফসল দাও।`;
+
+  try {
+    const res = await fetch(`${GEMINI_URL}?key=${key}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: system }] },
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.4,
+          maxOutputTokens: 2048,
+          responseMimeType: "application/json",
+        },
+      }),
+    });
+    if (!res.ok) {
+      console.error("Gemini soil error", res.status, await res.text().catch(() => ""));
+      return null;
+    }
+    const json = await res.json();
+    const text: string = json?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) return null;
+    return JSON.parse(match[0]) as Narrative;
+  } catch (err) {
+    console.error("Gemini soil exception", err);
+    return null;
+  }
+}
+
+function fallbackNarrative(
+  data: z.infer<typeof SoilInputSchema>,
+  score: number,
+  ph: ReturnType<typeof phInfo>,
+): Narrative {
+  const lvl = (l?: string, name = "") =>
+    l === "low"
+      ? `${name} কম — সুপারিশকৃত মাত্রার চেয়ে ২৫% বেশি প্রয়োগ করুন।`
+      : l === "high"
+        ? `${name} পর্যাপ্ত — মাত্রা ২৫% কমিয়ে দিন।`
+        : l === "medium"
+          ? `${name} মাঝারি — সুপারিশকৃত মাত্রাই যথেষ্ট।`
+          : `${name} পরীক্ষা করা হয়নি — সাধারণ মাত্রা ধরা হয়েছে।`;
+  return {
+    summary: `${data.soilType} মাটির প্রাথমিক স্বাস্থ্য স্কোর ${toBn(score)}। ${ph.advice} নিয়মিত জৈব সার প্রয়োগে মাটির গুণাগুণ ধরে রাখুন।`,
+    nutrientStatus: {
+      nitrogen: lvl(data.nitrogen, "নাইট্রোজেন"),
+      phosphorus: lvl(data.phosphorus, "ফসফরাস"),
+      potassium: lvl(data.potassium, "পটাশিয়াম"),
+      ph: `${ph.label} — ${ph.advice}`,
+      organicMatter: lvl(data.organicMatter, "জৈব উপাদান"),
+    },
+    organicAmendments: [
+      "প্রতি বিঘায় ৮০০–১২০০ কেজি পচা গোবর বা কম্পোস্ট দিন",
+      "ট্রাইকো-কম্পোস্ট ব্যবহারে রোগবালাই কমে ও ইউরিয়া ৩৫% সাশ্রয় হয়",
+      "ধৈঞ্চা বা শনপাট চাষ করে সবুজ সার হিসেবে মাটিতে মিশিয়ে দিন",
+    ],
+    soilManagement: [
+      "একই জমিতে বছরের পর বছর একই ফসল না করে শস্য পর্যায় অনুসরণ করুন",
+      "জমিতে পানি জমতে দেবেন না, নিকাশ নালা রাখুন",
+      "ফসলের অবশিষ্টাংশ পুড়িয়ে না ফেলে মাটিতে মিশিয়ে দিন",
+    ],
+    suitableCrops: data.soilType.includes("বেলে")
+      ? ["আলু", "বাদাম", "তরমুজ", "মিষ্টি আলু", "পেঁয়াজ"]
+      : data.soilType.includes("এঁটেল")
+        ? ["ধান", "পাট", "গম", "ভুট্টা"]
+        : ["ধান", "টমেটো", "আলু", "বেগুন", "মরিচ", "ফুলকপি"],
+    warnings: ph.penalty >= 18 ? ["pH সংশোধন না করে অতিরিক্ত রাসায়নিক সার দিলে অর্থ অপচয় হবে।"] : [],
+  };
+}
 
 export const analyzeSoil = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => SoilInputSchema.parse(d))
-  .handler(async ({ data, context }): Promise<SoilAnalysisResult> => {
-    const apiKey = process.env.NEXT_PUBLIC_KIMI_API_KEY;
-    if (!apiKey) throw new Error("Kimi API key অনুপস্থিত");
+  .handler(async ({ data }): Promise<SoilAnalysisResult> => {
+    const ph = phInfo(data.phLevel);
+    const lime = limeRecommendation(data.soilType, data.phLevel);
+    const score = computeScore(data);
+    const { doses, areaLabel, matched } = computeDoses(data);
 
-    const prompt = `
-মাটির তথ্য:
-- ধরন: ${data.soilType}
-- pH লেভেল: ${data.phLevel ?? "অজানা"}
-- নাইট্রোজেন (N): ${data.nitrogen ?? "অজানা"}
-- ফসফরাস (P): ${data.phosphorus ?? "অজানা"}
-- পটাশিয়াম (K): ${data.potassium ?? "অজানা"}
-- জৈব উপাদান: ${data.organicMatter ?? "অজানা"}
-- আগের ফসল: ${data.lastCrop ?? "অজানা"}
-- পরিকল্পিত ফসল: ${data.plannedCrop ?? "অজানা"}
+    const narrative =
+      (await callGeminiNarrative(data, score, ph, lime, doses)) ?? fallbackNarrative(data, score, ph);
 
-এই তথ্যগুলো বিশ্লেষণ করে মাটির স্বাস্থ্যের রিপোর্ট এবং সারের সুপারিশ প্রদান করো।`;
+    const timings: Record<string, string> = Object.fromEntries(doses.map((d) => [d.name, d.note]));
 
-    const res = await fetch("https://api.moonshot.ai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
+    return {
+      healthScore: score,
+      scoreLabel: scoreLabel(score),
+      summary: narrative.summary,
+      phStatus: { value: data.phLevel ?? null, label: ph.label, advice: ph.advice },
+      limeAdvice: lime,
+      areaLabel,
+      nutrientStatus: narrative.nutrientStatus,
+      computedDoses: doses,
+      recommendations: {
+        fertilizers: doses.map((d) => ({
+          name: d.name,
+          amount: `${d.amount} (${areaLabel})`,
+          timing: timings[d.name] ?? "",
+        })),
+        organicAmendments: narrative.organicAmendments ?? [],
+        soilManagement: narrative.soilManagement ?? [],
       },
-      body: JSON.stringify({
-        model: "kimi-latest",
-        temperature: 0.3,
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: prompt },
-        ],
-      }),
-    });
-
-    if (!res.ok) {
-      throw new Error(`API ত্রুটি (${res.status})`);
-    }
-
-    const json = await res.json();
-    const content = json.choices?.[0]?.message?.content ?? "";
-
-    try {
-      return JSON.parse(content);
-    } catch {
-      const match = content.match(/\{[\s\S]*\}/);
-      if (match) return JSON.parse(match[0]);
-      throw new Error("ফলাফল প্রসেস করা যায়নি");
-    }
+      suitableCrops: narrative.suitableCrops ?? [],
+      warnings: [
+        ...(narrative.warnings ?? []),
+        ...(matched
+          ? []
+          : data.plannedCrop
+            ? [`"${data.plannedCrop}" ফসলের নির্দিষ্ট সুপারিশ না থাকায় সাধারণ সবজির মাত্রা ধরা হয়েছে।`]
+            : []),
+      ],
+    };
   });
