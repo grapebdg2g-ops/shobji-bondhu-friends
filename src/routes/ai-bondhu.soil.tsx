@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   FlaskConical,
@@ -17,9 +17,19 @@ import {
   Ruler,
   Copy,
   RefreshCw,
+  Camera,
+  FileText,
+  Upload,
+  X,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { analyzeSoil, type SoilAnalysisResult } from "@/lib/soil.functions";
+import {
+  analyzeSoil,
+  extractSoilReport,
+  type SoilAnalysisResult,
+  type SoilExtraction,
+} from "@/lib/soil.functions";
 import { BengaliButton } from "@/components/krishi/bengali-button";
 import { MASTER_CROP_LABELS } from "@/lib/crop-options";
 import { useUser } from "@/contexts/user-context";
