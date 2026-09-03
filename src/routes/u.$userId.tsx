@@ -91,7 +91,8 @@ function PublicProfilePage() {
             .maybeSingle();
           
           if (fallbackErr) throw fallbackErr;
-          data = fallbackData;
+          // Fallback lacks cover_url — normalize it so the shapes match
+          data = (fallbackData ? { ...fallbackData, cover_url: null } : null) as typeof data;
         }
 
         if (cancelled) return;
