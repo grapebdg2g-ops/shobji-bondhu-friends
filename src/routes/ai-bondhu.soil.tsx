@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   FlaskConical,
@@ -17,9 +17,19 @@ import {
   Ruler,
   Copy,
   RefreshCw,
+  Camera,
+  FileText,
+  Upload,
+  X,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { analyzeSoil, type SoilAnalysisResult } from "@/lib/soil.functions";
+import {
+  analyzeSoil,
+  extractSoilReport,
+  type SoilAnalysisResult,
+  type SoilExtraction,
+} from "@/lib/soil.functions";
 import { BengaliButton } from "@/components/krishi/bengali-button";
 import { MASTER_CROP_LABELS } from "@/lib/crop-options";
 import { useUser } from "@/contexts/user-context";
@@ -74,12 +84,26 @@ function scoreColor(score: number) {
   return { ring: "text-red-500", bg: "bg-red-500", soft: "bg-red-50" };
 }
 
+function readFileAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
+    reader.onerror = () => reject(new Error("ফাইলটি পড়া যায়নি"));
+    reader.readAsDataURL(file);
+  });
+}
+
 function SoilAnalysisPage() {
   const navigate = useNavigate();
   const { user } = useUser();
   const analyzeFn = useServerFn(analyzeSoil);
+  const extractFn = useServerFn(extractSoilReport);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [extracting, setExtracting] = useState(false);
   const [result, setResult] = useState<SoilAnalysisResult | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [extractionNotes, setExtractionNotes] = useState<string[]>([]);
 
   const [soilType, setSoilType] = useState("");
   const [phLevel, setPhLevel] = useState<number | null>(null);
@@ -100,6 +124,64 @@ function SoilAnalysisPage() {
   }, [areaValue]);
 
   const level = (v: string) => (v === "unknown" ? undefined : (v as "low" | "medium" | "high"));
+
+  const handleFiles = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(event.target.files ?? []);
+    event.target.value = "";
+    if (selected.length === 0) return;
+    const invalid = selected.find(
+      (file) => !file.type.startsWith("image/") && file.type !== "application/pdf",
+    );
+    if (invalid) {
+      toast.error("শুধু JPG, PNG বা PDF ফাইল আপলোড করুন");
+      return;
+    }
+    if (selected.some((file) => file.size > 10 * 1024 * 1024)) {
+      toast.error("প্রতিটি ফাইল ১০ মেগাবাইটের কম হতে হবে");
+      return;
+    }
+    const nextFiles = [...uploadedFiles, ...selected].slice(0, 3);
+    if (uploadedFiles.length + selected.length > 3) {
+      toast.error("সর্বোচ্চ ৩টি ছবি বা রিপোর্ট আপলোড করা যাবে");
+    }
+    setUploadedFiles(nextFiles);
+    setExtractionNotes([]);
+    setExtracting(true);
+    try {
+      const files = await Promise.all(nextFiles.map(async (file) => ({
+        name: file.name,
+        mimeType: file.type,
+        data: (await readFileAsBase64(file)).split(",")[1] ?? "",
+      })));
+      const extracted = await extractFn({ data: { files } });
+      applyExtraction(extracted);
+      setExtractionNotes(extracted.notes);
+      toast.success("রিপোর্টের তথ্য ফর্মে বসানো হয়েছে — প্রয়োজনে যাচাই করে নিন");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "ফাইল পড়া যায়নি, আবার চেষ্টা করুন");
+    } finally {
+      setExtracting(false);
+    }
+  };
+
+  const applyExtraction = (extracted: SoilExtraction) => {
+    if (extracted.soilType && SOIL_TYPES.some((item) => item.name === extracted.soilType)) {
+      setSoilType(extracted.soilType);
+    }
+    if (extracted.phLevel != null) setPhLevel(extracted.phLevel);
+    if (extracted.nitrogen) setNitrogen(extracted.nitrogen);
+    if (extracted.phosphorus) setPhosphorus(extracted.phosphorus);
+    if (extracted.potassium) setPotassium(extracted.potassium);
+    if (extracted.organicMatter) setOrganicMatter(extracted.organicMatter);
+    if (extracted.plannedCrop && MASTER_CROP_LABELS.includes(extracted.plannedCrop)) {
+      setPlannedCrop(extracted.plannedCrop);
+    }
+  };
+
+  const removeFile = (name: string) => {
+    setUploadedFiles((files) => files.filter((file) => file.name !== name));
+    setExtractionNotes([]);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -194,6 +276,55 @@ function SoilAnalysisPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5 pb-6">
+              <Card icon={Upload} title="ছবি বা রিপোর্ট দিয়ে শুরু করুন">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,application/pdf"
+                  multiple
+                  onChange={handleFiles}
+                  className="sr-only"
+                  aria-label="মাটি নমুনার ছবি বা রিপোর্ট আপলোড করুন"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={extracting || uploadedFiles.length >= 3}
+                  className="flex w-full items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-emerald-200 bg-emerald-50/60 px-4 py-5 text-left transition hover:border-emerald-400 disabled:opacity-60"
+                >
+                  {extracting ? <Loader2 className="h-6 w-6 animate-spin text-emerald-600" /> : <Camera className="h-6 w-6 text-emerald-600" />}
+                  <span>
+                    <span className="block text-sm font-black text-emerald-900">
+                      {extracting ? "রিপোর্ট পড়া হচ্ছে..." : "মাটির ছবি বা রিপোর্ট আপলোড করুন"}
+                    </span>
+                    <span className="mt-1 block text-[11px] text-emerald-700">
+                      JPG, PNG বা PDF · সর্বোচ্চ ৩টি · প্রতিটি ১০ MB-এর মধ্যে
+                    </span>
+                  </span>
+                </button>
+                {uploadedFiles.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    {uploadedFiles.map((file) => (
+                      <div key={`${file.name}-${file.lastModified}`} className="flex items-center gap-2 rounded-xl bg-gray-50 px-3 py-2 text-xs">
+                        {file.type === "application/pdf" ? <FileText className="h-4 w-4 text-red-500" /> : <Camera className="h-4 w-4 text-emerald-600" />}
+                        <span className="min-w-0 flex-1 truncate font-bold text-gray-700">{file.name}</span>
+                        <button type="button" onClick={() => removeFile(file.name)} className="rounded-full p-1 text-gray-400 hover:bg-white hover:text-red-500" aria-label={`${file.name} সরান`}>
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {extractionNotes.length > 0 && (
+                  <div className="mt-3 rounded-xl bg-amber-50 p-3 text-[11px] leading-relaxed text-amber-800">
+                    <p className="font-black">AI-এর পড়া তথ্য যাচাই করুন</p>
+                    <ul className="mt-1 list-disc space-y-0.5 pl-4">
+                      {extractionNotes.map((note, index) => <li key={`${note}-${index}`}>{note}</li>)}
+                    </ul>
+                  </div>
+                )}
+              </Card>
+
               {/* Soil type */}
               <Card icon={Mountain} title="মাটির ধরন *">
                 <div className="grid grid-cols-2 gap-2">
