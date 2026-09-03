@@ -88,8 +88,13 @@ function SoilAnalysisPage() {
   const navigate = useNavigate();
   const { user } = useUser();
   const analyzeFn = useServerFn(analyzeSoil);
+  const extractFn = useServerFn(extractSoilReport);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [extracting, setExtracting] = useState(false);
   const [result, setResult] = useState<SoilAnalysisResult | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [extractionNotes, setExtractionNotes] = useState<string[]>([]);
 
   const [soilType, setSoilType] = useState("");
   const [phLevel, setPhLevel] = useState<number | null>(null);
