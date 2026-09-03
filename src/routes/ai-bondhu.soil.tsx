@@ -116,6 +116,64 @@ function SoilAnalysisPage() {
 
   const level = (v: string) => (v === "unknown" ? undefined : (v as "low" | "medium" | "high"));
 
+  const handleFiles = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(event.target.files ?? []);
+    event.target.value = "";
+    if (selected.length === 0) return;
+    const invalid = selected.find(
+      (file) => !file.type.startsWith("image/") && file.type !== "application/pdf",
+    );
+    if (invalid) {
+      toast.error("শুধু JPG, PNG বা PDF ফাইল আপলোড করুন");
+      return;
+    }
+    if (selected.some((file) => file.size > 10 * 1024 * 1024)) {
+      toast.error("প্রতিটি ফাইল ১০ মেগাবাইটের কম হতে হবে");
+      return;
+    }
+    const nextFiles = [...uploadedFiles, ...selected].slice(0, 3);
+    if (uploadedFiles.length + selected.length > 3) {
+      toast.error("সর্বোচ্চ ৩টি ছবি বা রিপোর্ট আপলোড করা যাবে");
+    }
+    setUploadedFiles(nextFiles);
+    setExtractionNotes([]);
+    setExtracting(true);
+    try {
+      const files = await Promise.all(nextFiles.map(async (file) => ({
+        name: file.name,
+        mimeType: file.type,
+        data: (await readFileAsBase64(file)).split(",")[1] ?? "",
+      })));
+      const extracted = await extractFn({ data: { files } });
+      applyExtraction(extracted);
+      setExtractionNotes(extracted.notes);
+      toast.success("রিপোর্টের তথ্য ফর্মে বসানো হয়েছে — প্রয়োজনে যাচাই করে নিন");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "ফাইল পড়া যায়নি, আবার চেষ্টা করুন");
+    } finally {
+      setExtracting(false);
+    }
+  };
+
+  const applyExtraction = (extracted: SoilExtraction) => {
+    if (extracted.soilType && SOIL_TYPES.some((item) => item.name === extracted.soilType)) {
+      setSoilType(extracted.soilType);
+    }
+    if (extracted.phLevel != null) setPhLevel(extracted.phLevel);
+    if (extracted.nitrogen) setNitrogen(extracted.nitrogen);
+    if (extracted.phosphorus) setPhosphorus(extracted.phosphorus);
+    if (extracted.potassium) setPotassium(extracted.potassium);
+    if (extracted.organicMatter) setOrganicMatter(extracted.organicMatter);
+    if (extracted.plannedCrop && MASTER_CROP_LABELS.includes(extracted.plannedCrop)) {
+      setPlannedCrop(extracted.plannedCrop);
+    }
+  };
+
+  const removeFile = (name: string) => {
+    setUploadedFiles((files) => files.filter((file) => file.name !== name));
+    setExtractionNotes([]);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!soilType) {
