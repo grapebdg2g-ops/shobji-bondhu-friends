@@ -332,3 +332,128 @@ export const analyzeSoil = createServerFn({ method: "POST" })
       ],
     };
   });
+
+// ── মাটি পরীক্ষার রিপোর্ট / ছবি থেকে তথ্য বের করা ─────────
+
+const SoilFileSchema = z.object({
+  files: z
+    .array(
+      z.object({
+        mimeType: z.string().min(3).max(120),
+        data: z.string().min(50), // base64, no data: prefix
+        name: z.string().max(200).optional(),
+      }),
+    )
+    .min(1)
+    .max(3),
+});
+
+export type SoilExtraction = {
+  soilType?: string;
+  phLevel?: number;
+  nitrogen?: "low" | "medium" | "high";
+  phosphorus?: "low" | "medium" | "high";
+  potassium?: "low" | "medium" | "high";
+  organicMatter?: "low" | "medium" | "high";
+  plannedCrop?: string;
+  notes: string[];
+  confidence: "high" | "medium" | "low";
+};
+
+export const extractSoilReport = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => SoilFileSchema.parse(d))
+  .handler(async ({ data }): Promise<SoilExtraction> => {
+    const key = process.env.GEMINI_API_KEY;
+    if (!key) throw new Error("AI সেবা এখন কনফিগার করা নেই।");
+
+    const totalBytes = data.files.reduce((s, f) => s + Math.floor((f.data.length * 3) / 4), 0);
+    if (totalBytes > 12 * 1024 * 1024) {
+      throw new Error("ফাইলের আকার অনেক বড় — ১০ মেগাবাইটের কম ফাইল দিন।");
+    }
+
+    const system = `তুমি বাংলাদেশের SRDI মাটি পরীক্ষার রিপোর্ট পড়তে দক্ষ একজন মৃত্তিকা বিজ্ঞানী।
+ব্যবহারকারী মাটি পরীক্ষার রিপোর্ট (ছবি/PDF) অথবা মাটির নমুনার ছবি দেবে।
+রিপোর্ট হলে: pH, জৈব পদার্থ (%), N, P, K মান পড়ে মাত্রা নির্ধারণ করো।
+শুধু মাটির ছবি হলে: রঙ ও গঠন দেখে মাটির ধরন অনুমান করো, confidence "low" দাও এবং notes-এ পরীক্ষাগারে পরীক্ষার পরামর্শ দাও।
+মান রূপান্তরের নিয়ম: জৈব পদার্থ <1.7% = low, 1.7–3.4% = medium, >3.4% = high।
+কোনো তথ্য না পেলে সেই ফিল্ড বাদ দাও — অনুমান করে বানিয়ে লিখো না।
+শুধু JSON দেবে, অন্য কিছু নয়।
+স্কিমা:
+{
+  "soilType": "দোআঁশ | এঁটেল | বেলে | বেলে-দোআঁশ | এঁটেল-দোআঁশ | পলি",
+  "phLevel": 6.2,
+  "nitrogen": "low|medium|high",
+  "phosphorus": "low|medium|high",
+  "potassium": "low|medium|high",
+  "organicMatter": "low|medium|high",
+  "plannedCrop": "রিপোর্টে সুপারিশকৃত ফসল থাকলে",
+  "notes": ["বাংলায় ২-৪টি সংক্ষিপ্ত পর্যবেক্ষণ"],
+  "confidence": "high|medium|low"
+}`;
+
+    const parts: any[] = [
+      { text: "এই ফাইল/ছবি থেকে মাটির তথ্য বের করে JSON দাও।" },
+      ...data.files.map((f) => ({
+        inline_data: { mime_type: f.mimeType, data: f.data },
+      })),
+    ];
+
+    let json: any;
+    try {
+      const res = await fetch(`${GEMINI_URL}?key=${key}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: system }] },
+          contents: [{ role: "user", parts }],
+          generationConfig: {
+            temperature: 0.2,
+            maxOutputTokens: 1024,
+            responseMimeType: "application/json",
+          },
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        console.error("Gemini soil extract error", res.status, body);
+        if (res.status === 429) throw new Error("এখন অনুরোধ বেশি, একটু পরে আবার চেষ্টা করুন।");
+        throw new Error("ফাইলটি পড়া যায়নি, পরিষ্কার ছবি দিয়ে আবার চেষ্টা করুন।");
+      }
+      json = await res.json();
+    } catch (err) {
+      if (err instanceof Error && err.message.includes("চেষ্টা")) throw err;
+      console.error("Gemini soil extract exception", err);
+      throw new Error("ফাইল বিশ্লেষণে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
+    }
+
+    const text: string = json?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error("ফাইল থেকে মাটির তথ্য পাওয়া যায়নি।");
+
+    let parsed: any;
+    try {
+      parsed = JSON.parse(match[0]);
+    } catch {
+      throw new Error("ফাইল থেকে মাটির তথ্য পাওয়া যায়নি।");
+    }
+
+    const lvl = (v: unknown) =>
+      v === "low" || v === "medium" || v === "high" ? v : undefined;
+    const ph = Number(parsed?.phLevel);
+
+    return {
+      soilType: typeof parsed?.soilType === "string" ? parsed.soilType : undefined,
+      phLevel: Number.isFinite(ph) && ph >= 3 && ph <= 10 ? Math.round(ph * 10) / 10 : undefined,
+      nitrogen: lvl(parsed?.nitrogen),
+      phosphorus: lvl(parsed?.phosphorus),
+      potassium: lvl(parsed?.potassium),
+      organicMatter: lvl(parsed?.organicMatter),
+      plannedCrop: typeof parsed?.plannedCrop === "string" ? parsed.plannedCrop : undefined,
+      notes: Array.isArray(parsed?.notes)
+        ? parsed.notes.filter((n: unknown) => typeof n === "string").slice(0, 5)
+        : [],
+      confidence:
+        parsed?.confidence === "high" || parsed?.confidence === "low" ? parsed.confidence : "medium",
+    };
+  });
