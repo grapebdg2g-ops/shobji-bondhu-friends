@@ -84,6 +84,15 @@ function scoreColor(score: number) {
   return { ring: "text-red-500", bg: "bg-red-500", soft: "bg-red-50" };
 }
 
+function readFileAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
+    reader.onerror = () => reject(new Error("ফাইলটি পড়া যায়নি"));
+    reader.readAsDataURL(file);
+  });
+}
+
 function SoilAnalysisPage() {
   const navigate = useNavigate();
   const { user } = useUser();
