@@ -276,6 +276,55 @@ function SoilAnalysisPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5 pb-6">
+              <Card icon={Upload} title="ছবি বা রিপোর্ট দিয়ে শুরু করুন">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,application/pdf"
+                  multiple
+                  onChange={handleFiles}
+                  className="sr-only"
+                  aria-label="মাটি নমুনার ছবি বা রিপোর্ট আপলোড করুন"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={extracting || uploadedFiles.length >= 3}
+                  className="flex w-full items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-emerald-200 bg-emerald-50/60 px-4 py-5 text-left transition hover:border-emerald-400 disabled:opacity-60"
+                >
+                  {extracting ? <Loader2 className="h-6 w-6 animate-spin text-emerald-600" /> : <Camera className="h-6 w-6 text-emerald-600" />}
+                  <span>
+                    <span className="block text-sm font-black text-emerald-900">
+                      {extracting ? "রিপোর্ট পড়া হচ্ছে..." : "মাটির ছবি বা রিপোর্ট আপলোড করুন"}
+                    </span>
+                    <span className="mt-1 block text-[11px] text-emerald-700">
+                      JPG, PNG বা PDF · সর্বোচ্চ ৩টি · প্রতিটি ১০ MB-এর মধ্যে
+                    </span>
+                  </span>
+                </button>
+                {uploadedFiles.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    {uploadedFiles.map((file) => (
+                      <div key={`${file.name}-${file.lastModified}`} className="flex items-center gap-2 rounded-xl bg-gray-50 px-3 py-2 text-xs">
+                        {file.type === "application/pdf" ? <FileText className="h-4 w-4 text-red-500" /> : <Camera className="h-4 w-4 text-emerald-600" />}
+                        <span className="min-w-0 flex-1 truncate font-bold text-gray-700">{file.name}</span>
+                        <button type="button" onClick={() => removeFile(file.name)} className="rounded-full p-1 text-gray-400 hover:bg-white hover:text-red-500" aria-label={`${file.name} সরান`}>
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {extractionNotes.length > 0 && (
+                  <div className="mt-3 rounded-xl bg-amber-50 p-3 text-[11px] leading-relaxed text-amber-800">
+                    <p className="font-black">AI-এর পড়া তথ্য যাচাই করুন</p>
+                    <ul className="mt-1 list-disc space-y-0.5 pl-4">
+                      {extractionNotes.map((note, index) => <li key={`${note}-${index}`}>{note}</li>)}
+                    </ul>
+                  </div>
+                )}
+              </Card>
+
               {/* Soil type */}
               <Card icon={Mountain} title="মাটির ধরন *">
                 <div className="grid grid-cols-2 gap-2">
