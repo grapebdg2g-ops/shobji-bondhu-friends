@@ -12,6 +12,12 @@ const SoilInputSchema = z.object({
   phosphorus: LevelSchema,
   potassium: LevelSchema,
   organicMatter: LevelSchema,
+  sulfur: LevelSchema,
+  zincLevel: LevelSchema,
+  boronLevel: LevelSchema,
+  calcium: LevelSchema,
+  magnesium: LevelSchema,
+  ecValue: z.number().min(0).max(40).optional(), // dS/m
   lastCrop: z.string().max(60).optional(),
   plannedCrop: z.string().max(60).optional(),
   district: z.string().max(60).optional(),
@@ -32,6 +38,15 @@ export type SoilAnalysisResult = {
   summary: string;
   phStatus: { value: number | null; label: string; advice: string };
   limeAdvice: { needed: boolean; amount: string; note: string };
+  salinity: {
+    value: number | null;
+    label: string;
+    severity: "none" | "slight" | "moderate" | "high" | "unknown";
+    advice: string;
+    actions: string[];
+    tolerantCrops: string[];
+  };
+  secondaryNutrients: { name: string; status: string; dose: string; note: string }[];
   areaLabel: string;
   nutrientStatus: {
     nitrogen: string;
@@ -49,6 +64,7 @@ export type SoilAnalysisResult = {
   suitableCrops: string[];
   warnings: string[];
 };
+
 
 // ── Deterministic agronomy helpers ───────────────────────
 
@@ -99,6 +115,153 @@ function limeRecommendation(soilType: string, ph?: number) {
   };
 }
 
+// ── লবণাক্ততা (EC) ───────────────────────────────────────
+const SALT_TOLERANT_CROPS = [
+  "বার্লি", "সরিষা", "সূর্যমুখী", "খেসারি", "গম (বিনা গম-১)",
+  "লবণসহিষ্ণু ধান (ব্রি ধান৪৭/৬৭/৯৭/৯৯)", "মিষ্টি আলু", "টমেটো (BINA টমেটো-১০)",
+];
+
+function salinityInfo(ec?: number): SoilAnalysisResult["salinity"] {
+  if (ec == null) {
+    return {
+      value: null,
+      label: "পরীক্ষা করা হয়নি",
+      severity: "unknown",
+      advice:
+        "রিপোর্টে EC (ডিএস/মিটার) থাকলে বসিয়ে দিন — উপকূলীয় বা সেচের পানিতে লবণ থাকলে এটি জরুরি।",
+      actions: [],
+      tolerantCrops: [],
+    };
+  }
+  const base = [
+    "সেচের পানি মিষ্টি (কম লবণাক্ত) উৎস থেকে নিন, প্রয়োজনে বৃষ্টির পানি সংরক্ষণ করুন।",
+    "জমিতে ভালো নিকাশ নালা রাখুন যাতে লবণ ধুয়ে বেরিয়ে যেতে পারে।",
+  ];
+  if (ec < 2)
+    return {
+      value: ec,
+      label: "স্বাভাবিক",
+      severity: "none",
+      advice: "মাটিতে ক্ষতিকর লবণাক্ততা নেই, স্বাভাবিকভাবে চাষ করুন।",
+      actions: ["বছরে একবার EC পরীক্ষা করিয়ে নজরে রাখুন।"],
+      tolerantCrops: [],
+    };
+  if (ec < 4)
+    return {
+      value: ec,
+      label: "সামান্য লবণাক্ত",
+      severity: "slight",
+      advice:
+        "সংবেদনশীল ফসলে (ডাল, পেঁয়াজ, শিম) ১০–১৫% ফলন কমতে পারে; জৈব সার ও মালচিং দিয়ে সামলানো যাবে।",
+      actions: [
+        ...base,
+        "প্রতি বিঘায় ৮০০–১০০০ কেজি পচা গোবর/কম্পোস্ট দিন — লবণের প্রভাব কমে।",
+        "খড় বা কচুরিপানা দিয়ে মালচিং করুন, উপরিভাগে লবণ জমা কমবে।",
+        "MoP-এর একটি অংশ কমিয়ে সালফেট অব পটাশ (SOP) ব্যবহার করুন।",
+      ],
+      tolerantCrops: SALT_TOLERANT_CROPS.slice(0, 5),
+    };
+  if (ec < 8)
+    return {
+      value: ec,
+      label: "মাঝারি লবণাক্ত",
+      severity: "moderate",
+      advice:
+        "অধিকাংশ সবজিতে ২৫–৫০% ফলন কমবে — লবণ ধোয়ানো (লিচিং) ও লবণসহিষ্ণু জাত ছাড়া চাষ ঝুঁকিপূর্ণ।",
+      actions: [
+        "বর্ষার আগে/শুরুতে জমিতে ৮–১০ সেমি পানি দাঁড় করিয়ে ২–৩ বার ধুয়ে (লিচিং) নিকাশ করে দিন।",
+        "প্রতি বিঘায় ৮০–১০০ কেজি জিপসাম দিন (সোডিয়াম সরিয়ে ক্যালশিয়াম বসায়)।",
+        ...base,
+        "উঁচু বেড/আইল করে বেডের কিনারায় নয়, মাঝখানে চারা লাগান — কিনারায় লবণ জমে।",
+        "ইউরিয়া ভাগ করে অল্প অল্প করে দিন; একসাথে বেশি সার দিলে লবণাক্ততা বাড়ে।",
+      ],
+      tolerantCrops: SALT_TOLERANT_CROPS,
+    };
+  return {
+    value: ec,
+    label: "তীব্র লবণাক্ত",
+    severity: "high",
+    advice:
+      "সাধারণ ফসল টিকবে না। আগে লবণ ধোয়ানো ও জিপসাম প্রয়োগ করে মাটি সংশোধন করতে হবে।",
+    actions: [
+      "প্রতি বিঘায় ১২০–১৫০ কেজি জিপসাম প্রয়োগ করে ভালোভাবে চাষ দিন, তারপর পানি দিয়ে ধুয়ে নিন।",
+      "টানা ২–৩ দফা লিচিং করে নিকাশ নালা দিয়ে লবণ পানি বের করে দিন।",
+      "চুন প্রয়োগ করবেন না (pH বেশি হলে) — জিপসামই সঠিক সংশোধক।",
+      ...base,
+      "এক মৌসুম ধৈঞ্চা/সবুজ সার চাষ করে মাটিতে মিশিয়ে দিন।",
+      "নিকটস্থ উপজেলা কৃষি অফিস বা SRDI-এর পরামর্শ নিয়ে ফসল নির্বাচন করুন।",
+    ],
+    tolerantCrops: SALT_TOLERANT_CROPS,
+  };
+}
+
+// ── ক্যালশিয়াম ও ম্যাগনেসিয়াম ─────────────────────────
+function secondaryNutrientPlan(data: z.infer<typeof SoilInputSchema>, bigha: number) {
+  const amount = (kgPerBigha: number) => `${toBn(round1(kgPerBigha * bigha))} কেজি`;
+  const items: SoilAnalysisResult["secondaryNutrients"] = [];
+
+  // ক্যালশিয়াম
+  const ca = data.calcium;
+  const ph = data.phLevel;
+  if (ca === "high") {
+    items.push({
+      name: "ক্যালশিয়াম (Ca)",
+      status: "পর্যাপ্ত",
+      dose: "আলাদা প্রয়োগ লাগবে না",
+      note: "অতিরিক্ত চুন দিলে জিংক ও বোরন গ্রহণ ব্যাহত হবে।",
+    });
+  } else {
+    const acidic = ph != null && ph < 6.0;
+    const perBigha = ca === "low" ? (acidic ? 100 : 60) : acidic ? 60 : 35;
+    items.push({
+      name: "ক্যালশিয়াম (Ca)",
+      status: ca === "low" ? "কম" : ca === "medium" ? "মাঝারি" : "পরীক্ষা হয়নি",
+      dose: acidic
+        ? `${amount(perBigha)} কৃষি চুন/ডলোচুন`
+        : `${amount(perBigha)} জিপসাম (ক্যালশিয়াম সালফেট)`,
+      note: acidic
+        ? "pH কম, তাই চুন দিলেই ক্যালশিয়াম ও অম্লত্ব দুটোই ঠিক হবে — জমি তৈরির ১৫–২০ দিন আগে দিন।"
+        : "pH ঠিক আছে, তাই চুন নয় — জিপসাম দিলে pH না বাড়িয়েই ক্যালশিয়াম ও গন্ধক মিলবে।",
+    });
+  }
+
+  // ম্যাগনেসিয়াম
+  const mg = data.magnesium;
+  if (mg === "high") {
+    items.push({
+      name: "ম্যাগনেসিয়াম (Mg)",
+      status: "পর্যাপ্ত",
+      dose: "আলাদা প্রয়োগ লাগবে না",
+      note: "ডলোচুন এড়িয়ে সাধারণ কৃষি চুন ব্যবহার করুন।",
+    });
+  } else {
+    const perBigha = mg === "low" ? 14 : mg === "medium" ? 8 : 7;
+    items.push({
+      name: "ম্যাগনেসিয়াম (Mg)",
+      status: mg === "low" ? "কম" : mg === "medium" ? "মাঝারি" : "পরীক্ষা হয়নি",
+      dose: `${amount(perBigha)} ম্যাগনেসিয়াম সালফেট`,
+      note:
+        (ph != null && ph < 6.0
+          ? "চুন হিসেবে ডলোচুন নিলে অতিরিক্ত ম্যাগনেসিয়াম এমনিতেই মিলবে। "
+          : "") +
+        "শেষ চাষের সময় বেসাল দিন; পাতা হলুদ হলে ২% ম্যাগনেসিয়াম সালফেট স্প্রে করুন।",
+    });
+  }
+
+  // গন্ধক
+  if (data.sulfur && data.sulfur !== "high") {
+    items.push({
+      name: "গন্ধক (S)",
+      status: data.sulfur === "low" ? "কম" : "মাঝারি",
+      dose: `${amount(data.sulfur === "low" ? 12 : 8)} জিপসাম`,
+      note: "সরিষা, পেঁয়াজ, ডাল জাতীয় ফসলে গন্ধক বিশেষভাবে জরুরি।",
+    });
+  }
+
+  return items;
+}
+
+
 const LEVEL_FACTOR: Record<string, number> = { low: 1.25, medium: 1, high: 0.75 };
 
 function baseDose(crop?: string): { dose: FertilizerDose; matched: string | null } {
@@ -144,6 +307,7 @@ function computeDoses(data: z.infer<typeof SoilInputSchema>) {
   return {
     matched,
     areaLabel,
+    bigha,
     doses: items.map((i) => ({
       name: i.name,
       amount: `${toBn(round1(i.kg * bigha))} কেজি`,
@@ -161,6 +325,14 @@ function computeScore(data: z.infer<typeof SoilInputSchema>) {
   score -= drop(data.phosphorus, 12);
   score -= drop(data.potassium, 12);
   score -= drop(data.organicMatter, 18, 8);
+  score -= drop(data.calcium, 6, 0);
+  score -= drop(data.magnesium, 6, 0);
+  const ec = data.ecValue;
+  if (ec != null) {
+    if (ec >= 8) score -= 25;
+    else if (ec >= 4) score -= 15;
+    else if (ec >= 2) score -= 7;
+  }
   if (data.soilType.includes("বেলে") && !data.soilType.includes("দোআঁশ")) score -= 8;
   if (data.soilType.includes("দোআঁশ")) score += 5;
   return Math.max(15, Math.min(98, Math.round(score)));
@@ -208,6 +380,10 @@ JSON স্কিমা:
 - ফসফরাস: ${LEVEL_BN[data.phosphorus ?? ""] ?? "অজানা"}
 - পটাশিয়াম: ${LEVEL_BN[data.potassium ?? ""] ?? "অজানা"}
 - জৈব উপাদান: ${LEVEL_BN[data.organicMatter ?? ""] ?? "অজানা"}
+- ক্যালশিয়াম: ${LEVEL_BN[data.calcium ?? ""] ?? "অজানা"}
+- ম্যাগনেসিয়াম: ${LEVEL_BN[data.magnesium ?? ""] ?? "অজানা"}
+- গন্ধক: ${LEVEL_BN[data.sulfur ?? ""] ?? "অজানা"}
+- লবণাক্ততা EC (dS/m): ${data.ecValue ?? "অজানা"}
 - সেচ: ${data.irrigation ?? "অজানা"}
 - আগের ফসল: ${data.lastCrop || "অজানা"}
 - পরিকল্পিত ফসল: ${data.plannedCrop || "অজানা"}
@@ -217,7 +393,9 @@ JSON স্কিমা:
 - চুন: ${lime.needed ? lime.amount : "প্রয়োজন নেই"}
 - সার (মোট জমির জন্য): ${doses.map((d) => `${d.name} ${d.amount}`).join(", ")}
 
-এই তথ্যের ভিত্তিতে JSON রিপোর্ট দাও। suitableCrops-এ চলতি মৌসুমে এই মাটিতে লাভজনক ফসল দাও।`;
+এই তথ্যের ভিত্তিতে JSON রিপোর্ট দাও। suitableCrops-এ চলতি মৌসুমে এই মাটিতে লাভজনক ফসল দাও।
+EC ৪ dS/m-এর বেশি হলে শুধু লবণসহিষ্ণু ফসল/জাত সুপারিশ করবে এবং warnings-এ লবণাক্ততার ঝুঁকি উল্লেখ করবে।
+ক্যালশিয়াম বা ম্যাগনেসিয়াম কম থাকলে soilManagement-এ তা সংশোধনের কথা বলবে (pH কম হলে ডলোচুন, pH ঠিক থাকলে জিপসাম/ম্যাগনেসিয়াম সালফেট)।`;
 
   try {
     const res = await fetch(`${GEMINI_URL}?key=${key}`, {
@@ -296,7 +474,9 @@ export const analyzeSoil = createServerFn({ method: "POST" })
     const ph = phInfo(data.phLevel);
     const lime = limeRecommendation(data.soilType, data.phLevel);
     const score = computeScore(data);
-    const { doses, areaLabel, matched } = computeDoses(data);
+    const { doses, areaLabel, matched, bigha } = computeDoses(data);
+    const salinity = salinityInfo(data.ecValue);
+    const secondaryNutrients = secondaryNutrientPlan(data, bigha);
 
     const narrative =
       (await callGeminiNarrative(data, score, ph, lime, doses)) ?? fallbackNarrative(data, score, ph);
@@ -309,6 +489,8 @@ export const analyzeSoil = createServerFn({ method: "POST" })
       summary: narrative.summary,
       phStatus: { value: data.phLevel ?? null, label: ph.label, advice: ph.advice },
       limeAdvice: lime,
+      salinity,
+      secondaryNutrients,
       areaLabel,
       nutrientStatus: narrative.nutrientStatus,
       computedDoses: doses,
@@ -321,8 +503,16 @@ export const analyzeSoil = createServerFn({ method: "POST" })
         organicAmendments: narrative.organicAmendments ?? [],
         soilManagement: narrative.soilManagement ?? [],
       },
-      suitableCrops: narrative.suitableCrops ?? [],
+      suitableCrops:
+        salinity.severity === "high" || salinity.severity === "moderate"
+          ? Array.from(new Set([...salinity.tolerantCrops, ...(narrative.suitableCrops ?? [])])).slice(0, 10)
+          : (narrative.suitableCrops ?? []),
       warnings: [
+        ...(salinity.severity === "high"
+          ? ["মাটি তীব্র লবণাক্ত — সংশোধন না করে সাধারণ ফসল চাষ করলে ফলন প্রায় শূন্য হতে পারে।"]
+          : salinity.severity === "moderate"
+            ? ["মাঝারি লবণাক্ততা শনাক্ত হয়েছে — লিচিং ও জিপসাম ছাড়া সংবেদনশীল ফসল দেবেন না।"]
+            : []),
         ...(narrative.warnings ?? []),
         ...(matched
           ? []
