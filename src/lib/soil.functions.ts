@@ -380,6 +380,10 @@ JSON স্কিমা:
 - ফসফরাস: ${LEVEL_BN[data.phosphorus ?? ""] ?? "অজানা"}
 - পটাশিয়াম: ${LEVEL_BN[data.potassium ?? ""] ?? "অজানা"}
 - জৈব উপাদান: ${LEVEL_BN[data.organicMatter ?? ""] ?? "অজানা"}
+- ক্যালশিয়াম: ${LEVEL_BN[data.calcium ?? ""] ?? "অজানা"}
+- ম্যাগনেসিয়াম: ${LEVEL_BN[data.magnesium ?? ""] ?? "অজানা"}
+- গন্ধক: ${LEVEL_BN[data.sulfur ?? ""] ?? "অজানা"}
+- লবণাক্ততা EC (dS/m): ${data.ecValue ?? "অজানা"}
 - সেচ: ${data.irrigation ?? "অজানা"}
 - আগের ফসল: ${data.lastCrop || "অজানা"}
 - পরিকল্পিত ফসল: ${data.plannedCrop || "অজানা"}
