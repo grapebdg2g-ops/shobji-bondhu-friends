@@ -559,27 +559,34 @@ export function AiChatView({ sessionId: initialSessionId }: { sessionId?: string
               >
                 {m.content}
               </div>
-              {m.role === "assistant" && m.cacheId && (
+              {m.role === "assistant" && (
                 <div className="mt-1 ml-1 flex items-center gap-2 text-[11px] text-gray-500">
-                  <span>সহায়ক ছিল?</span>
-                  <button
-                    onClick={() => submitFeedback(i, true)}
-                    disabled={!!m.feedback}
-                    className={`h-6 w-6 rounded-full flex items-center justify-center border transition ${
-                      m.feedback === "up" ? "bg-green-100 border-green-300 text-green-700" : "border-gray-200 hover:bg-gray-100 disabled:opacity-50"
-                    }`}
-                  >
-                    <ThumbsUp className="h-3 w-3" />
-                  </button>
-                  <button
-                    onClick={() => submitFeedback(i, false)}
-                    disabled={!!m.feedback}
-                    className={`h-6 w-6 rounded-full flex items-center justify-center border transition ${
-                      m.feedback === "down" ? "bg-red-100 border-red-300 text-red-700" : "border-gray-200 hover:bg-gray-100 disabled:opacity-50"
-                    }`}
-                  >
-                    <ThumbsDown className="h-3 w-3" />
-                  </button>
+                  <span className="rounded-full bg-gray-100 px-2 py-0.5">
+                    {m.source === "cache" ? "সংরক্ষিত উত্তর" : "AI উত্তর"}
+                  </span>
+                  {m.cacheId && (
+                    <>
+                      <span>সহায়ক ছিল?</span>
+                      <button
+                        onClick={() => submitFeedback(i, true)}
+                        disabled={!!m.feedback}
+                        className={`h-6 w-6 rounded-full flex items-center justify-center border transition ${
+                          m.feedback === "up" ? "bg-green-100 border-green-300 text-green-700" : "border-gray-200 hover:bg-gray-100 disabled:opacity-50"
+                        }`}
+                      >
+                        <ThumbsUp className="h-3 w-3" />
+                      </button>
+                      <button
+                        onClick={() => submitFeedback(i, false)}
+                        disabled={!!m.feedback}
+                        className={`h-6 w-6 rounded-full flex items-center justify-center border transition ${
+                          m.feedback === "down" ? "bg-red-100 border-red-300 text-red-700" : "border-gray-200 hover:bg-gray-100 disabled:opacity-50"
+                        }`}
+                      >
+                        <ThumbsDown className="h-3 w-3" />
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>

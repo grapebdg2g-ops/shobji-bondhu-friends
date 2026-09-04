@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { BengaliButton } from "@/components/krishi/bengali-button";
 import { cn } from "@/lib/utils";
 import { analyzeDisease, type DiseaseResult } from "@/lib/disease.functions";
+import { toBn } from "@/lib/bn";
 import { supabase } from "@/integrations/supabase/client";
 import { AI_CROP_LABELS } from "@/lib/crop-options";
 import { optimizeImage, fileToBase64, fileToRawBase64 } from "@/lib/image-optimizer";
@@ -472,6 +473,15 @@ function ResultScreen({
           <span className={cn("inline-flex items-center gap-1 mt-2 px-2.5 py-1 rounded-full border text-xs font-bold", sev.color)}>
             {sev.dot} তীব্রতা: {sev.label}
           </span>
+          {typeof result.confidence === "number" && (
+            <span className="inline-flex items-center gap-1 mt-2 ml-2 px-2.5 py-1 rounded-full border border-gray-200 bg-gray-50 text-xs text-gray-600">
+              নিশ্চয়তা: {toBn(String(Math.round(result.confidence)))}%
+            </span>
+          )}
+          <p className="mt-2 text-[11px] text-gray-500">
+            AI সহায়ক বিশ্লেষণ — নিশ্চিত নির্ণয় নয়। রাসায়নিক ব্যবহারের আগে product label, PHI/PPE যাচাই
+            করুন{result.severity === "high" ? " এবং উপজেলা কৃষি কর্মকর্তার পরামর্শ নিন" : ""}।
+          </p>
         </div>
       </div>
 

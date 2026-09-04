@@ -36,7 +36,13 @@ const SYSTEM_PROMPT = `তুমি একজন অভিজ্ঞ বাংল
   "reason": "যদি detected=false হয় তবে কারণ"
 }
 
-যদি ছবিতে রোগ স্পষ্ট না হয় বা ফসলের ছবি না হয়, detected=false দাও।`;
+যদি ছবিতে রোগ স্পষ্ট না হয় বা ফসলের ছবি না হয়, detected=false দাও।
+
+নিরাপত্তা নিয়ম (অবশ্য পালনীয়):
+- ঔষধ/কীটনাশকের মাত্রা শুধুমাত্র DAE-অনুমোদিত লেবেল মাত্রায় বলো; মাত্রা নিশ্চিত না হলে treatments-এ মাত্রা না লিখে "উপজেলা কৃষি অফিসে জিজ্ঞেস করুন" লেখো। কখনো মাত্রা অনুমান করে বানিয়ে লিখো না।
+- রাসায়নিক চিকিৎসা দিলে prevention-এর প্রথম পয়েন্টে PHI (অপেক্ষা সময়) ও PPE (মাস্ক, গ্লাভস) উল্লেখ করো।
+- severity "high" হলে description-এর শেষে উপজেলা কৃষি কর্মকর্তার পরামর্শ নেওয়ার কথা যোগ করো।
+- confidence সৎভাবে দাও; ৬০-এর নিচে হলে detected=false দেওয়াই ভালো।`;
 
 export const analyzeDisease = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -56,7 +62,10 @@ export const analyzeDisease = createServerFn({ method: "POST" })
       throw new Error("প্রতি ঘণ্টায় সর্বোচ্চ ১০টি বিশ্লেষণ করা যাবে, একটু পর আবার চেষ্টা করুন");
     }
 
-    const apiKey = process.env.NEXT_PUBLIC_KIMI_API_KEY;
+    // Canonical server-only name first; legacy NEXT_PUBLIC_ prefix kept as
+    // fallback during transition (Vite only exposes VITE_*, so it never leaked
+    // to the client, but the prefix is misleading — use KIMI_API_KEY).
+    const apiKey = process.env.KIMI_API_KEY ?? process.env.NEXT_PUBLIC_KIMI_API_KEY;
     if (!apiKey) throw new Error("Kimi API key অনুপস্থিত");
 
     const dataUrl = `data:${data.mimeType};base64,${data.imageBase64}`;
@@ -112,10 +121,13 @@ export const analyzeDisease = createServerFn({ method: "POST" })
       if (match) parsed = JSON.parse(match[0]);
     }
 
+    const detected = parsed.detected ?? false;
     return {
-      detected: parsed.detected ?? false,
+      detected,
       diseaseName: parsed.diseaseName ?? "অজানা",
-      severity: (parsed.severity as DiseaseResult["severity"]) ?? "medium",
+      // Unknown severity defaults to low (never overstate); prompt asks the
+      // model for honest confidence and officer referral on high severity.
+      severity: (parsed.severity as DiseaseResult["severity"]) ?? "low",
       description: parsed.description ?? "",
       treatments: Array.isArray(parsed.treatments) ? parsed.treatments : [],
       prevention: Array.isArray(parsed.prevention) ? parsed.prevention : [],
