@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { isAuthorizedCronRequest, unauthorizedCronResponse } from "@/lib/cron-auth.server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 type Prediction = {
@@ -21,7 +22,8 @@ type Prediction = {
 export const Route = createFileRoute("/api/public/hooks/check-prediction-accuracy")({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
+        if (!isAuthorizedCronRequest(request)) return unauthorizedCronResponse();
         // 7-day window: between 8 days and 7 days ago (giving a 1-day grace)
         const olderThan = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
         const newerThan = new Date(Date.now() - 14 * 24 * 3600 * 1000).toISOString();

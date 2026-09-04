@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { isAuthorizedCronRequest, unauthorizedCronResponse } from "@/lib/cron-auth.server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { configureVapid, sendWebPush } from "@/lib/push.server";
 
@@ -19,16 +20,14 @@ type Subscription = {
 };
 
 function isAuthorized(request: Request) {
-  const expected = process.env.PUSH_CRON_SECRET;
-  if (!expected) return true;
-  return request.headers.get("x-push-cron-secret") === expected;
+  return isAuthorizedCronRequest(request);
 }
 
 export const Route = createFileRoute("/api/public/hooks/crop-reminders")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        if (!isAuthorized(request)) return Response.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+        if (!isAuthorized(request)) return unauthorizedCronResponse();
         if (!configureVapid()) return Response.json({ ok: false, error: "VAPID keys not configured" }, { status: 500 });
 
         const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });

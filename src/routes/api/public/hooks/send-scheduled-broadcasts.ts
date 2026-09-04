@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { isAuthorizedCronRequest, unauthorizedCronResponse } from "@/lib/cron-auth.server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 type Broadcast = {
@@ -30,7 +31,8 @@ async function resolveRecipients(b: Broadcast): Promise<string[]> {
 export const Route = createFileRoute("/api/public/hooks/send-scheduled-broadcasts")({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
+        if (!isAuthorizedCronRequest(request)) return unauthorizedCronResponse();
         const nowIso = new Date().toISOString();
         const { data: due, error } = await supabaseAdmin
           .from("notification_broadcasts")

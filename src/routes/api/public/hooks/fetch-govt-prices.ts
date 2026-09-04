@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { isAuthorizedCronRequest } from "@/lib/cron-auth.server";
 
 // Daily fetch of Bangladesh DAM (dam.gov.bd) market prices.
 // Triggered by pg_cron at 08:00 Asia/Dhaka.
@@ -148,12 +149,10 @@ export const Route = createFileRoute("/api/public/hooks/fetch-govt-prices")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        // Lightweight auth: require Supabase anon/publishable apikey header
-        const apikey = request.headers.get("apikey") ?? request.headers.get("x-apikey");
-        const expected =
-          process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY ?? "";
-        if (!apikey || apikey !== expected) {
-          return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        // Cron auth: preferred `x-cron-secret`, legacy `apikey` accepted
+        // during transition (see src/lib/cron-auth.server.ts).
+        if (!isAuthorizedCronRequest(request)) {
+          return new Response(JSON.stringify({ ok: false, error: "Unauthorized" }), {
             status: 401,
             headers: { "Content-Type": "application/json" },
           });

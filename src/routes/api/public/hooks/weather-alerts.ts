@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { isAuthorizedCronRequest, unauthorizedCronResponse } from "@/lib/cron-auth.server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { configureVapid, sendWebPush } from "@/lib/push.server";
 import { getDistrictUpazilaLatLng } from "@/lib/bd-data";
@@ -89,7 +90,8 @@ async function processLocation(district: string, upazila: string | null) {
 export const Route = createFileRoute("/api/public/hooks/weather-alerts")({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
+        if (!isAuthorizedCronRequest(request)) return unauthorizedCronResponse();
         if (!configureVapid()) {
           return Response.json(
             { ok: false, error: "VAPID keys not configured" },
