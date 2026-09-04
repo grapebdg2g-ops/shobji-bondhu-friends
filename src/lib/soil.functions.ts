@@ -115,6 +115,153 @@ function limeRecommendation(soilType: string, ph?: number) {
   };
 }
 
+// ── লবণাক্ততা (EC) ───────────────────────────────────────
+const SALT_TOLERANT_CROPS = [
+  "বার্লি", "সরিষা", "সূর্যমুখী", "খেসারি", "গম (বিনা গম-১)",
+  "লবণসহিষ্ণু ধান (ব্রি ধান৪৭/৬৭/৯৭/৯৯)", "মিষ্টি আলু", "টমেটো (BINA টমেটো-১০)",
+];
+
+function salinityInfo(ec?: number): SoilAnalysisResult["salinity"] {
+  if (ec == null) {
+    return {
+      value: null,
+      label: "পরীক্ষা করা হয়নি",
+      severity: "unknown",
+      advice:
+        "রিপোর্টে EC (ডিএস/মিটার) থাকলে বসিয়ে দিন — উপকূলীয় বা সেচের পানিতে লবণ থাকলে এটি জরুরি।",
+      actions: [],
+      tolerantCrops: [],
+    };
+  }
+  const base = [
+    "সেচের পানি মিষ্টি (কম লবণাক্ত) উৎস থেকে নিন, প্রয়োজনে বৃষ্টির পানি সংরক্ষণ করুন।",
+    "জমিতে ভালো নিকাশ নালা রাখুন যাতে লবণ ধুয়ে বেরিয়ে যেতে পারে।",
+  ];
+  if (ec < 2)
+    return {
+      value: ec,
+      label: "স্বাভাবিক",
+      severity: "none",
+      advice: "মাটিতে ক্ষতিকর লবণাক্ততা নেই, স্বাভাবিকভাবে চাষ করুন।",
+      actions: ["বছরে একবার EC পরীক্ষা করিয়ে নজরে রাখুন।"],
+      tolerantCrops: [],
+    };
+  if (ec < 4)
+    return {
+      value: ec,
+      label: "সামান্য লবণাক্ত",
+      severity: "slight",
+      advice:
+        "সংবেদনশীল ফসলে (ডাল, পেঁয়াজ, শিম) ১০–১৫% ফলন কমতে পারে; জৈব সার ও মালচিং দিয়ে সামলানো যাবে।",
+      actions: [
+        ...base,
+        "প্রতি বিঘায় ৮০০–১০০০ কেজি পচা গোবর/কম্পোস্ট দিন — লবণের প্রভাব কমে।",
+        "খড় বা কচুরিপানা দিয়ে মালচিং করুন, উপরিভাগে লবণ জমা কমবে।",
+        "MoP-এর একটি অংশ কমিয়ে সালফেট অব পটাশ (SOP) ব্যবহার করুন।",
+      ],
+      tolerantCrops: SALT_TOLERANT_CROPS.slice(0, 5),
+    };
+  if (ec < 8)
+    return {
+      value: ec,
+      label: "মাঝারি লবণাক্ত",
+      severity: "moderate",
+      advice:
+        "অধিকাংশ সবজিতে ২৫–৫০% ফলন কমবে — লবণ ধোয়ানো (লিচিং) ও লবণসহিষ্ণু জাত ছাড়া চাষ ঝুঁকিপূর্ণ।",
+      actions: [
+        "বর্ষার আগে/শুরুতে জমিতে ৮–১০ সেমি পানি দাঁড় করিয়ে ২–৩ বার ধুয়ে (লিচিং) নিকাশ করে দিন।",
+        "প্রতি বিঘায় ৮০–১০০ কেজি জিপসাম দিন (সোডিয়াম সরিয়ে ক্যালশিয়াম বসায়)।",
+        ...base,
+        "উঁচু বেড/আইল করে বেডের কিনারায় নয়, মাঝখানে চারা লাগান — কিনারায় লবণ জমে।",
+        "ইউরিয়া ভাগ করে অল্প অল্প করে দিন; একসাথে বেশি সার দিলে লবণাক্ততা বাড়ে।",
+      ],
+      tolerantCrops: SALT_TOLERANT_CROPS,
+    };
+  return {
+    value: ec,
+    label: "তীব্র লবণাক্ত",
+    severity: "high",
+    advice:
+      "সাধারণ ফসল টিকবে না। আগে লবণ ধোয়ানো ও জিপসাম প্রয়োগ করে মাটি সংশোধন করতে হবে।",
+    actions: [
+      "প্রতি বিঘায় ১২০–১৫০ কেজি জিপসাম প্রয়োগ করে ভালোভাবে চাষ দিন, তারপর পানি দিয়ে ধুয়ে নিন।",
+      "টানা ২–৩ দফা লিচিং করে নিকাশ নালা দিয়ে লবণ পানি বের করে দিন।",
+      "চুন প্রয়োগ করবেন না (pH বেশি হলে) — জিপসামই সঠিক সংশোধক।",
+      ...base,
+      "এক মৌসুম ধৈঞ্চা/সবুজ সার চাষ করে মাটিতে মিশিয়ে দিন।",
+      "নিকটস্থ উপজেলা কৃষি অফিস বা SRDI-এর পরামর্শ নিয়ে ফসল নির্বাচন করুন।",
+    ],
+    tolerantCrops: SALT_TOLERANT_CROPS,
+  };
+}
+
+// ── ক্যালশিয়াম ও ম্যাগনেসিয়াম ─────────────────────────
+function secondaryNutrientPlan(data: z.infer<typeof SoilInputSchema>, bigha: number) {
+  const amount = (kgPerBigha: number) => `${toBn(round1(kgPerBigha * bigha))} কেজি`;
+  const items: SoilAnalysisResult["secondaryNutrients"] = [];
+
+  // ক্যালশিয়াম
+  const ca = data.calcium;
+  const ph = data.phLevel;
+  if (ca === "high") {
+    items.push({
+      name: "ক্যালশিয়াম (Ca)",
+      status: "পর্যাপ্ত",
+      dose: "আলাদা প্রয়োগ লাগবে না",
+      note: "অতিরিক্ত চুন দিলে জিংক ও বোরন গ্রহণ ব্যাহত হবে।",
+    });
+  } else {
+    const acidic = ph != null && ph < 6.0;
+    const perBigha = ca === "low" ? (acidic ? 100 : 60) : acidic ? 60 : 35;
+    items.push({
+      name: "ক্যালশিয়াম (Ca)",
+      status: ca === "low" ? "কম" : ca === "medium" ? "মাঝারি" : "পরীক্ষা হয়নি",
+      dose: acidic
+        ? `${amount(perBigha)} কৃষি চুন/ডলোচুন`
+        : `${amount(perBigha)} জিপসাম (ক্যালশিয়াম সালফেট)`,
+      note: acidic
+        ? "pH কম, তাই চুন দিলেই ক্যালশিয়াম ও অম্লত্ব দুটোই ঠিক হবে — জমি তৈরির ১৫–২০ দিন আগে দিন।"
+        : "pH ঠিক আছে, তাই চুন নয় — জিপসাম দিলে pH না বাড়িয়েই ক্যালশিয়াম ও গন্ধক মিলবে।",
+    });
+  }
+
+  // ম্যাগনেসিয়াম
+  const mg = data.magnesium;
+  if (mg === "high") {
+    items.push({
+      name: "ম্যাগনেসিয়াম (Mg)",
+      status: "পর্যাপ্ত",
+      dose: "আলাদা প্রয়োগ লাগবে না",
+      note: "ডলোচুন এড়িয়ে সাধারণ কৃষি চুন ব্যবহার করুন।",
+    });
+  } else {
+    const perBigha = mg === "low" ? 14 : mg === "medium" ? 8 : 7;
+    items.push({
+      name: "ম্যাগনেসিয়াম (Mg)",
+      status: mg === "low" ? "কম" : mg === "medium" ? "মাঝারি" : "পরীক্ষা হয়নি",
+      dose: `${amount(perBigha)} ম্যাগনেসিয়াম সালফেট`,
+      note:
+        (ph != null && ph < 6.0
+          ? "চুন হিসেবে ডলোচুন নিলে অতিরিক্ত ম্যাগনেসিয়াম এমনিতেই মিলবে। "
+          : "") +
+        "শেষ চাষের সময় বেসাল দিন; পাতা হলুদ হলে ২% ম্যাগনেসিয়াম সালফেট স্প্রে করুন।",
+    });
+  }
+
+  // গন্ধক
+  if (data.sulfur && data.sulfur !== "high") {
+    items.push({
+      name: "গন্ধক (S)",
+      status: data.sulfur === "low" ? "কম" : "মাঝারি",
+      dose: `${amount(data.sulfur === "low" ? 12 : 8)} জিপসাম`,
+      note: "সরিষা, পেঁয়াজ, ডাল জাতীয় ফসলে গন্ধক বিশেষভাবে জরুরি।",
+    });
+  }
+
+  return items;
+}
+
+
 const LEVEL_FACTOR: Record<string, number> = { low: 1.25, medium: 1, high: 0.75 };
 
 function baseDose(crop?: string): { dose: FertilizerDose; matched: string | null } {
