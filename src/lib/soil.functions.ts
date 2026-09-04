@@ -474,7 +474,9 @@ export const analyzeSoil = createServerFn({ method: "POST" })
     const ph = phInfo(data.phLevel);
     const lime = limeRecommendation(data.soilType, data.phLevel);
     const score = computeScore(data);
-    const { doses, areaLabel, matched } = computeDoses(data);
+    const { doses, areaLabel, matched, bigha } = computeDoses(data);
+    const salinity = salinityInfo(data.ecValue);
+    const secondaryNutrients = secondaryNutrientPlan(data, bigha);
 
     const narrative =
       (await callGeminiNarrative(data, score, ph, lime, doses)) ?? fallbackNarrative(data, score, ph);
@@ -487,6 +489,8 @@ export const analyzeSoil = createServerFn({ method: "POST" })
       summary: narrative.summary,
       phStatus: { value: data.phLevel ?? null, label: ph.label, advice: ph.advice },
       limeAdvice: lime,
+      salinity,
+      secondaryNutrients,
       areaLabel,
       nutrientStatus: narrative.nutrientStatus,
       computedDoses: doses,
@@ -499,8 +503,16 @@ export const analyzeSoil = createServerFn({ method: "POST" })
         organicAmendments: narrative.organicAmendments ?? [],
         soilManagement: narrative.soilManagement ?? [],
       },
-      suitableCrops: narrative.suitableCrops ?? [],
+      suitableCrops:
+        salinity.severity === "high" || salinity.severity === "moderate"
+          ? Array.from(new Set([...salinity.tolerantCrops, ...(narrative.suitableCrops ?? [])])).slice(0, 10)
+          : (narrative.suitableCrops ?? []),
       warnings: [
+        ...(salinity.severity === "high"
+          ? ["মাটি তীব্র লবণাক্ত — সংশোধন না করে সাধারণ ফসল চাষ করলে ফলন প্রায় শূন্য হতে পারে।"]
+          : salinity.severity === "moderate"
+            ? ["মাঝারি লবণাক্ততা শনাক্ত হয়েছে — লিচিং ও জিপসাম ছাড়া সংবেদনশীল ফসল দেবেন না।"]
+            : []),
         ...(narrative.warnings ?? []),
         ...(matched
           ? []
