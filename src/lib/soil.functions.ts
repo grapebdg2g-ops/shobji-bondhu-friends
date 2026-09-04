@@ -12,6 +12,12 @@ const SoilInputSchema = z.object({
   phosphorus: LevelSchema,
   potassium: LevelSchema,
   organicMatter: LevelSchema,
+  sulfur: LevelSchema,
+  zincLevel: LevelSchema,
+  boronLevel: LevelSchema,
+  calcium: LevelSchema,
+  magnesium: LevelSchema,
+  ecValue: z.number().min(0).max(40).optional(), // dS/m
   lastCrop: z.string().max(60).optional(),
   plannedCrop: z.string().max(60).optional(),
   district: z.string().max(60).optional(),
@@ -32,6 +38,15 @@ export type SoilAnalysisResult = {
   summary: string;
   phStatus: { value: number | null; label: string; advice: string };
   limeAdvice: { needed: boolean; amount: string; note: string };
+  salinity: {
+    value: number | null;
+    label: string;
+    severity: "none" | "slight" | "moderate" | "high" | "unknown";
+    advice: string;
+    actions: string[];
+    tolerantCrops: string[];
+  };
+  secondaryNutrients: { name: string; status: string; dose: string; note: string }[];
   areaLabel: string;
   nutrientStatus: {
     nitrogen: string;
@@ -49,6 +64,7 @@ export type SoilAnalysisResult = {
   suitableCrops: string[];
   warnings: string[];
 };
+
 
 // ── Deterministic agronomy helpers ───────────────────────
 
