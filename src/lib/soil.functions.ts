@@ -325,6 +325,14 @@ function computeScore(data: z.infer<typeof SoilInputSchema>) {
   score -= drop(data.phosphorus, 12);
   score -= drop(data.potassium, 12);
   score -= drop(data.organicMatter, 18, 8);
+  score -= drop(data.calcium, 6, 0);
+  score -= drop(data.magnesium, 6, 0);
+  const ec = data.ecValue;
+  if (ec != null) {
+    if (ec >= 8) score -= 25;
+    else if (ec >= 4) score -= 15;
+    else if (ec >= 2) score -= 7;
+  }
   if (data.soilType.includes("বেলে") && !data.soilType.includes("দোআঁশ")) score -= 8;
   if (data.soilType.includes("দোআঁশ")) score += 5;
   return Math.max(15, Math.min(98, Math.round(score)));
