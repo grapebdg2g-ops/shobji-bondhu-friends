@@ -307,6 +307,7 @@ function computeDoses(data: z.infer<typeof SoilInputSchema>) {
   return {
     matched,
     areaLabel,
+    bigha,
     doses: items.map((i) => ({
       name: i.name,
       amount: `${toBn(round1(i.kg * bigha))} কেজি`,
