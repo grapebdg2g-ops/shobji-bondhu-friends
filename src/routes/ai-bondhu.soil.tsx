@@ -178,6 +178,11 @@ function SoilAnalysisPage() {
     if (extracted.phosphorus) setPhosphorus(extracted.phosphorus);
     if (extracted.potassium) setPotassium(extracted.potassium);
     if (extracted.organicMatter) setOrganicMatter(extracted.organicMatter);
+    if (extracted.calcium) setCalcium(extracted.calcium);
+    if (extracted.magnesium) setMagnesium(extracted.magnesium);
+    if (extracted.sulfur) setSulfur(extracted.sulfur);
+    if (extracted.ecValue != null) setEcValue(extracted.ecValue);
+    setDocType(extracted.documentType ?? null);
     if (extracted.plannedCrop && MASTER_CROP_LABELS.includes(extracted.plannedCrop)) {
       setPlannedCrop(extracted.plannedCrop);
     }
@@ -204,6 +209,10 @@ function SoilAnalysisPage() {
           phosphorus: level(phosphorus),
           potassium: level(potassium),
           organicMatter: level(organicMatter),
+          calcium: level(calcium),
+          magnesium: level(magnesium),
+          sulfur: level(sulfur),
+          ecValue: ecValue ?? undefined,
           lastCrop: lastCrop || undefined,
           plannedCrop: plannedCrop || undefined,
           district: user?.district ?? undefined,
