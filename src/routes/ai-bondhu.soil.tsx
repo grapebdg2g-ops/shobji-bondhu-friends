@@ -640,9 +640,16 @@ function ResultView({ result, onReset }: { result: SoilAnalysisResult; onReset: 
       ``,
       `জমি: ${result.areaLabel}`,
       `চুন: ${result.limeAdvice.amount}`,
+      `লবণাক্ততা: ${result.salinity.label}${result.salinity.value != null ? ` (EC ${toBn(result.salinity.value)})` : ""}`,
       ``,
       `সারের পরিমাণ:`,
       ...result.computedDoses.map((d) => `- ${d.name}: ${d.amount} (${d.note})`),
+      ``,
+      `ক্যালশিয়াম/ম্যাগনেসিয়াম:`,
+      ...result.secondaryNutrients.map((s) => `- ${s.name} (${s.status}): ${s.dose}`),
+      ...(result.salinity.actions.length
+        ? [``, `লবণাক্ততা ব্যবস্থাপনা:`, ...result.salinity.actions.map((a) => `- ${a}`)]
+        : []),
       ``,
       `উপযুক্ত ফসল: ${result.suitableCrops.join(", ")}`,
     ].join("\n");
