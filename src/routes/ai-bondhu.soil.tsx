@@ -440,6 +440,29 @@ function SoilAnalysisPage() {
                   <NutrientSelect label="ফসফরাস (P)" value={phosphorus} onChange={setPhosphorus} />
                   <NutrientSelect label="পটাশিয়াম (K)" value={potassium} onChange={setPotassium} />
                   <NutrientSelect label="জৈব উপাদান" value={organicMatter} onChange={setOrganicMatter} />
+                  <NutrientSelect label="ক্যালশিয়াম (Ca)" value={calcium} onChange={setCalcium} />
+                  <NutrientSelect label="ম্যাগনেসিয়াম (Mg)" value={magnesium} onChange={setMagnesium} />
+                  <NutrientSelect label="গন্ধক (S)" value={sulfur} onChange={setSulfur} />
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-widest">
+                      লবণাক্ততা EC (ডিএস/মিটার)
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        inputMode="decimal"
+                        value={ecValue == null ? "" : String(ecValue)}
+                        onChange={(e) => {
+                          const n = parseFloat(e.target.value.replace(/[০-৯]/g, (d) => String("০১২৩৪৫৬৭৮৯".indexOf(d))));
+                          setEcValue(Number.isFinite(n) && n >= 0 ? n : null);
+                        }}
+                        placeholder="যেমন: ১.২"
+                        className="w-32 rounded-xl bg-gray-50 border border-gray-100 p-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                      />
+                      <span className="text-[10px] text-gray-400 leading-snug">
+                        ২-এর কম স্বাভাবিক · ২–৪ সামান্য · ৪–৮ মাঝারি · ৮+ তীব্র লবণাক্ত
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </Card>
 
