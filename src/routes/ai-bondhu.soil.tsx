@@ -312,10 +312,19 @@ function SoilAnalysisPage() {
                       {extracting ? "রিপোর্ট পড়া হচ্ছে..." : "মাটির ছবি বা রিপোর্ট আপলোড করুন"}
                     </span>
                     <span className="mt-1 block text-[11px] text-emerald-700">
-                      JPG, PNG বা PDF · সর্বোচ্চ ৩টি · প্রতিটি ১০ MB-এর মধ্যে
+                      SRDI "সার সুপারিশ কার্ড", ল্যাব রিপোর্ট বা মাটির ছবি · JPG, PNG বা PDF · সর্বোচ্চ ৩টি
                     </span>
                   </span>
                 </button>
+                <p className="mt-2 text-[10px] leading-relaxed text-gray-400">
+                  হাতে লেখা সার সুপারিশ কার্ড থেকেও pH, EC (লবণাক্ততা), N-P-K, গন্ধক, দস্তা, বোরন,
+                  ক্যালশিয়াম ও ম্যাগনেসিয়ামের শ্রেণী পড়ে ফর্মে বসে যাবে। ছক স্পষ্ট দেখা যায় এমন সোজা ছবি তুলুন।
+                </p>
+                {docType && (
+                  <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-black text-emerald-700">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> শনাক্ত: {docType}
+                  </div>
+                )}
                 {uploadedFiles.length > 0 && (
                   <div className="mt-3 space-y-2">
                     {uploadedFiles.map((file) => (
