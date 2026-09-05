@@ -675,6 +675,23 @@ ecValue: EC মান ডিএস/মিটার (dS/m) এককে সংখ
       phosphorus: lvl(parsed?.phosphorus),
       potassium: lvl(parsed?.potassium),
       organicMatter: lvl(parsed?.organicMatter),
+      sulfur: lvl(parsed?.sulfur),
+      zincLevel: lvl(parsed?.zincLevel),
+      boronLevel: lvl(parsed?.boronLevel),
+      calcium: lvl(parsed?.calcium),
+      magnesium: lvl(parsed?.magnesium),
+      ecValue:
+        Number.isFinite(Number(parsed?.ecValue)) &&
+        Number(parsed?.ecValue) >= 0 &&
+        Number(parsed?.ecValue) <= 40
+          ? Math.round(Number(parsed.ecValue) * 100) / 100
+          : undefined,
+      documentType:
+        parsed?.documentType === "সার সুপারিশ কার্ড" ||
+        parsed?.documentType === "মাটি পরীক্ষার রিপোর্ট" ||
+        parsed?.documentType === "মাটির ছবি"
+          ? parsed.documentType
+          : "অন্যান্য",
       plannedCrop: typeof parsed?.plannedCrop === "string" ? parsed.plannedCrop : undefined,
       notes: Array.isArray(parsed?.notes)
         ? parsed.notes.filter((n: unknown) => typeof n === "string").slice(0, 5)
