@@ -111,6 +111,11 @@ function SoilAnalysisPage() {
   const [phosphorus, setPhosphorus] = useState("unknown");
   const [potassium, setPotassium] = useState("unknown");
   const [organicMatter, setOrganicMatter] = useState("unknown");
+  const [calcium, setCalcium] = useState("unknown");
+  const [magnesium, setMagnesium] = useState("unknown");
+  const [sulfur, setSulfur] = useState("unknown");
+  const [ecValue, setEcValue] = useState<number | null>(null);
+  const [docType, setDocType] = useState<string | null>(null);
   const [lastCrop, setLastCrop] = useState("");
   const [plannedCrop, setPlannedCrop] = useState("");
   const [areaValue, setAreaValue] = useState("১");
