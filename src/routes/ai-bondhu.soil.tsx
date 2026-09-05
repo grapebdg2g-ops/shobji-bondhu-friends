@@ -739,6 +739,85 @@ function ResultView({ result, onReset }: { result: SoilAnalysisResult; onReset: 
         </div>
       </div>
 
+      {/* Calcium / Magnesium / Sulfur */}
+      {result.secondaryNutrients.length > 0 && (
+        <div className="rounded-3xl bg-white p-5 shadow-sm border border-emerald-50">
+          <div className="mb-4 flex items-center justify-between gap-2">
+            <h3 className="text-sm font-black text-gray-900 flex items-center gap-2">
+              <Mountain className="h-4 w-4 text-emerald-600" /> ক্যালশিয়াম ও ম্যাগনেসিয়াম
+            </h3>
+            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700">
+              {result.areaLabel}
+            </span>
+          </div>
+          <div className="space-y-3">
+            {result.secondaryNutrients.map((s) => (
+              <div key={s.name} className="rounded-2xl bg-gray-50 p-3 border border-gray-100">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-sm font-black text-gray-900">{s.name}</span>
+                  <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-gray-500 border border-gray-100">
+                    {s.status}
+                  </span>
+                </div>
+                <div className="mt-2 inline-block rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-black text-white">
+                  {s.dose}
+                </div>
+                <p className="mt-2 text-[11px] leading-relaxed text-gray-500">{s.note}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Salinity */}
+      <div
+        className={cn(
+          "rounded-3xl p-5 shadow-sm border",
+          result.salinity.severity === "high"
+            ? "bg-red-50 border-red-100"
+            : result.salinity.severity === "moderate"
+              ? "bg-amber-50 border-amber-100"
+              : "bg-white border-emerald-50",
+        )}
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-sm font-black text-gray-900 flex items-center gap-2">
+            <Droplets className="h-4 w-4 text-emerald-600" /> লবণাক্ততা (EC)
+          </h3>
+          <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-black text-gray-700 border border-gray-100">
+            {result.salinity.value != null ? `EC ${toBn(result.salinity.value)} dS/m · ` : ""}
+            {result.salinity.label}
+          </span>
+        </div>
+        <p className="mt-3 text-xs leading-relaxed text-gray-600">{result.salinity.advice}</p>
+        {result.salinity.actions.length > 0 && (
+          <ul className="mt-3 space-y-2">
+            {result.salinity.actions.map((a, i) => (
+              <li key={i} className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+                {a}
+              </li>
+            ))}
+          </ul>
+        )}
+        {result.salinity.tolerantCrops.length > 0 && (
+          <div className="mt-4">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+              লবণসহিষ্ণু ফসল/জাত
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {result.salinity.tolerantCrops.map((c) => (
+                <span key={c} className="rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-gray-700 border border-gray-100">
+                  {c}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+
+
       {/* Dose table */}
       <div className="rounded-3xl bg-white p-5 shadow-sm border border-emerald-50">
         <div className="mb-4 flex items-center justify-between gap-2">
