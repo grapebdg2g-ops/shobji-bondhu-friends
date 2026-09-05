@@ -111,6 +111,11 @@ function SoilAnalysisPage() {
   const [phosphorus, setPhosphorus] = useState("unknown");
   const [potassium, setPotassium] = useState("unknown");
   const [organicMatter, setOrganicMatter] = useState("unknown");
+  const [calcium, setCalcium] = useState("unknown");
+  const [magnesium, setMagnesium] = useState("unknown");
+  const [sulfur, setSulfur] = useState("unknown");
+  const [ecValue, setEcValue] = useState<number | null>(null);
+  const [docType, setDocType] = useState<string | null>(null);
   const [lastCrop, setLastCrop] = useState("");
   const [plannedCrop, setPlannedCrop] = useState("");
   const [areaValue, setAreaValue] = useState("১");
@@ -173,6 +178,11 @@ function SoilAnalysisPage() {
     if (extracted.phosphorus) setPhosphorus(extracted.phosphorus);
     if (extracted.potassium) setPotassium(extracted.potassium);
     if (extracted.organicMatter) setOrganicMatter(extracted.organicMatter);
+    if (extracted.calcium) setCalcium(extracted.calcium);
+    if (extracted.magnesium) setMagnesium(extracted.magnesium);
+    if (extracted.sulfur) setSulfur(extracted.sulfur);
+    if (extracted.ecValue != null) setEcValue(extracted.ecValue);
+    setDocType(extracted.documentType ?? null);
     if (extracted.plannedCrop && MASTER_CROP_LABELS.includes(extracted.plannedCrop)) {
       setPlannedCrop(extracted.plannedCrop);
     }
@@ -199,6 +209,10 @@ function SoilAnalysisPage() {
           phosphorus: level(phosphorus),
           potassium: level(potassium),
           organicMatter: level(organicMatter),
+          calcium: level(calcium),
+          magnesium: level(magnesium),
+          sulfur: level(sulfur),
+          ecValue: ecValue ?? undefined,
           lastCrop: lastCrop || undefined,
           plannedCrop: plannedCrop || undefined,
           district: user?.district ?? undefined,
@@ -298,10 +312,19 @@ function SoilAnalysisPage() {
                       {extracting ? "রিপোর্ট পড়া হচ্ছে..." : "মাটির ছবি বা রিপোর্ট আপলোড করুন"}
                     </span>
                     <span className="mt-1 block text-[11px] text-emerald-700">
-                      JPG, PNG বা PDF · সর্বোচ্চ ৩টি · প্রতিটি ১০ MB-এর মধ্যে
+                      SRDI "সার সুপারিশ কার্ড", ল্যাব রিপোর্ট বা মাটির ছবি · JPG, PNG বা PDF · সর্বোচ্চ ৩টি
                     </span>
                   </span>
                 </button>
+                <p className="mt-2 text-[10px] leading-relaxed text-gray-400">
+                  হাতে লেখা সার সুপারিশ কার্ড থেকেও pH, EC (লবণাক্ততা), N-P-K, গন্ধক, দস্তা, বোরন,
+                  ক্যালশিয়াম ও ম্যাগনেসিয়ামের শ্রেণী পড়ে ফর্মে বসে যাবে। ছক স্পষ্ট দেখা যায় এমন সোজা ছবি তুলুন।
+                </p>
+                {docType && (
+                  <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-black text-emerald-700">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> শনাক্ত: {docType}
+                  </div>
+                )}
                 {uploadedFiles.length > 0 && (
                   <div className="mt-3 space-y-2">
                     {uploadedFiles.map((file) => (
@@ -426,6 +449,29 @@ function SoilAnalysisPage() {
                   <NutrientSelect label="ফসফরাস (P)" value={phosphorus} onChange={setPhosphorus} />
                   <NutrientSelect label="পটাশিয়াম (K)" value={potassium} onChange={setPotassium} />
                   <NutrientSelect label="জৈব উপাদান" value={organicMatter} onChange={setOrganicMatter} />
+                  <NutrientSelect label="ক্যালশিয়াম (Ca)" value={calcium} onChange={setCalcium} />
+                  <NutrientSelect label="ম্যাগনেসিয়াম (Mg)" value={magnesium} onChange={setMagnesium} />
+                  <NutrientSelect label="গন্ধক (S)" value={sulfur} onChange={setSulfur} />
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-widest">
+                      লবণাক্ততা EC (ডিএস/মিটার)
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        inputMode="decimal"
+                        value={ecValue == null ? "" : String(ecValue)}
+                        onChange={(e) => {
+                          const n = parseFloat(e.target.value.replace(/[০-৯]/g, (d) => String("০১২৩৪৫৬৭৮৯".indexOf(d))));
+                          setEcValue(Number.isFinite(n) && n >= 0 ? n : null);
+                        }}
+                        placeholder="যেমন: ১.২"
+                        className="w-32 rounded-xl bg-gray-50 border border-gray-100 p-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                      />
+                      <span className="text-[10px] text-gray-400 leading-snug">
+                        ২-এর কম স্বাভাবিক · ২–৪ সামান্য · ৪–৮ মাঝারি · ৮+ তীব্র লবণাক্ত
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </Card>
 
@@ -594,9 +640,16 @@ function ResultView({ result, onReset }: { result: SoilAnalysisResult; onReset: 
       ``,
       `জমি: ${result.areaLabel}`,
       `চুন: ${result.limeAdvice.amount}`,
+      `লবণাক্ততা: ${result.salinity.label}${result.salinity.value != null ? ` (EC ${toBn(result.salinity.value)})` : ""}`,
       ``,
       `সারের পরিমাণ:`,
       ...result.computedDoses.map((d) => `- ${d.name}: ${d.amount} (${d.note})`),
+      ``,
+      `ক্যালশিয়াম/ম্যাগনেসিয়াম:`,
+      ...result.secondaryNutrients.map((s) => `- ${s.name} (${s.status}): ${s.dose}`),
+      ...(result.salinity.actions.length
+        ? [``, `লবণাক্ততা ব্যবস্থাপনা:`, ...result.salinity.actions.map((a) => `- ${a}`)]
+        : []),
       ``,
       `উপযুক্ত ফসল: ${result.suitableCrops.join(", ")}`,
     ].join("\n");
@@ -685,6 +738,85 @@ function ResultView({ result, onReset }: { result: SoilAnalysisResult; onReset: 
           <StatusItem label="জৈব উপাদান" value={result.nutrientStatus.organicMatter} icon={Leaf} />
         </div>
       </div>
+
+      {/* Calcium / Magnesium / Sulfur */}
+      {result.secondaryNutrients.length > 0 && (
+        <div className="rounded-3xl bg-white p-5 shadow-sm border border-emerald-50">
+          <div className="mb-4 flex items-center justify-between gap-2">
+            <h3 className="text-sm font-black text-gray-900 flex items-center gap-2">
+              <Mountain className="h-4 w-4 text-emerald-600" /> ক্যালশিয়াম ও ম্যাগনেসিয়াম
+            </h3>
+            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700">
+              {result.areaLabel}
+            </span>
+          </div>
+          <div className="space-y-3">
+            {result.secondaryNutrients.map((s) => (
+              <div key={s.name} className="rounded-2xl bg-gray-50 p-3 border border-gray-100">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-sm font-black text-gray-900">{s.name}</span>
+                  <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-gray-500 border border-gray-100">
+                    {s.status}
+                  </span>
+                </div>
+                <div className="mt-2 inline-block rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-black text-white">
+                  {s.dose}
+                </div>
+                <p className="mt-2 text-[11px] leading-relaxed text-gray-500">{s.note}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Salinity */}
+      <div
+        className={cn(
+          "rounded-3xl p-5 shadow-sm border",
+          result.salinity.severity === "high"
+            ? "bg-red-50 border-red-100"
+            : result.salinity.severity === "moderate"
+              ? "bg-amber-50 border-amber-100"
+              : "bg-white border-emerald-50",
+        )}
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-sm font-black text-gray-900 flex items-center gap-2">
+            <Droplets className="h-4 w-4 text-emerald-600" /> লবণাক্ততা (EC)
+          </h3>
+          <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-black text-gray-700 border border-gray-100">
+            {result.salinity.value != null ? `EC ${toBn(result.salinity.value)} dS/m · ` : ""}
+            {result.salinity.label}
+          </span>
+        </div>
+        <p className="mt-3 text-xs leading-relaxed text-gray-600">{result.salinity.advice}</p>
+        {result.salinity.actions.length > 0 && (
+          <ul className="mt-3 space-y-2">
+            {result.salinity.actions.map((a, i) => (
+              <li key={i} className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+                {a}
+              </li>
+            ))}
+          </ul>
+        )}
+        {result.salinity.tolerantCrops.length > 0 && (
+          <div className="mt-4">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+              লবণসহিষ্ণু ফসল/জাত
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {result.salinity.tolerantCrops.map((c) => (
+                <span key={c} className="rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-gray-700 border border-gray-100">
+                  {c}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+
 
       {/* Dose table */}
       <div className="rounded-3xl bg-white p-5 shadow-sm border border-emerald-50">
