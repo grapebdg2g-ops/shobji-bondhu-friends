@@ -635,7 +635,7 @@ ecValue: EC মান ডিএস/মিটার (dS/m) এককে সংখ
           contents: [{ role: "user", parts }],
           generationConfig: {
             temperature: 0.2,
-            maxOutputTokens: 1024,
+            maxOutputTokens: 4096,
             responseMimeType: "application/json",
           },
         }),
