@@ -635,7 +635,7 @@ ecValue: EC মান ডিএস/মিটার (dS/m) এককে সংখ
           contents: [{ role: "user", parts }],
           generationConfig: {
             temperature: 0.2,
-            maxOutputTokens: 1024,
+            maxOutputTokens: 4096,
             responseMimeType: "application/json",
           },
         }),
@@ -653,16 +653,38 @@ ecValue: EC মান ডিএস/মিটার (dS/m) এককে সংখ
       throw new Error("ফাইল বিশ্লেষণে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
     }
 
-    const text: string = json?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-    const match = text.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error("ফাইল থেকে মাটির তথ্য পাওয়া যায়নি।");
+    const candidate = json?.candidates?.[0];
+    const finishReason: string = candidate?.finishReason ?? "";
+    const text: string = (candidate?.content?.parts ?? [])
+      .map((p: any) => (typeof p?.text === "string" ? p.text : ""))
+      .join("")
+      .trim();
+
+    if (!text) {
+      console.error("Gemini soil extract empty output", {
+        finishReason,
+        promptFeedback: json?.promptFeedback,
+      });
+      if (finishReason === "MAX_TOKENS") {
+        throw new Error("ফাইলটি অনেক বড় — একবারে একটি পরিষ্কার পাতা দিয়ে আবার চেষ্টা করুন।");
+      }
+      if (finishReason === "SAFETY" || json?.promptFeedback?.blockReason) {
+        throw new Error("ফাইলটি বিশ্লেষণ করা যায়নি, অন্য একটি ছবি দিয়ে চেষ্টা করুন।");
+      }
+      throw new Error("ফাইল থেকে মাটির তথ্য পাওয়া যায়নি — পরিষ্কার ছবি দিয়ে আবার চেষ্টা করুন।");
+    }
+
+    const cleaned = text.replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
+    const match = cleaned.match(/\{[\s\S]*\}/);
 
     let parsed: any;
     try {
-      parsed = JSON.parse(match[0]);
+      parsed = JSON.parse(match ? match[0] : cleaned);
     } catch {
-      throw new Error("ফাইল থেকে মাটির তথ্য পাওয়া যায়নি।");
+      console.error("Gemini soil extract unparsable output", cleaned.slice(0, 500));
+      throw new Error("ফাইল থেকে মাটির তথ্য পাওয়া যায়নি — পরিষ্কার ছবি দিয়ে আবার চেষ্টা করুন।");
     }
+
 
     const lvl = (v: unknown) =>
       v === "low" || v === "medium" || v === "high" ? v : undefined;
