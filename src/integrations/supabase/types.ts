@@ -482,6 +482,24 @@ export type Database = {
         }
         Relationships: []
       }
+      internal_secrets: {
+        Row: {
+          name: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          name: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          name?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       muted_users: {
         Row: {
           created_at: string
@@ -1331,6 +1349,7 @@ export type Database = {
       increment_cache_hit: { Args: { _id: string }; Returns: undefined }
       increment_comments: { Args: { post_id: string }; Returns: undefined }
       increment_likes: { Args: { post_id: string }; Returns: undefined }
+      invoke_cron_hook: { Args: { _path: string }; Returns: number }
       is_active_user: { Args: { _user_id: string }; Returns: boolean }
       mark_direct_messages_read: {
         Args: { peer_user_id: string }
@@ -1408,6 +1427,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      set_cron_secret: { Args: { _value: string }; Returns: undefined }
     }
     Enums: {
       app_role: "farmer" | "expert" | "moderator" | "admin"
