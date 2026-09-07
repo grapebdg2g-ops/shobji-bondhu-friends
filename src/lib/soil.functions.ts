@@ -625,32 +625,50 @@ ecValue: EC মান ডিএস/মিটার (dS/m) এককে সংখ
       })),
     ];
 
+    // মাঝে মাঝে মডেল খালি বা অর্ধেক উত্তর দেয় — তাই একবার ব্যর্থ হলে আরেকবার চেষ্টা করা হয়
     let json: any;
-    try {
-      const res = await fetch(`${GEMINI_URL}?key=${key}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: system }] },
-          contents: [{ role: "user", parts }],
-          generationConfig: {
-            temperature: 0.2,
-            maxOutputTokens: 4096,
-            responseMimeType: "application/json",
-          },
-        }),
-      });
-      if (!res.ok) {
-        const body = await res.text().catch(() => "");
-        console.error("Gemini soil extract error", res.status, body);
-        if (res.status === 429) throw new Error("এখন অনুরোধ বেশি, একটু পরে আবার চেষ্টা করুন।");
-        throw new Error("ফাইলটি পড়া যায়নি, পরিষ্কার ছবি দিয়ে আবার চেষ্টা করুন।");
+    let lastStatus = 0;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await fetch(`${GEMINI_URL}?key=${key}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: system }] },
+            contents: [{ role: "user", parts }],
+            generationConfig: {
+              temperature: attempt === 0 ? 0.2 : 0.4,
+              maxOutputTokens: 4096,
+              responseMimeType: "application/json",
+            },
+          }),
+        });
+        if (!res.ok) {
+          lastStatus = res.status;
+          const body = await res.text().catch(() => "");
+          console.error("Gemini soil extract error", res.status, body);
+          if (res.status === 429) throw new Error("এখন অনুরোধ বেশি, একটু পরে আবার চেষ্টা করুন।");
+          continue;
+        }
+        const attemptJson = await res.json();
+        const attemptText: string = (attemptJson?.candidates?.[0]?.content?.parts ?? [])
+          .map((p: any) => (typeof p?.text === "string" ? p.text : ""))
+          .join("")
+          .trim();
+        if (!attemptText && attempt === 0) {
+          console.error("Gemini soil extract empty output, retrying", attemptJson?.candidates?.[0]?.finishReason);
+          continue;
+        }
+        json = attemptJson;
+        break;
+      } catch (err) {
+        if (err instanceof Error && err.message.includes("চেষ্টা")) throw err;
+        console.error("Gemini soil extract exception", err);
+        if (attempt === 1) throw new Error("ফাইল বিশ্লেষণে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
       }
-      json = await res.json();
-    } catch (err) {
-      if (err instanceof Error && err.message.includes("চেষ্টা")) throw err;
-      console.error("Gemini soil extract exception", err);
-      throw new Error("ফাইল বিশ্লেষণে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
+    }
+    if (!json) {
+      throw new Error(lastStatus ? "ফাইলটি পড়া যায়নি, পরিষ্কার ছবি দিয়ে আবার চেষ্টা করুন।" : "ফাইল বিশ্লেষণে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
     }
 
     const candidate = json?.candidates?.[0];

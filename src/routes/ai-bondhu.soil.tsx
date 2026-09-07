@@ -93,6 +93,53 @@ function readFileAsBase64(file: File): Promise<string> {
   });
 }
 
+// বড় মোবাইল ছবি (৫-১০ মেগাবাইট) সরাসরি পাঠালে AI ধীর হয়ে যায় বা ব্যর্থ হয়,
+// তাই ছবি ছোট করে (সর্বোচ্চ ১৬০০px, JPEG) পাঠানো হয় — ছকের লেখা পড়তে এটাই যথেষ্ট।
+function fileToOptimizedBase64(file: File): Promise<{ mimeType: string; data: string }> {
+  if (file.type === "application/pdf") {
+    return readFileAsBase64(file).then((url) => ({
+      mimeType: "application/pdf",
+      data: url.split(",")[1] ?? "",
+    }));
+  }
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      const maxSide = 1600;
+      const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+      if (scale === 1 && file.size < 900 * 1024) {
+        readFileAsBase64(file)
+          .then((url) => resolve({ mimeType: file.type, data: url.split(",")[1] ?? "" }))
+          .catch(reject);
+        return;
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        reject(new Error("ছবিটি প্রস্তুত করা যায়নি"));
+        return;
+      }
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+      resolve({ mimeType: "image/jpeg", data: dataUrl.split(",")[1] ?? "" });
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      // ছবি হিসেবে খোলা না গেলে মূল ফাইলটাই পাঠাই
+      readFileAsBase64(file)
+        .then((url) => resolve({ mimeType: file.type, data: url.split(",")[1] ?? "" }))
+        .catch(reject);
+    };
+    img.src = objectUrl;
+  });
+}
+
 function SoilAnalysisPage() {
   const navigate = useNavigate();
   const { user } = useUser();
@@ -155,8 +202,7 @@ function SoilAnalysisPage() {
     try {
       const files = await Promise.all(nextFiles.map(async (file) => ({
         name: file.name,
-        mimeType: file.type,
-        data: (await readFileAsBase64(file)).split(",")[1] ?? "",
+        ...(await fileToOptimizedBase64(file)),
       })));
       const extracted = await extractFn({ data: { files } });
       applyExtraction(extracted);
