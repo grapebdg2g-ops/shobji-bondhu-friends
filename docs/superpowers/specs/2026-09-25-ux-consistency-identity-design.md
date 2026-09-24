@@ -115,7 +115,7 @@ Opacity variants map to token/opacity equivalents. Where no exact token exists, 
 One rule, replacing today's mix of gradient `text-white` headers and token headers:
 
 - **Keep gradients** (intentional brand surfaces): `index.tsx` splash, `login.tsx`, `register.tsx`, `offline.tsx`, dashboard hero in `dashboard.tsx`.
-- **Convert to token headers** (`bg-card` / `text-foreground`): the ~10 core browsing pages — `exchange`, `feed`, `prices`, `friends`, `farmers`, `notifications`, `weather`, `messages`, `u.$userId`, `profile.index`, plus `crop-diary` and `vegetable-guide.index`.
+- **Convert to token headers** (`bg-card` / `text-foreground`): the 12 core browsing pages — `exchange`, `feed`, `prices`, `friends`, `farmers`, `notifications`, `weather`, `messages`, `u.$userId`, `profile.index`, `crop-diary`, `vegetable-guide.index`.
 - Everything else (deep tool pages, admin) keeps its current header — no churn beyond the listed pages.
 
 ## 7. Verification
