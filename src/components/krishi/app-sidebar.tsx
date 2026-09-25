@@ -10,8 +10,6 @@ import { useDirectThreads } from "@/hooks/use-direct-messages";
 import { useRole } from "@/hooks/use-role";
 import { RoleBadge } from "@/components/krishi/role-badge";
 
-const BRAND = "#2D6A4F";
-
 type Item = {
   label: string;
   to:
@@ -117,18 +115,18 @@ export function AppSidebar({
       )}
 
       <aside
-        className={`fixed left-0 top-0 h-full z-40 bg-white border-r border-gray-100 shadow-lg flex flex-col w-64 transition-transform duration-[250ms] ease-in-out ${
+        className={`fixed left-0 top-0 h-full z-40 bg-card border-r border-border shadow-lg flex flex-col w-64 transition-transform duration-[250ms] ease-in-out ${
           expanded ? "translate-x-0" : "-translate-x-full"
         }`}
         aria-label="মূল মেনু"
         aria-hidden={!expanded}
       >
         {/* Toggle + Profile header */}
-        <div className="p-3 border-b border-gray-100">
+        <div className="p-3 border-b border-border">
           <button
             onClick={() => setCollapsed(true)}
             aria-label="মেনু বন্ধ করুন"
-            className="h-10 w-10 rounded-lg flex items-center justify-center hover:bg-[#F0FFF4] transition-colors"
+            className="h-10 w-10 rounded-lg flex items-center justify-center hover:bg-muted transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -136,18 +134,15 @@ export function AppSidebar({
           {user && (
             <div className="mt-3 px-1 animate-fade-in">
               <div className="flex items-center gap-3">
-                <div
-                  className="h-12 w-12 rounded-full flex items-center justify-center text-white font-bold text-base shrink-0"
-                  style={{ background: BRAND }}
-                >
+                <div className="h-12 w-12 rounded-full flex items-center justify-center text-white font-bold text-base shrink-0 bg-primary">
                   {user.name?.[0] ?? "ক"}
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-bold text-gray-900 truncate">{user.name || "কৃষক"}</p>
+                    <p className="text-sm font-bold text-foreground truncate">{user.name || "কৃষক"}</p>
                     <RoleBadge role={role} verified />
                   </div>
-                  <p className="text-xs text-gray-500 truncate">
+                  <p className="text-xs text-muted-foreground truncate">
                     {user.district ?? "—"}{user.upazila ? ` • ${user.upazila}` : ""}
                   </p>
                 </div>
@@ -173,7 +168,7 @@ export function AppSidebar({
           {expanded && (
             <a
               href="tel:16123"
-              className="mx-2 mt-1 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-[#F0FFF4] transition-colors"
+              className="mx-2 mt-1 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-muted transition-colors"
             >
               <Phone className="h-5 w-5 shrink-0" />
               <span>সাহায্য</span>
@@ -196,7 +191,7 @@ export function AppSidebar({
 
         {/* Footer */}
         {expanded && (
-          <div className="border-t border-gray-100 p-3 text-[11px] text-gray-400 leading-tight animate-fade-in">
+          <div className="border-t border-border p-3 text-[11px] text-muted-foreground leading-tight animate-fade-in">
             <p>v1.0.0</p>
             <p>কৃষক বন্ধু © ২০২৫</p>
           </div>
@@ -207,7 +202,7 @@ export function AppSidebar({
 }
 
 function Divider({ expanded }: { expanded: boolean }) {
-  return <div className={`my-2 border-t border-gray-100 ${expanded ? "mx-3" : "mx-2"}`} />;
+  return <div className={`my-2 border-t border-border ${expanded ? "mx-3" : "mx-2"}`} />;
 }
 
 function MenuGroup({
@@ -229,13 +224,13 @@ function MenuGroup({
               onClick={onNav}
               className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
                 active
-                  ? "bg-[#D8F3DC] text-[#2D6A4F] font-bold"
-                  : "text-gray-700 hover:bg-[#F0FFF4]"
+                  ? "bg-secondary text-primary font-bold"
+                  : "text-muted-foreground hover:bg-muted"
               } ${expanded ? "" : "justify-center px-0"}`}
               title={expanded ? undefined : it.label}
             >
               {active && (
-                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r bg-[#2D6A4F]" />
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r bg-primary" />
               )}
               <span className="relative shrink-0">
                 <it.icon className="h-5 w-5" strokeWidth={active ? 2.5 : 2} />
