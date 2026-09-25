@@ -1,8 +1,22 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import {
-  Home, TrendingUp, Repeat2, Bug, Newspaper,
-  CloudSun, Bell, User, LogOut, Phone, X, Shield, UserCog, CalendarDays, Users, MessageCircle,
+  Home,
+  TrendingUp,
+  Repeat2,
+  Bug,
+  Newspaper,
+  CloudSun,
+  Bell,
+  User,
+  LogOut,
+  Phone,
+  X,
+  Shield,
+  UserCog,
+  CalendarDays,
+  Users,
+  MessageCircle,
 } from "lucide-react";
 import { useUser } from "@/contexts/user-context";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -13,8 +27,19 @@ import { RoleBadge } from "@/components/krishi/role-badge";
 type Item = {
   label: string;
   to:
-    | "/dashboard" | "/prices" | "/exchange" | "/disease-detection" | "/feed" | "/crop-diary" | "/farmers" | "/messages"
-    | "/weather" | "/notifications" | "/profile" | "/moderation" | "/admin";
+    | "/dashboard"
+    | "/prices"
+    | "/exchange"
+    | "/disease-detection"
+    | "/feed"
+    | "/crop-diary"
+    | "/farmers"
+    | "/messages"
+    | "/weather"
+    | "/notifications"
+    | "/profile"
+    | "/moderation"
+    | "/admin";
   icon: typeof Home;
   badge?: number;
 };
@@ -86,9 +111,7 @@ export function AppSidebar({
     { label: "মেসেজ", to: "/messages", icon: MessageCircle, badge: messageUnreadCount },
     { label: "নোটিফিকেশন", to: "/notifications", icon: Bell, badge: unreadCount },
   ];
-  const account: Item[] = [
-    { label: "আমার প্রোফাইল", to: "/profile", icon: User },
-  ];
+  const account: Item[] = [{ label: "আমার প্রোফাইল", to: "/profile", icon: User }];
   const staffItems: Item[] = [];
   if (isStaff) staffItems.push({ label: "মডারেশন", to: "/moderation", icon: Shield });
   if (isAdmin) staffItems.push({ label: "অ্যাডমিন প্যানেল", to: "/admin", icon: UserCog });
@@ -139,11 +162,14 @@ export function AppSidebar({
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-bold text-foreground truncate">{user.name || "কৃষক"}</p>
+                    <p className="text-sm font-bold text-foreground truncate">
+                      {user.name || "কৃষক"}
+                    </p>
                     <RoleBadge role={role} verified />
                   </div>
                   <p className="text-xs text-muted-foreground truncate">
-                    {user.district ?? "—"}{user.upazila ? ` • ${user.upazila}` : ""}
+                    {user.district ?? "—"}
+                    {user.upazila ? ` • ${user.upazila}` : ""}
                   </p>
                 </div>
               </div>
@@ -159,7 +185,12 @@ export function AppSidebar({
           {staffItems.length > 0 && (
             <>
               <Divider expanded={expanded} />
-              <MenuGroup items={staffItems} pathname={pathname} expanded={expanded} onNav={closeOnNav} />
+              <MenuGroup
+                items={staffItems}
+                pathname={pathname}
+                expanded={expanded}
+                onNav={closeOnNav}
+              />
             </>
           )}
           <Divider expanded={expanded} />
@@ -206,7 +237,10 @@ function Divider({ expanded }: { expanded: boolean }) {
 }
 
 function MenuGroup({
-  items, pathname, expanded, onNav,
+  items,
+  pathname,
+  expanded,
+  onNav,
 }: {
   items: Item[];
   pathname: string;
@@ -235,7 +269,9 @@ function MenuGroup({
               <span className="relative shrink-0">
                 <it.icon className="h-5 w-5" strokeWidth={active ? 2.5 : 2} />
                 {!!it.badge && it.badge > 0 && (
-                  <span className={`absolute ${expanded ? "-top-1.5 -right-2" : "-top-1 -right-1"} min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center`}>
+                  <span
+                    className={`absolute ${expanded ? "-top-1.5 -right-2" : "-top-1 -right-1"} min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center`}
+                  >
                     {it.badge > 9 ? "৯+" : it.badge}
                   </span>
                 )}
