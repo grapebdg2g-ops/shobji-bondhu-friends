@@ -24,7 +24,7 @@ export function CompactFriendItem({ friend }: { friend: DirectMessageRecipient }
           params={{ userId: friend.id }}
           className="flex min-w-0 flex-col items-center"
         >
-          <div className="relative h-12 w-12 overflow-hidden rounded-full border-2 border-[#E7F3FF] bg-[#E7F3FF] text-lg font-black text-[#1877F2] shadow-sm transition group-hover:border-[#1877F2] sm:h-14 sm:w-14 sm:text-xl">
+          <div className="relative h-12 w-12 overflow-hidden rounded-full border-2 border-border bg-muted text-lg font-black text-primary shadow-sm transition group-hover:border-primary sm:h-14 sm:w-14 sm:text-xl">
             {friend.avatar_url ? (
               <LazyImage
                 src={friend.avatar_url}
@@ -37,7 +37,7 @@ export function CompactFriendItem({ friend }: { friend: DirectMessageRecipient }
               </div>
             )}
           </div>
-          <p className="mt-1.5 w-full truncate text-[10px] font-bold text-[#1C1E21] sm:text-xs">
+          <p className="mt-1.5 w-full truncate text-[10px] font-bold text-foreground sm:text-xs">
             {friend.name || "কৃষক"}
           </p>
         </Link>
@@ -45,7 +45,7 @@ export function CompactFriendItem({ friend }: { friend: DirectMessageRecipient }
           type="button"
           onClick={() => setOpen(true)}
           aria-label={`${friend.name || "কৃষক"} কে মেসেজ করুন`}
-          className="absolute right-0 top-0 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-[#1877F2] text-white shadow-sm transition hover:scale-110"
+          className="absolute right-0 top-0 flex h-5 w-5 items-center justify-center rounded-full border-2 border-card bg-primary text-primary-foreground shadow-sm transition hover:scale-110"
         >
           <MessageCircle className="h-2.5 w-2.5" />
         </button>
@@ -127,8 +127,8 @@ function DirectMessagePopupContent({
       title="দ্রুত মেসেজ"
       className="mx-auto max-h-[calc(100dvh-0.5rem)] max-w-xl px-3 pb-2 sm:px-4"
     >
-      <div className="flex items-center gap-3 rounded-2xl bg-[#F0F2F5] p-3">
-        <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-[#E7F3FF] text-lg font-black text-[#1877F2]">
+      <div className="flex items-center gap-3 rounded-2xl bg-muted p-3">
+        <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-muted text-lg font-black text-primary">
           {recipient.avatar_url ? (
             <LazyImage
               src={recipient.avatar_url}
@@ -142,8 +142,8 @@ function DirectMessagePopupContent({
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-black text-[#1C1E21]">{recipient.name || "কৃষক"}</p>
-          <p className="truncate text-[11px] text-[#65676B]">
+          <p className="truncate text-sm font-black text-foreground">{recipient.name || "কৃষক"}</p>
+          <p className="truncate text-[11px] text-muted-foreground">
             {conversation.peerTyping
               ? "লিখছেন..."
               : conversation.peerOnline
@@ -156,7 +156,7 @@ function DirectMessagePopupContent({
           params={{ userId: recipient.id }}
           onClick={onClose}
           aria-label="প্রোফাইল দেখুন"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#1877F2]"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-card text-primary"
         >
           <UserRound className="h-4 w-4" />
         </Link>
@@ -164,14 +164,14 @@ function DirectMessagePopupContent({
 
       {canMessage ? (
         <>
-          <div className="mt-3 max-h-[30dvh] min-h-16 space-y-2 overflow-y-auto overscroll-contain rounded-2xl border border-[#E4E6EB] bg-[#F8FAFC] p-3 sm:max-h-52">
+          <div className="mt-3 max-h-[30dvh] min-h-16 space-y-2 overflow-y-auto overscroll-contain rounded-2xl border border-border bg-card p-3 sm:max-h-52">
             {conversation.loading ? (
-              <div className="flex items-center justify-center py-5 text-[#1877F2]">
+              <div className="flex items-center justify-center py-5 text-primary">
                 <Loader2 className="h-5 w-5 animate-spin" />
               </div>
             ) : recentMessages.length === 0 ? (
-              <div className="py-5 text-center text-xs text-[#65676B]">
-                <MessageCircle className="mx-auto mb-2 h-5 w-5 text-[#1877F2]" />
+              <div className="py-5 text-center text-xs text-muted-foreground">
+                <MessageCircle className="mx-auto mb-2 h-5 w-5 text-primary" />
                 প্রথম মেসেজটি আপনিই পাঠান
               </div>
             ) : (
@@ -183,7 +183,7 @@ function DirectMessagePopupContent({
                     className={`flex ${mine ? "justify-end" : "justify-start"}`}
                   >
                     <div
-                      className={`max-w-[82%] rounded-2xl px-3 py-2 text-xs ${mine ? "rounded-br-md bg-[#1877F2] text-white" : "rounded-bl-md bg-white text-[#1C1E21] shadow-sm"}`}
+                      className={`max-w-[82%] rounded-2xl px-3 py-2 text-xs ${mine ? "rounded-br-md bg-primary text-primary-foreground" : "rounded-bl-md bg-muted text-foreground shadow-sm"}`}
                     >
                       <p className="whitespace-pre-wrap break-words">{message.body}</p>
                       <span className="mt-1 flex items-center justify-end gap-1 text-[9px] opacity-70">
@@ -218,13 +218,13 @@ function DirectMessagePopupContent({
               onChange={(event) => setDraft(event.target.value)}
               maxLength={2000}
               placeholder="মেসেজ লিখুন..."
-              className="h-11 min-w-0 flex-1 rounded-full bg-[#F0F2F5] px-4 text-sm text-[#1C1E21] outline-none focus:ring-2 focus:ring-[#1877F2]/30"
+              className="h-11 min-w-0 flex-1 rounded-full bg-muted px-4 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
             />
             <button
               type="submit"
               disabled={!draft.trim() || conversation.sending}
               aria-label="মেসেজ পাঠান"
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1877F2] text-white disabled:opacity-50"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground disabled:opacity-50"
             >
               {conversation.sending ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -237,13 +237,13 @@ function DirectMessagePopupContent({
             to="/messages/$userId"
             params={{ userId: recipient.id }}
             onClick={onClose}
-            className="mt-3 flex items-center justify-center text-xs font-bold text-[#1877F2]"
+            className="mt-3 flex items-center justify-center text-xs font-bold text-primary"
           >
             পুরো চ্যাট খুলুন
           </Link>
         </>
       ) : (
-        <div className="mt-3 rounded-2xl bg-[#FFF7E6] px-4 py-5 text-center text-xs font-semibold leading-relaxed text-[#8A5A00]">
+        <div className="mt-3 rounded-2xl bg-muted px-4 py-5 text-center text-xs font-semibold leading-relaxed text-muted-foreground">
           এই কৃষকের সঙ্গে মেসেজ করতে আগে সংযোগ গ্রহণ করতে হবে।
         </div>
       )}
