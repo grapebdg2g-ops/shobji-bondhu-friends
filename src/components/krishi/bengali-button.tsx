@@ -7,7 +7,7 @@ type Size = "md" | "lg";
 const variants: Record<Variant, string> = {
   primary: "bg-primary text-primary-foreground active:bg-primary/90",
   accent: "bg-accent text-accent-foreground active:bg-accent/90",
-  warning: "bg-[#E07A2C] text-white active:bg-[#c96a22]",
+  warning: "bg-accent text-accent-foreground active:bg-accent/90",
   outline: "bg-card text-foreground border border-border active:bg-muted",
   ghost: "bg-transparent text-foreground active:bg-muted",
 };
@@ -27,7 +27,21 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export const BengaliButton = forwardRef<HTMLButtonElement, Props>(
-  ({ variant = "primary", size = "lg", fullWidth, loading, leftIcon, rightIcon, className, children, disabled, ...rest }, ref) => (
+  (
+    {
+      variant = "primary",
+      size = "lg",
+      fullWidth,
+      loading,
+      leftIcon,
+      rightIcon,
+      className,
+      children,
+      disabled,
+      ...rest
+    },
+    ref,
+  ) => (
     <button
       ref={ref}
       disabled={disabled || loading}
@@ -40,11 +54,15 @@ export const BengaliButton = forwardRef<HTMLButtonElement, Props>(
       )}
       {...rest}
     >
-      {loading ? <span className="text-base font-semibold">লোড হচ্ছে...</span> : <>
-        {leftIcon}
-        {children}
-        {rightIcon}
-      </>}
+      {loading ? (
+        <span className="text-base font-semibold">লোড হচ্ছে...</span>
+      ) : (
+        <>
+          {leftIcon}
+          {children}
+          {rightIcon}
+        </>
+      )}
     </button>
   ),
 );

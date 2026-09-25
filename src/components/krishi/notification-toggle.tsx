@@ -6,7 +6,9 @@ import { usePushNotifications } from "@/hooks/use-push-notifications";
 export function NotificationToggle() {
   const { status, supported, busy, enable, disable } = usePushNotifications();
   const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Render a stable, SSR-safe placeholder until client mount to avoid hydration mismatch.
   if (!mounted || status === "loading") {
@@ -27,7 +29,6 @@ export function NotificationToggle() {
     );
   }
 
-
   if (status === "denied") {
     return (
       <div className="mt-4 rounded-xl border border-destructive/40 bg-destructive/5 p-4">
@@ -40,7 +41,7 @@ export function NotificationToggle() {
 
   if (status === "enabled") {
     return (
-      <div className="mt-4 rounded-xl border border-[#22C55E] bg-[#DCFCE7] p-3 flex items-center justify-between gap-3">
+      <div className="mt-4 rounded-xl border border-primary bg-secondary p-3 flex items-center justify-between gap-3">
         <span className="text-sm font-semibold text-foreground flex items-center gap-2">
           <Bell className="h-4 w-4" /> ✅ কৃষি ও আবহাওয়া সতর্কতা চালু আছে
         </span>
@@ -51,7 +52,7 @@ export function NotificationToggle() {
             if (ok) toast("🔕 সতর্কতা বন্ধ হয়েছে");
             else toast.error("বন্ধ করা যায়নি");
           }}
-          className="text-sm font-semibold text-destructive px-3 py-1.5 rounded-lg hover:bg-white/60 disabled:opacity-50"
+          className="text-sm font-semibold text-destructive px-3 py-1.5 rounded-lg hover:bg-card/60 disabled:opacity-50"
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "বন্ধ করুন"}
         </button>

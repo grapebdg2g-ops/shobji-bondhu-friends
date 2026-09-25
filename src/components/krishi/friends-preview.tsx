@@ -57,15 +57,17 @@ export function FriendsPreview({ userId }: { userId: string }) {
   });
 
   return (
-    <section className="mx-auto mt-3 max-w-3xl border-y border-[#DADDE1] bg-white px-4 py-4 sm:rounded-xl sm:border sm:px-6">
+    <section className="mx-auto mt-3 max-w-3xl border-y border-border bg-card px-4 py-4 sm:rounded-xl sm:border sm:px-6">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-base font-extrabold text-[#1C1E21]">বন্ধু তালিকা</h2>
-          <p className="mt-0.5 text-xs text-[#65676B]">{query.data?.total ?? 0} জন সংযুক্ত কৃষক</p>
+          <h2 className="text-base font-extrabold text-foreground">বন্ধু তালিকা</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {query.data?.total ?? 0} জন সংযুক্ত কৃষক
+          </p>
         </div>
         <Link
           to="/friends"
-          className="flex h-9 shrink-0 items-center gap-1 rounded-lg bg-[#E4E6EB] px-3 text-xs font-extrabold text-[#1C1E21] transition hover:bg-[#D8DADF]"
+          className="flex h-9 shrink-0 items-center gap-1 rounded-lg bg-muted px-3 text-xs font-extrabold text-foreground transition hover:bg-foreground/10"
         >
           সব দেখুন <ChevronRight className="h-3.5 w-3.5" />
         </Link>
@@ -85,16 +87,16 @@ export function FriendsPreview({ userId }: { userId: string }) {
       </div>
 
       {!query.isLoading && !query.data?.total ? (
-        <div className="mt-2 rounded-xl bg-[#F0F2F5] px-4 py-8 text-center">
-          <Users className="mx-auto h-8 w-8 text-[#BCC0C4]" />
-          <p className="mt-2 text-sm font-bold text-[#65676B]">এখনো কোনো বন্ধু নেই</p>
+        <div className="mt-2 rounded-xl bg-muted px-4 py-8 text-center">
+          <Users className="mx-auto h-8 w-8 text-muted-foreground" />
+          <p className="mt-2 text-sm font-bold text-muted-foreground">এখনো কোনো বন্ধু নেই</p>
         </div>
       ) : null}
 
       {(query.data?.total ?? 0) > PREVIEW_LIMIT ? (
         <Link
           to="/friends"
-          className="mt-3 flex h-10 w-full items-center justify-center rounded-lg bg-[#F0F2F5] text-sm font-extrabold text-[#1C1E21] transition hover:bg-[#E4E6EB]"
+          className="mt-3 flex h-10 w-full items-center justify-center rounded-lg bg-muted text-sm font-extrabold text-foreground transition hover:bg-foreground/10"
         >
           আরও দেখুন ({query.data!.total - PREVIEW_LIMIT} জন)
         </Link>

@@ -45,10 +45,17 @@ export function CropAdvisoryWidget() {
   return (
     <section className="px-5 mt-5">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-base font-bold text-gray-900 inline-flex items-center gap-1.5">
+        <h2 className="text-base font-bold text-foreground inline-flex items-center gap-1.5">
           <ClipboardList className="h-5 w-5 text-emerald-600" /> আজকের ফসল পরামর্শ
         </h2>
-        <div className="flex items-center gap-3"><Link to="/crop-diary" className="text-emerald-600 text-sm font-semibold">ডায়েরি</Link><Link to="/crop-guide" className="text-emerald-600 text-sm font-semibold">সব দেখুন</Link></div>
+        <div className="flex items-center gap-3">
+          <Link to="/crop-diary" className="text-emerald-600 text-sm font-semibold">
+            ডায়েরি
+          </Link>
+          <Link to="/crop-guide" className="text-emerald-600 text-sm font-semibold">
+            সব দেখুন
+          </Link>
+        </div>
       </div>
       <div className="space-y-2">
         {items.map(({ plan, task, stageName }) => {
@@ -59,15 +66,17 @@ export function CropAdvisoryWidget() {
               key={plan.id}
               to="/crop-guide/plan/$planId"
               params={{ planId: plan.id }}
-              className="block bg-white rounded-2xl p-3.5 shadow-sm ring-1 ring-emerald-100 active:scale-[0.99] transition"
+              className="block bg-card rounded-2xl p-3.5 shadow-sm ring-1 ring-emerald-100 active:scale-[0.99] transition"
             >
               <div className="flex items-center gap-3">
                 <span className="text-3xl">{guide.icon}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-emerald-700 font-semibold">{plan.crop_type} · {stageName} · {toBn(days)} দিন</p>
-                  <p className="text-sm font-bold text-gray-900 truncate">{task.title}</p>
+                  <p className="text-xs text-emerald-700 font-semibold">
+                    {plan.crop_type} · {stageName} · {toBn(days)} দিন
+                  </p>
+                  <p className="text-sm font-bold text-foreground truncate">{task.title}</p>
                 </div>
-                <ChevronRight className="h-5 w-5 text-gray-400 shrink-0" />
+                <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
               </div>
             </Link>
           );

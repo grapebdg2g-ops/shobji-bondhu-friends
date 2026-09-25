@@ -3,15 +3,22 @@ import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronRight, CloudLightning, CloudRain, Thermometer } from "lucide-react";
+import {
+  X,
+  ChevronRight,
+  CloudLightning,
+  CloudRain,
+  Thermometer,
+  type LucideIcon,
+} from "lucide-react";
 import { getWeatherForecast } from "@/lib/weather.functions";
 import { evaluateAlert, type WeatherAlert } from "@/lib/weather-rules";
 
-const STYLES: Record<WeatherAlert["type"], { bg: string; border: string; icon: any }> = {
-  STORM:      { bg: "bg-[#FFF3CD]", border: "border-[#F59E0B]", icon: CloudLightning },
-  HEAVY_RAIN: { bg: "bg-[#DBEAFE]", border: "border-[#3B82F6]", icon: CloudRain },
-  HEAT_WAVE:  { bg: "bg-[#FEE2E2]", border: "border-[#EF4444]", icon: Thermometer },
-  GOOD:       { bg: "bg-[#DCFCE7]", border: "border-[#22C55E]", icon: CloudRain },
+const STYLES: Record<WeatherAlert["type"], { bg: string; border: string; icon: LucideIcon }> = {
+  STORM: { bg: "bg-accent/15", border: "border-accent", icon: CloudLightning },
+  HEAVY_RAIN: { bg: "bg-muted", border: "border-border", icon: CloudRain },
+  HEAT_WAVE: { bg: "bg-destructive/15", border: "border-destructive", icon: Thermometer },
+  GOOD: { bg: "bg-secondary", border: "border-primary", icon: CloudRain },
 };
 
 export function WeatherAlertBanner({ district }: { district: string | null | undefined }) {
@@ -24,7 +31,8 @@ export function WeatherAlertBanner({ district }: { district: string | null | und
     gcTime: 60 * 60_000,
   });
 
-  const alert: WeatherAlert | null = data?.forecast && district ? evaluateAlert(district, data.forecast) : null;
+  const alert: WeatherAlert | null =
+    data?.forecast && district ? evaluateAlert(district, data.forecast) : null;
   // Only show dangerous conditions in the banner (per spec)
   const showable = alert && alert.type !== "GOOD" ? alert : null;
 
