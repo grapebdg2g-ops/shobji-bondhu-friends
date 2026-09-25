@@ -103,11 +103,16 @@
   --brand-accent: var(--accent);
   --brand-surface: var(--background);
   --brand-warm: oklch(0.75 0.13 55);
-  --gradient-brand: linear-gradient(160deg, oklch(0.32 0.07 165) 0%, var(--primary) 50%, var(--accent) 100%);
+  --gradient-brand: linear-gradient(
+    160deg,
+    oklch(0.32 0.07 165) 0%,
+    var(--primary) 50%,
+    var(--accent) 100%
+  );
   --gradient-soft: linear-gradient(135deg, var(--background) 0%, var(--muted) 100%);
   --shadow-card: 0 4px 14px -4px color-mix(in oklch, var(--primary) 18%, transparent);
   --shadow-lift: 0 14px 32px -20px color-mix(in oklch, var(--primary) 48%, transparent);
-  --ease-spring: cubic-bezier(.2, .8, .2, 1);
+  --ease-spring: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .dark {
@@ -160,39 +165,78 @@
     color: var(--color-foreground);
   }
 
-  h1, h2, h3, h4, h5, h6,
-  button, input, textarea, select {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  button,
+  input,
+  textarea,
+  select {
     font-family: "Tiro Bangla", ui-sans-serif, system-ui, sans-serif;
   }
 }
 
 @layer utilities {
-  .no-scrollbar::-webkit-scrollbar { display: none; }
-  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* Home page motion primitives */
 @keyframes krishi-float {
-  0%, 100% { transform: translate3d(0, 0, 0); }
-  50% { transform: translate3d(0, -6px, 0); }
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -6px, 0);
+  }
 }
 
 @keyframes krishi-soft-pulse {
-  0%, 100% { opacity: 0.55; transform: scale(0.96); }
-  50% { opacity: 1; transform: scale(1); }
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-.home-float { animation: krishi-float 4s ease-in-out infinite; }
-.home-soft-pulse { animation: krishi-soft-pulse 2.4s ease-in-out infinite; }
+.home-float {
+  animation: krishi-float 4s ease-in-out infinite;
+}
+.home-soft-pulse {
+  animation: krishi-soft-pulse 2.4s ease-in-out infinite;
+}
 
 @keyframes home-rise-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes home-ring-draw {
-  from { stroke-dashoffset: 100; }
-  to { stroke-dashoffset: 28; }
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 28;
+  }
 }
 
 .home-rise-in {
@@ -206,7 +250,10 @@
 }
 
 .home-pressable {
-  transition: transform 140ms var(--ease-spring), box-shadow 140ms ease, background-color 140ms ease;
+  transition:
+    transform 140ms var(--ease-spring),
+    box-shadow 140ms ease,
+    background-color 140ms ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -233,8 +280,15 @@
   z-index: -1;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(116, 198, 157, .65), rgba(255, 255, 255, .8), rgba(244, 162, 97, .3));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  background: linear-gradient(
+    135deg,
+    rgba(116, 198, 157, 0.65),
+    rgba(255, 255, 255, 0.8),
+    rgba(244, 162, 97, 0.3)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
 }
@@ -243,11 +297,21 @@
   animation: home-rise-in 280ms var(--ease-spring) both;
 }
 
-.home-stagger > *:nth-child(1) { animation-delay: 40ms; }
-.home-stagger > *:nth-child(2) { animation-delay: 80ms; }
-.home-stagger > *:nth-child(3) { animation-delay: 120ms; }
-.home-stagger > *:nth-child(4) { animation-delay: 160ms; }
-.home-stagger > *:nth-child(5) { animation-delay: 200ms; }
+.home-stagger > *:nth-child(1) {
+  animation-delay: 40ms;
+}
+.home-stagger > *:nth-child(2) {
+  animation-delay: 80ms;
+}
+.home-stagger > *:nth-child(3) {
+  animation-delay: 120ms;
+}
+.home-stagger > *:nth-child(4) {
+  animation-delay: 160ms;
+}
+.home-stagger > *:nth-child(5) {
+  animation-delay: 200ms;
+}
 
 button:focus-visible,
 a:focus-visible,
@@ -278,4 +342,3 @@ a:focus-visible,
     box-shadow: none;
   }
 }
-
