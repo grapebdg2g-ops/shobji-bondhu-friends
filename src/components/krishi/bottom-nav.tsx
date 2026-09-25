@@ -45,7 +45,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="মূল মেনু"
-      className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-xl border-t border-gray-200 shadow-[0_-4px_16px_-4px_rgba(0,0,0,0.08)]"
+      className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur-xl border-t border-border shadow-[0_-4px_16px_-4px_rgba(0,0,0,0.08)]"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="relative grid grid-cols-5 items-end h-16">
@@ -55,8 +55,8 @@ export function BottomNav() {
 
         <div className="flex justify-center">
           {open && (
-            <div className="absolute bottom-[4.5rem] left-1/2 -translate-x-1/2 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-white/70 bg-white/95 p-2 shadow-2xl backdrop-blur-xl animate-fade-in">
-              <p className="px-3 pt-1 pb-2 text-[11px] font-bold uppercase tracking-wide text-gray-400">
+            <div className="absolute bottom-[4.5rem] left-1/2 -translate-x-1/2 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-border/70 bg-card/95 p-2 shadow-2xl backdrop-blur-xl animate-fade-in">
+              <p className="px-3 pt-1 pb-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
                 দ্রুত কাজ
               </p>
               {QUICK_ACTIONS.map((action) => (
@@ -64,9 +64,9 @@ export function BottomNav() {
                   key={action.to}
                   to={action.to}
                   onClick={() => setOpen(false)}
-                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-800 transition hover:bg-[#F0FFF4] active:scale-[0.98]"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-foreground transition hover:bg-muted active:scale-[0.98]"
                 >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#D8F3DC] text-[#2D6A4F]">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary">
                     <action.Icon className="h-4.5 w-4.5" />
                   </span>
                   {action.label}
@@ -100,7 +100,7 @@ function TabBtn({ tab, active }: { tab: Tab; active: boolean }) {
     <Link
       to={tab.to}
       className={`h-16 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors ${
-        active ? "text-[#2D6A4F]" : "text-gray-500"
+        active ? "text-primary" : "text-muted-foreground"
       }`}
     >
       <tab.Icon className="h-5 w-5" strokeWidth={active ? 2.6 : 2} />
