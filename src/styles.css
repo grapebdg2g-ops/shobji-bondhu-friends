@@ -99,14 +99,14 @@
   --sidebar-border: oklch(0.9 0.02 145);
   --sidebar-ring: oklch(0.435 0.09 152);
 
-  --brand-primary: #2D6A4F;
-  --brand-accent: #52B788;
-  --brand-surface: #F6FBF7;
-  --brand-warm: #F4A261;
-  --gradient-brand: linear-gradient(160deg, #1B4332 0%, #2D6A4F 50%, #52B788 100%);
-  --gradient-soft: linear-gradient(135deg, #F8FFFA 0%, #EFFAF2 100%);
-  --shadow-card: 0 4px 14px -4px rgba(45, 106, 79, 0.18);
-  --shadow-lift: 0 14px 32px -20px rgba(27, 67, 50, 0.48);
+  --brand-primary: var(--primary);
+  --brand-accent: var(--accent);
+  --brand-surface: var(--background);
+  --brand-warm: oklch(0.75 0.13 55);
+  --gradient-brand: linear-gradient(160deg, oklch(0.32 0.07 165) 0%, var(--primary) 50%, var(--accent) 100%);
+  --gradient-soft: linear-gradient(135deg, var(--background) 0%, var(--muted) 100%);
+  --shadow-card: 0 4px 14px -4px color-mix(in oklch, var(--primary) 18%, transparent);
+  --shadow-lift: 0 14px 32px -20px color-mix(in oklch, var(--primary) 48%, transparent);
   --ease-spring: cubic-bezier(.2, .8, .2, 1);
 }
 
