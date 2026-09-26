@@ -1,9 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
-  Link,
   createRootRouteWithContext,
   useRouter,
+  useNavigate,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -18,24 +18,22 @@ import { AppLayout } from "@/components/krishi/app-layout";
 import { SidebarProvider } from "@/components/krishi/app-sidebar";
 
 function NotFoundComponent() {
+  const navigate = useNavigate();
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
-          </Link>
-        </div>
-      </div>
-    </div>
+    <main className="flex min-h-screen flex-col items-center justify-center bg-background px-6 text-center">
+      <p className="text-5xl font-black text-primary">৪০৪</p>
+      <h1 className="mt-3 text-xl font-bold text-foreground">পৃষ্ঠাটি পাওয়া যায়নি</h1>
+      <p className="mt-1 text-sm text-muted-foreground">
+        আপনি যে পৃষ্ঠাটি খুঁজছেন সেটি হয় সরানো হয়েছে বা ঠিকানা ভুল।
+      </p>
+      <button
+        type="button"
+        onClick={() => navigate({ to: "/dashboard" })}
+        className="mt-6 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground"
+      >
+        হোমে ফিরে যান
+      </button>
+    </main>
   );
 }
 
@@ -131,7 +129,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="bn">
       <head>
         <HeadContent />
       </head>
