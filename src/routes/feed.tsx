@@ -228,30 +228,30 @@ function FeedPage() {
   return (
     <main className="min-h-screen min-w-0 max-w-full overflow-x-hidden bg-background pb-20">
       {/* Header */}
-      <header className="relative overflow-hidden rounded-b-[28px] px-4 pb-6 pt-8 sm:px-6" style={{ background: "var(--gradient-brand)" }}>
+      <header className="relative overflow-hidden rounded-b-[28px] px-4 pb-6 pt-8 sm:px-6 bg-card border-b border-border">
         <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[#74C69D]/20 blur-3xl" />
         <div className="relative z-10 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate({ to: "/dashboard" })}
               aria-label="ফিরে যান"
-              className="home-pressable flex h-11 w-11 items-center justify-center rounded-full bg-white/15 ring-2 ring-white/20"
+              className="home-pressable flex h-11 w-11 items-center justify-center rounded-full bg-muted ring-2 ring-border"
             >
-              <ArrowLeft className="h-5 w-5 text-white" />
+              <ArrowLeft className="h-5 w-5 text-foreground" />
             </button>
             <div>
-              <h1 className="text-xl font-bold text-white leading-tight">{headerMeta.title}</h1>
+              <h1 className="text-xl font-bold text-foreground leading-tight">{headerMeta.title}</h1>
               {headerMeta.subtitle && (
-                <p className="text-[11px] text-white/80 mt-0.5">{headerMeta.subtitle}</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">{headerMeta.subtitle}</p>
               )}
             </div>
           </div>
           <button
             onClick={() => setFilterOpen(true)}
             aria-label="ফিল্টার"
-            className="home-pressable flex h-11 w-11 items-center justify-center rounded-full bg-white/15 ring-2 ring-white/20"
+            className="home-pressable flex h-11 w-11 items-center justify-center rounded-full bg-muted ring-2 ring-border"
           >
-            <SlidersHorizontal className="h-5 w-5 text-white" />
+            <SlidersHorizontal className="h-5 w-5 text-foreground" />
           </button>
         </div>
       </header>

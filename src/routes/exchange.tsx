@@ -36,16 +36,16 @@ function ExchangePage() {
 
   return (
     <main className="min-h-screen bg-background pb-28">
-      <header className="px-4 pt-10 pb-4 rounded-b-3xl" style={{ background: "var(--gradient-brand)" }}>
+      <header className="px-4 pt-10 pb-4 rounded-b-3xl bg-card border-b border-border">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate({ to: "/dashboard" })}
             aria-label="ফিরে যান"
-            className="h-10 w-10 rounded-full bg-white/15 flex items-center justify-center ring-2 ring-white/20"
+            className="h-10 w-10 rounded-full bg-muted flex items-center justify-center ring-2 ring-border"
           >
-            <ArrowLeft className="h-5 w-5 text-white" />
+            <ArrowLeft className="h-5 w-5 text-foreground" />
           </button>
-          <h1 className="text-xl font-bold text-white">বিনিময়</h1>
+          <h1 className="text-xl font-bold text-foreground">বিনিময়</h1>
         </div>
         <div className="mt-4 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
